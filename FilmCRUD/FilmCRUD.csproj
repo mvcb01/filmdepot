@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\FilmDataAccess.EFCore\FilmDataAccess.EFCore.csproj" />
@@ -14,6 +14,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>e56da8aa-c34f-43b6-acd7-99b1dd322389</UserSecretsId>
   </PropertyGroup>
 
 </Project>
