@@ -34,9 +34,7 @@ namespace FilmCRUD
                 .WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
                 .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager))
                 .WithNotParsed(HandleParseError);
-
             {}
-
 
         }
 
