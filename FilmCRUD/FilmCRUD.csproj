@@ -1,5 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <ProjectReference Include="..\FilmDataAccess.EFCore\FilmDataAccess.EFCore.csproj" />
+    <ProjectReference Include="..\FilmDomain\FilmDomain.csproj" />
+    <ProjectReference Include="..\ConfigUtils\ConfigUtils.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
