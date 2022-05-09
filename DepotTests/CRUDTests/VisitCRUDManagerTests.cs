@@ -236,6 +236,7 @@ namespace DepotTests.CRUDTests
                 "2011 - some movie name - 720p"
             });
             allParsingErrors.Should().BeEmpty();
+
         }
 
     }
