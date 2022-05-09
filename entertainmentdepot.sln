@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmDataAccess.EFCore", "Fi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigUtils", "ConfigUtils\ConfigUtils.csproj", "{8213DFE4-D54B-4ECF-AA89-DDD23DF77233}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmCRUD", "FilmCRUD\FilmCRUD.csproj", "{0E7E8989-1C6D-44A0-A2A5-6DC7CF79B5C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{8213DFE4-D54B-4ECF-AA89-DDD23DF77233}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8213DFE4-D54B-4ECF-AA89-DDD23DF77233}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8213DFE4-D54B-4ECF-AA89-DDD23DF77233}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E7E8989-1C6D-44A0-A2A5-6DC7CF79B5C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E7E8989-1C6D-44A0-A2A5-6DC7CF79B5C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E7E8989-1C6D-44A0-A2A5-6DC7CF79B5C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E7E8989-1C6D-44A0-A2A5-6DC7CF79B5C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
