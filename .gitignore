@@ -6,6 +6,7 @@
 # manuais
 FilmDataAccess.EFCore/*.db
 _NOTES.txt
+.vscode
 
 
 # User-specific files
