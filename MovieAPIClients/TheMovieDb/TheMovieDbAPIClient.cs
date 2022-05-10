@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Text.Json;
+using MovieAPIClients.Interfaces;
 
 namespace MovieAPIClients.TheMovieDb
 {
-    public class TheMovieDbAPIClient
+    public class TheMovieDbAPIClient : IMovieAPIClient
     {
         private string _apiKey { get; init; }
 
@@ -23,7 +24,7 @@ namespace MovieAPIClients.TheMovieDb
             this._httpClient = client;
         }
 
-        public async Task<IEnumerable<MovieSearchResult>> SearchMovie(string title)
+        public async Task<IEnumerable<MovieSearchResult>> SearchMovieAsync(string title)
         {
             var movieTitle = title.Trim().ToLower();
 
