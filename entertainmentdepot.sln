@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmCRUD", "FilmCRUD\FilmCR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepotTests", "DepotTests\DepotTests.csproj", "{B231DF13-09A0-442A-846C-896134285ECD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieAPIClients", "MovieAPIClients\MovieAPIClients.csproj", "{F6282AFE-A653-48C5-A9D1-D2F62167E44B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,9 +42,5 @@ Global
 		{B231DF13-09A0-442A-846C-896134285ECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B231DF13-09A0-442A-846C-896134285ECD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B231DF13-09A0-442A-846C-896134285ECD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F6282AFE-A653-48C5-A9D1-D2F62167E44B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F6282AFE-A653-48C5-A9D1-D2F62167E44B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F6282AFE-A653-48C5-A9D1-D2F62167E44B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F6282AFE-A653-48C5-A9D1-D2F62167E44B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
