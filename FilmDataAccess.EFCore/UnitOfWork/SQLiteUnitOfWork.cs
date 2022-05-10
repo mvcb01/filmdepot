@@ -9,6 +9,8 @@ namespace FilmDataAccess.EFCore.UnitOfWork
 
         public IMovieRepository Movies { get; init; }
 
+        public IPersonRepository Persons { get; init; }
+
         public IGenreRepository Genres { get; init; }
 
         public IMovieRipRepository MovieRips { get; init; }
@@ -19,6 +21,7 @@ namespace FilmDataAccess.EFCore.UnitOfWork
         {
             _context = context;
             Movies = new MovieRepository(_context);
+            Persons = new PersonRepository(_context);
             Genres = new GenreRepository(_context);
             MovieRips = new MovieRipRepository(_context);
             MovieWarehouseVisits = new MovieWarehouseVisitRepository(_context);
