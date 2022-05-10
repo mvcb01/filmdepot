@@ -112,7 +112,6 @@ namespace FilmCRUD
             _unitOfWork.Complete();
         }
 
-
         public (
             IEnumerable<MovieRip> OldMovieRips,
             IEnumerable<MovieRip> NewMovieRips,

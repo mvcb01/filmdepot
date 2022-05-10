@@ -36,7 +36,6 @@ namespace FilmCRUD
                 .WithNotParsed(HandleParseError);
 
             {}
-
         }
 
         private static void ConfigureServices(IServiceCollection services)
