@@ -38,8 +38,8 @@ namespace MovieAPIClients.TheMovieDb
             // por enquanto fica martelada a primeira página no fim da query string
             string resultString = await _httpClient.GetStringAsync($"search/movie?api_key={_apiKey}&query={searchQuery}&page=1");
 
-            var searchResult = JsonSerializer.Deserialize<SearchResult>(resultString);
-            return searchResult.Results;
+            var searchResultTMDB = JsonSerializer.Deserialize<SearchResultTMDB>(resultString);
+            return searchResultTMDB.Results.Select(res => res.ToMovieSearchResult());
         }
 
     }

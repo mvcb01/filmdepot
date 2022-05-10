@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace MovieAPIClients.TheMovieDb
 {
-    public class SearchResult
+    public class SearchResultTMDB
     {
         [JsonPropertyName("results")]
-        public IEnumerable<MovieSearchResult> Results { get; set; }
+        public IEnumerable<MovieSearchResultTMDB> Results { get; set; }
     }
 }
