@@ -13,6 +13,10 @@ namespace FilmDomain.Entities
 
         public ICollection<Genre> Genres { get; set; }
 
+        public ICollection<Person> Actors { get; set; }
+
+        public ICollection<Person> Directors { get; set; }
+
         public ICollection<MovieRip> MovieRips { get; set; }
 
         public override string ToString()
