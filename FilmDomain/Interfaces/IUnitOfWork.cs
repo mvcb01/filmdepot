@@ -6,6 +6,8 @@ namespace FilmDomain.Interfaces
     {
         IMovieRepository Movies { get; }
 
+        IPersonRepository Persons { get; }
+
         IGenreRepository Genres { get; }
 
         IMovieRipRepository MovieRips { get; }
