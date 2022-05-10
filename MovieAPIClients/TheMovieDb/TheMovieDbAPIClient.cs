@@ -39,7 +39,7 @@ namespace MovieAPIClients.TheMovieDb
             string resultString = await _httpClient.GetStringAsync($"search/movie?api_key={_apiKey}&query={searchQuery}&page=1");
 
             var searchResult = JsonSerializer.Deserialize<SearchResult>(resultString);
-            return searchResult.Results.Where(r => r.Title.Trim().ToLower() == movieTitle);
+            return searchResult.Results;
         }
 
     }
