@@ -1,5 +1,7 @@
 using System;
 using Xunit;
+using MovieAPIClients.TheMovieDb;
+using ConfigUtils;
 
 namespace DepotTests
 {
@@ -8,6 +10,8 @@ namespace DepotTests
         [Fact]
         public void Test1()
         {
+
+            AppSettingsManager appSettingsManager = new("appsettings.json");
 
         }
     }
