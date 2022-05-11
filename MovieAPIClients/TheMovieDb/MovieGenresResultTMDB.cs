@@ -5,7 +5,7 @@ namespace MovieAPIClients.TheMovieDb
 {
     public class MovieGenresResultTMDB
     {
-        public class GenreResult
+        public class GenreEach
         {
             [JsonPropertyName("id")]
             public int ExternalId { get; set; }
@@ -15,6 +15,6 @@ namespace MovieAPIClients.TheMovieDb
         }
 
         [JsonPropertyName("genres")]
-        public IEnumerable<GenreResult> Genres { get; set; }
+        public IEnumerable<GenreEach> Genres { get; set; }
     }
 }
