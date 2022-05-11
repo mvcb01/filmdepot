@@ -3,14 +3,16 @@ using System;
 using FilmDataAccess.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FilmDataAccess.EFCore.Migrations
 {
     [DbContext(typeof(SQLiteAppContext))]
-    partial class SQLiteAppContextModelSnapshot : ModelSnapshot
+    [Migration("20220511182539_AddedOriginalTitle")]
+    partial class AddedOriginalTitle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
