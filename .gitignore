@@ -5,6 +5,8 @@
 
 # manuais
 FilmDataAccess.EFCore/*.db
+FilmDataAccess.EFCore/*.db-shm
+FilmDataAccess.EFCore/*.db-wal
 _NOTES.txt
 .vscode
 
