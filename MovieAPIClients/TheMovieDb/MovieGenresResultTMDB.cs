@@ -8,7 +8,7 @@ namespace MovieAPIClients.TheMovieDb
         public class GenreResult
         {
             [JsonPropertyName("id")]
-            public int Id { get; set; }
+            public int ExternalId { get; set; }
 
             [JsonPropertyName("name")]
             public string Name { get; set; }

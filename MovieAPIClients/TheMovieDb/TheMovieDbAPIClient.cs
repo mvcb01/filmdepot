@@ -51,5 +51,13 @@ namespace MovieAPIClients.TheMovieDb
             var resultObj = JsonSerializer.Deserialize<MovieGenresResultTMDB>(resultString);
             return resultObj.Genres.Select(g => g.Name);
         }
+
+        public async Task<IEnumerable<string>> GetMovieActorsAsync(int externalId)
+        {
+            // vamos buscar aos movie credits
+            string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/credits?api_key={_apiKey}");
+            var resultObj = JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
+            return resultObj.Cast.Select(c => c.Name);
+        }
     }
 }
