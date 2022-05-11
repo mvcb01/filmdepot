@@ -44,5 +44,12 @@ namespace MovieAPIClients.TheMovieDb
 
         }
 
+        public async Task<IEnumerable<string>> GetMovieGenresAsync(int externalId)
+        {
+            // vamos buscar aos movie details
+            string resultString = await _httpClient.GetStringAsync($"movie/{externalId}?api_key={_apiKey}");
+            var resultObj = JsonSerializer.Deserialize<MovieGenresResultTMDB>(resultString);
+            return resultObj.Genres.Select(g => g.Name);
+        }
     }
 }

@@ -17,7 +17,8 @@ namespace DepotTests
             var apiCaller = new TheMovieDbAPIClient(apiKey);
             {}
 
-            var result = await apiCaller.SearchMovieAsync("the tenant");
+            // var result = await apiCaller.SearchMovieAsync("the tenant");
+            var result = await apiCaller.GetMovieGenresAsync(11482);
             var resultList = result.ToList();
             {}
         }
