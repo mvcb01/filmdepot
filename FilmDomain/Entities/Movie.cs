@@ -11,6 +11,8 @@ namespace FilmDomain.Entities
 
         public string Title { get; set; }
 
+        public string OriginalTitle { get; set; }
+
         public int ReleaseDate { get; set; }
 
         public ICollection<Genre> Genres { get; set; }
