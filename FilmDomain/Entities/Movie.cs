@@ -7,6 +7,8 @@ namespace FilmDomain.Entities
     {
         public int Id { get; set; }
 
+        public int ExternalId { get; set; }
+
         public string Title { get; set; }
 
         public int ReleaseDate { get; set; }
