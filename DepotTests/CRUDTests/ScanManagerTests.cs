@@ -76,6 +76,10 @@ namespace DepotTests.CRUDTests
                      new MovieRip() {
                         FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
                         ParsedReleaseDate = "1997"
+                        },
+                    new MovieRip() {
+                        FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+                        ParsedReleaseDate = "1973"
                         }
                 };
 
