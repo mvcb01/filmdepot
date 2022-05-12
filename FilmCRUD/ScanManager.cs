@@ -34,7 +34,9 @@ namespace FilmCRUD
         public IEnumerable<string> GetAllRipsWithReleaseDate(string releaseDate)
         {
             MovieWarehouseVisit latestVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
-            return latestVisit.MovieRips.Select(r => r.FileName);
+            return latestVisit.MovieRips
+                .Where(r => r.ParsedReleaseDate == releaseDate.Trim())
+                .Select(r => r.FileName);
         }
 
         public Dictionary<DateTime, int> GetRipCountByVisit()
