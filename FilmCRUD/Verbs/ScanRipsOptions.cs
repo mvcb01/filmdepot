@@ -17,5 +17,8 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "CountRipsByVisit", HelpText = "Contagem por visita")]
         public bool CountByVisit { get; set; }
 
+        [Option(SetName = "LastVisitRipDifference", HelpText = "Novos rips e rips removidos na última visita")]
+        public bool LastVisitDiff { get; set; }
+
     }
 }
