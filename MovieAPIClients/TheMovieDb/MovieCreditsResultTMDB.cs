@@ -22,6 +22,9 @@ namespace MovieAPIClients.TheMovieDb
 
             [JsonPropertyName("name")]
             public string Name { get; set; }
+
+            [JsonPropertyName("job")]
+            public string Job { get; set; }
         }
 
         [JsonPropertyName("cast")]
