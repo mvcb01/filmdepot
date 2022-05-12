@@ -113,6 +113,17 @@ namespace FilmCRUD
                     System.Console.WriteLine($"{visitStr} : {item.Value}");
                 }
             }
+            else if (scanRipsOpts.LastVisitDiff)
+            {
+                System.Console.WriteLine("Scan: diff da última visita\n");
+                Dictionary<string, IEnumerable<string>> lastVisitDiff = scanManager.GetLastVisitDiff();
+                foreach (var item in lastVisitDiff.OrderBy(kvp => kvp.Key))
+                {
+                    System.Console.WriteLine("\n----------");
+                    System.Console.WriteLine(item.Key + "\n");
+                    System.Console.WriteLine(String.Join('\n', item.Value));
+                }
+            }
             else
             {
                 System.Console.WriteLine("Nada a fazer...");

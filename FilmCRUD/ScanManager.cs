@@ -49,5 +49,43 @@ namespace FilmCRUD
                 );
         }
 
+        public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
+        {
+            var addedFileNames = new List<string>();
+            var removedFileNames = new List<string>();
+
+            List<DateTime> lastTwoVisitDates = unitOfWork.MovieWarehouseVisits
+                .GetAll()
+                .GetVisitDates()
+                .OrderByDescending(dt => dt)
+                .Take(2)
+                .ToList();
+
+            int nVisits = lastTwoVisitDates.Count();
+            if (nVisits == 0)
+            {
+                throw new InvalidOperationException("No visits yet!");
+            }
+            else if (nVisits == 1)
+            {
+                addedFileNames = unitOfWork.MovieWarehouseVisits.GetAll().First().MovieRips.GetFileNames().ToList();
+            }
+            else
+            {
+                DateTime lastVisitDate = lastTwoVisitDates[0];
+                DateTime firstVisitDate = lastTwoVisitDates[1];
+
+                MovieWarehouseVisit lastVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(lastVisitDate);
+                MovieWarehouseVisit firstVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(firstVisitDate);
+
+                addedFileNames = lastVisit.MovieRips.GetFileNames().Except(firstVisit.MovieRips.GetFileNames()).ToList();
+                removedFileNames = firstVisit.MovieRips.GetFileNames().Except(lastVisit.MovieRips.GetFileNames()).ToList();
+            }
+            return new Dictionary<string, IEnumerable<string>>() {
+                ["added"] = addedFileNames,
+                ["removed"] = removedFileNames
+            };
+        }
+
     }
 }

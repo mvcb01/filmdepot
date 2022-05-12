@@ -132,5 +132,125 @@ namespace DepotTests.CRUDTests
             };
             ripCountByVisit.Should().BeEquivalentTo(expected);
         }
+
+        [Fact]
+        public void GetLastVisitDiff_WithoutAnyVisits_ShouldThrowInvalidOperationException()
+        {
+            // arrange
+            this._movieWarehouseVisitRepositoryMock.Setup(w => w.GetAll()).Returns(new MovieWarehouseVisit[] { });
+
+            // act
+            // nada a fazer...
+
+            // assert
+            this._scanManager.Invoking(s => s.GetLastVisitDiff()).Should().Throw<InvalidOperationException>();
+        }
+
+        [Fact]
+        public void GetLastVisitDiff_WithOnlyOneVisit_ShouldReturnEmptyEnumerableInRemovedKey()
+        {
+            // arrange
+            var onlyVisit = new MovieWarehouseVisit() {
+                MovieRips = new MovieRip[] { new MovieRip(), new MovieRip()},
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+                };
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetAll())
+                .Returns(new MovieWarehouseVisit[] { onlyVisit });
+
+            // act
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
+
+            // assert
+            lastVisitDiff["removed"].Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GetLastVisitDiff_WithOnlyOneVisit_ShouldReturnAllRipsInAddedKey()
+        {
+            // arrange
+            var movieRips = new List<MovieRip>() {
+                new MovieRip() {
+                    FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
+                    ParsedReleaseDate = "1997"
+                    },
+                new MovieRip() {
+                    FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                    ParsedReleaseDate = "1997"
+                    },
+                new MovieRip() {
+                    FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+                    ParsedReleaseDate = "1973"
+                    }
+            };
+            var onlyVisit = new MovieWarehouseVisit() {
+                MovieRips = movieRips,
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+                };
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetAll())
+                .Returns(new MovieWarehouseVisit[] { onlyVisit });
+
+            // act
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
+
+            // assert
+            lastVisitDiff["added"].Should().BeEquivalentTo(movieRips.Select(r => r.FileName));
+        }
+
+        [Fact]
+        public void GetLastVisitDiff_WithTwoVisits_ShouldReturnCorrectDifference()
+        {
+            // arrange
+            var movieRipsFirstVisit = new List<MovieRip>() {
+                new MovieRip() {
+                    FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
+                    ParsedReleaseDate = "1997"
+                    },
+                new MovieRip() {
+                    FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                    ParsedReleaseDate = "1997"
+                    }
+            };
+            var movieRipsSecondVisit = new List<MovieRip>() {
+                new MovieRip() {
+                    FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                    ParsedReleaseDate = "1997"
+                    },
+                new MovieRip() {
+                    FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+                    ParsedReleaseDate = "1973"
+                    }
+            };
+            DateTime firstVisitDate = DateTime.ParseExact("20220101", "yyyyMMdd", null);
+            DateTime secondVisitDate = DateTime.ParseExact("20220102", "yyyyMMdd", null);
+
+            var firstVisit = new MovieWarehouseVisit() {
+                MovieRips = movieRipsFirstVisit,
+                VisitDateTime = firstVisitDate
+                };
+            var secondVisit = new MovieWarehouseVisit() {
+                MovieRips = movieRipsSecondVisit,
+                VisitDateTime = secondVisitDate
+            };
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetAll())
+                .Returns(new MovieWarehouseVisit[] { secondVisit, firstVisit });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetClosestMovieWarehouseVisit(firstVisitDate))
+                .Returns(firstVisit);
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetClosestMovieWarehouseVisit(secondVisitDate))
+                .Returns(secondVisit);
+
+            // act
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
+
+            // assert
+            lastVisitDiff["removed"].Should().BeEquivalentTo(new string[] { "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]" });
+            lastVisitDiff["added"].Should().BeEquivalentTo(new string[] { "Papillon.1973.1080p.BluRay.X264-AMIABLE" });
+        }
+
+
     }
 }
