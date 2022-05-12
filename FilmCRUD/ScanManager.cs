@@ -56,12 +56,12 @@ namespace FilmCRUD
                 ["added"] = new string[] {}
             };
 
-            // List<DateTime> lastTwoVisitDates = unitOfWork.MovieWarehouseVisits
-            //     .GetAll()
-            //     .GetVisitDates()
-            //     .OrderByDescending(dt => dt)
-            //     .Take(2)
-            //     .ToList();
+            List<DateTime> lastTwoVisitDates = unitOfWork.MovieWarehouseVisits
+                .GetAll()
+                .GetVisitDates()
+                .OrderByDescending(dt => dt)
+                .Take(2)
+                .ToList();
             return resultDict;
         }
 

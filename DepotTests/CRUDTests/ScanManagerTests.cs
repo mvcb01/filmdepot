@@ -134,6 +134,19 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
+        public void GetLastVisitDiff_WithoutAnyVisits_ShouldThrowInvalidOperationException()
+        {
+            // arrange
+            this._movieWarehouseVisitRepositoryMock.Setup(w => w.GetAll()).Returns(new MovieWarehouseVisit[] { });
+
+            // act
+            // nada a fazer...
+
+            // assert
+            this._scanManager.Invoking(s => s.GetLastVisitDiff()).Should().Throw<InvalidOperationException>();
+        }
+
+        [Fact]
         public void GetLastVisitDiff_WithOnlyOneVisit_ShouldReturnEmptyEnumerableInRemovedKey()
         {
             // arrange
