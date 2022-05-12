@@ -120,8 +120,7 @@ namespace FilmCRUD
                 foreach (var item in lastVisitDiff.OrderBy(kvp => kvp.Key))
                 {
                     System.Console.WriteLine("\n----------");
-                    System.Console.WriteLine(item.Key);
-                    System.Console.WriteLine("\n");
+                    System.Console.WriteLine(item.Key + "\n");
                     System.Console.WriteLine(String.Join('\n', item.Value));
                 }
             }
