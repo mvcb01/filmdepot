@@ -121,6 +121,7 @@ namespace FilmCRUD
                 {
                     System.Console.WriteLine("\n----------");
                     System.Console.WriteLine(item.Key);
+                    System.Console.WriteLine("\n");
                     System.Console.WriteLine(String.Join('\n', item.Value));
                 }
             }
