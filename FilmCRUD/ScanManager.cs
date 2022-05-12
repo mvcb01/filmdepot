@@ -49,5 +49,14 @@ namespace FilmCRUD
                 );
         }
 
+        public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
+        {
+            var resultDict = new Dictionary<string, IEnumerable<string>>() {
+                ["removed"] = new string[] {},
+                ["added"] = new string[] {}
+            };
+            return resultDict;
+        }
+
     }
 }

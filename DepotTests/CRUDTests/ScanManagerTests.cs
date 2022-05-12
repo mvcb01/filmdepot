@@ -132,5 +132,103 @@ namespace DepotTests.CRUDTests
             };
             ripCountByVisit.Should().BeEquivalentTo(expected);
         }
+
+        [Fact]
+        public void GetLastVisitDiff_WithOnlyOneVisit_ShouldReturnEmptyEnumerableInRemovedKey()
+        {
+            // arrange
+            var onlyVisit = new MovieWarehouseVisit() {
+                MovieRips = new MovieRip[] { new MovieRip(), new MovieRip()},
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+                };
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetClosestMovieWarehouseVisit())
+                .Returns(onlyVisit);
+
+            // act
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
+
+            // assert
+            lastVisitDiff["removed"].Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GetLastVisitDiff_WithOnlyOneVisit_ShouldReturnAllRipsInAddedKey()
+        {
+            // arrange
+            var movieRips = new List<MovieRip>() {
+                    new MovieRip() {
+                        FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
+                        ParsedReleaseDate = "1997"
+                        },
+                     new MovieRip() {
+                        FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                        ParsedReleaseDate = "1997"
+                        },
+                    new MovieRip() {
+                        FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+                        ParsedReleaseDate = "1973"
+                        }
+                };
+            var onlyVisit = new MovieWarehouseVisit() {
+                MovieRips = movieRips,
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+                };
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetClosestMovieWarehouseVisit())
+                .Returns(onlyVisit);
+
+            // act
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
+
+            // assert
+            lastVisitDiff["added"].Should().BeEquivalentTo(movieRips.Select(r => r.FileName));
+        }
+
+        [Fact]
+        public void GetLastVisitDiff_WithTwoVisits_ShouldReturnCorrectDifference()
+        {
+            // arrange
+            var movieRipsFirstVisit = new List<MovieRip>() {
+                    new MovieRip() {
+                        FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
+                        ParsedReleaseDate = "1997"
+                        },
+                     new MovieRip() {
+                        FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                        ParsedReleaseDate = "1997"
+                        }
+                };
+            var movieRipsSecondVisit = new List<MovieRip>() {
+                     new MovieRip() {
+                        FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                        ParsedReleaseDate = "1997"
+                        },
+                    new MovieRip() {
+                        FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+                        ParsedReleaseDate = "1973"
+                        }
+                };
+            var firstVisit = new MovieWarehouseVisit() {
+                MovieRips = movieRipsFirstVisit,
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+                };
+            var secondVisit = new MovieWarehouseVisit() {
+                MovieRips = movieRipsSecondVisit,
+                VisitDateTime = DateTime.ParseExact("20220102", "yyyyMMdd", null)
+            };
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetAll())
+                .Returns(new MovieWarehouseVisit[] { secondVisit, firstVisit });
+
+            // act
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
+
+            // assert
+            lastVisitDiff["removed"].Should().BeEquivalentTo(new string[] { "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]" });
+            lastVisitDiff["added"].Should().BeEquivalentTo(new string[] { "Papillon.1973.1080p.BluRay.X264-AMIABLE" });
+        }
+
+
     }
 }
