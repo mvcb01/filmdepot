@@ -3,10 +3,11 @@ using Moq;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using FluentAssertions;
+using System;
+using System.Linq;
 
 using FilmCRUD;
 using FilmDomain.Interfaces;
-using System;
 using FilmDomain.Entities;
 
 namespace DepotTests.CRUDTests
@@ -78,9 +79,9 @@ namespace DepotTests.CRUDTests
                         }
                 };
 
-            this._movieRipRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
-                .Returns(movieRips);
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(v => v.GetClosestMovieWarehouseVisit())
+                .Returns(new MovieWarehouseVisit() { MovieRips = movieRips });
 
 
             // act
@@ -94,6 +95,10 @@ namespace DepotTests.CRUDTests
             // da documentação:
             //     The two collections are equivalent when they both contain the same strings in any order.
             ripsWithReleaseDate.Should().BeEquivalentTo(expected);
+
+            // garante que foi executado o método GetClosestMovieWarehouseVisit e não o IMovieRipRepository.Find
+            _movieWarehouseVisitRepositoryMock.Verify(w => w.GetClosestMovieWarehouseVisit(), Times.Once);
+            _movieRipRepositoryMock.Verify(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()), Times.Never);
 
         }
 
