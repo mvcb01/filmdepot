@@ -142,8 +142,8 @@ namespace DepotTests.CRUDTests
                 VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
                 };
             this._movieWarehouseVisitRepositoryMock
-                .Setup(w => w.GetClosestMovieWarehouseVisit())
-                .Returns(onlyVisit);
+                .Setup(w => w.GetAll())
+                .Returns(new MovieWarehouseVisit[] { onlyVisit });
 
             // act
             Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
@@ -175,8 +175,8 @@ namespace DepotTests.CRUDTests
                 VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
                 };
             this._movieWarehouseVisitRepositoryMock
-                .Setup(w => w.GetClosestMovieWarehouseVisit())
-                .Returns(onlyVisit);
+                .Setup(w => w.GetAll())
+                .Returns(new MovieWarehouseVisit[] { onlyVisit });
 
             // act
             Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();

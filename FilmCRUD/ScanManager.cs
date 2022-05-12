@@ -55,6 +55,13 @@ namespace FilmCRUD
                 ["removed"] = new string[] {},
                 ["added"] = new string[] {}
             };
+
+            // List<DateTime> lastTwoVisitDates = unitOfWork.MovieWarehouseVisits
+            //     .GetAll()
+            //     .GetVisitDates()
+            //     .OrderByDescending(dt => dt)
+            //     .Take(2)
+            //     .ToList();
             return resultDict;
         }
 
