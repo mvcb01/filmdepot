@@ -222,17 +222,26 @@ namespace DepotTests.CRUDTests
                     ParsedReleaseDate = "1973"
                     }
             };
+            DateTime firstVisitDate = DateTime.ParseExact("20220101", "yyyyMMdd", null);
+            DateTime secondVisitDate = DateTime.ParseExact("20220102", "yyyyMMdd", null);
+
             var firstVisit = new MovieWarehouseVisit() {
                 MovieRips = movieRipsFirstVisit,
-                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+                VisitDateTime = firstVisitDate
                 };
             var secondVisit = new MovieWarehouseVisit() {
                 MovieRips = movieRipsSecondVisit,
-                VisitDateTime = DateTime.ParseExact("20220102", "yyyyMMdd", null)
+                VisitDateTime = secondVisitDate
             };
             this._movieWarehouseVisitRepositoryMock
                 .Setup(w => w.GetAll())
                 .Returns(new MovieWarehouseVisit[] { secondVisit, firstVisit });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetClosestMovieWarehouseVisit(firstVisitDate))
+                .Returns(firstVisit);
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(w => w.GetClosestMovieWarehouseVisit(secondVisitDate))
+                .Returns(secondVisit);
 
             // act
             Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
