@@ -41,7 +41,6 @@ namespace MovieAPIClients.TheMovieDb
 
             var searchResultTMDB = JsonSerializer.Deserialize<SearchResultTMDB>(resultString);
             return searchResultTMDB.Results.Select(res => res.ToMovieSearchResult());
-
         }
 
         public async Task<IEnumerable<string>> GetMovieGenresAsync(int externalId)
