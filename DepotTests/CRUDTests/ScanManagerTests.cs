@@ -157,19 +157,19 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             var movieRips = new List<MovieRip>() {
-                    new MovieRip() {
-                        FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
-                        ParsedReleaseDate = "1997"
-                        },
-                     new MovieRip() {
-                        FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
-                        ParsedReleaseDate = "1997"
-                        },
-                    new MovieRip() {
-                        FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
-                        ParsedReleaseDate = "1973"
-                        }
-                };
+                new MovieRip() {
+                    FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
+                    ParsedReleaseDate = "1997"
+                    },
+                new MovieRip() {
+                    FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                    ParsedReleaseDate = "1997"
+                    },
+                new MovieRip() {
+                    FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+                    ParsedReleaseDate = "1973"
+                    }
+            };
             var onlyVisit = new MovieWarehouseVisit() {
                 MovieRips = movieRips,
                 VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
@@ -190,25 +190,25 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             var movieRipsFirstVisit = new List<MovieRip>() {
-                    new MovieRip() {
-                        FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
-                        ParsedReleaseDate = "1997"
-                        },
-                     new MovieRip() {
-                        FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
-                        ParsedReleaseDate = "1997"
-                        }
-                };
+                new MovieRip() {
+                    FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
+                    ParsedReleaseDate = "1997"
+                    },
+                new MovieRip() {
+                    FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                    ParsedReleaseDate = "1997"
+                    }
+            };
             var movieRipsSecondVisit = new List<MovieRip>() {
-                     new MovieRip() {
-                        FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
-                        ParsedReleaseDate = "1997"
-                        },
-                    new MovieRip() {
-                        FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
-                        ParsedReleaseDate = "1973"
-                        }
-                };
+                new MovieRip() {
+                    FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                    ParsedReleaseDate = "1997"
+                    },
+                new MovieRip() {
+                    FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+                    ParsedReleaseDate = "1973"
+                    }
+            };
             var firstVisit = new MovieWarehouseVisit() {
                 MovieRips = movieRipsFirstVisit,
                 VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
