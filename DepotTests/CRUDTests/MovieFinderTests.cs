@@ -1,6 +1,5 @@
 using Xunit;
 using Moq;
-using System.Collections.Generic;
 using FluentAssertions;
 
 using MovieAPIClients;
