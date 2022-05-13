@@ -51,7 +51,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void FindMovieOnlineAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
+        public async void FindMovieOnlineAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
         {
             // arrange
             MovieSearchResult[] searchResults = {
@@ -66,7 +66,10 @@ namespace DepotTests.CRUDTests
             // nada a fazer
 
             // assert
-            this._movieFinder.Invoking(m => m.FindMovieOnlineAsync(It.IsAny<string>())).Should().Throw<MultipleSearchResultsError>();
+            await this._movieFinder
+                .Invoking(m => m.FindMovieOnlineAsync(It.IsAny<string>()))
+                .Should()
+                .ThrowAsync<MultipleSearchResultsError>();
         }
 
         [Fact]
@@ -89,6 +92,28 @@ namespace DepotTests.CRUDTests
             // assert
             // só nos interessa o valor das duas properties Title e ReleaseDate
             movieFound.Should().BeEquivalentTo(new { Title = "The Fly", ReleaseDate = 1986 });
+        }
+
+        [Fact]
+        public async void FindMovieOnlineAsync_WithSeveralSearchResultsAndProvidedReleaseDateWithoutMatch_ShouldThrowNoSearchResultsError()
+        {
+            // arrange
+            string movieTitleToSearch = "the fly";
+            string movieReleaseDateToSearch = "1900";
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986, ExternalId = 1 },
+                new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1986, ExternalId = 2 },
+                };
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(movieTitleToSearch)).ReturnsAsync(searchResults);
+
+            // act
+            // nada a fazer
+
+            // assert
+            await this._movieFinder
+                .Invoking(m => m.FindMovieOnlineAsync(movieTitleToSearch, movieReleaseDateToSearch))
+                .Should()
+                .ThrowAsync<NoSearchResultsError>();
         }
 
         [Fact]
