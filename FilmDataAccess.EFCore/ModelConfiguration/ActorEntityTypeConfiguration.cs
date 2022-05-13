@@ -10,6 +10,7 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
         {
             builder.Property(a => a.Name).IsRequired();
             builder.HasAlternateKey(a => a.Name);
+
         }
     }
 }
