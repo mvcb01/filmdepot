@@ -61,7 +61,7 @@ namespace FilmCRUD
                     throw new MultipleSearchResultsError(
                         $"Multiple search results for \"{parsedTitle}\"  with release date = {parsedReleaseDate}; count = {resultCount}");
                 }
-                result = searchResult.First();
+                result = searchResultFiltered.First();
 
             }
             return new Movie() {
