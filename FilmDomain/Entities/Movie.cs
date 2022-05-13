@@ -7,7 +7,11 @@ namespace FilmDomain.Entities
     {
         public int Id { get; set; }
 
+        public int ExternalId { get; set; }
+
         public string Title { get; set; }
+
+        public string OriginalTitle { get; set; }
 
         public int ReleaseDate { get; set; }
 
@@ -21,12 +25,7 @@ namespace FilmDomain.Entities
 
         public override string ToString()
         {
-            string _genres = "";
-            if (Genres != null)
-            {
-                _genres = string.Join(' ', Genres.Select(g => g.Name));
-            }
-            return $"{Title} ({ReleaseDate}) - {_genres}";
+            return $"{Title} ({ReleaseDate})";
         }
     }
 }

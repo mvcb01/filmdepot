@@ -10,8 +10,8 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
         {
             builder.Property(m => m.Title).IsRequired();
 
-            // a combinação (título, release date) deve identificar bem um filme
-            builder.HasAlternateKey(m => new {m.Title, m.ReleaseDate });
+            // a combinação (título, título original, release date) deve identificar bem um filme
+            builder.HasAlternateKey(m => new {m.Title, m.OriginalTitle, m.ReleaseDate });
         }
     }
 }

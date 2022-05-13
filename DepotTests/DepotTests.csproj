@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FilmCRUD\FilmCRUD.csproj" />
     <ProjectReference Include="..\ConfigUtils\ConfigUtils.csproj" />
+    <ProjectReference Include="..\MovieAPIClients\MovieAPIClients.csproj" />
   </ItemGroup>
 
 </Project>
