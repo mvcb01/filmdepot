@@ -37,9 +37,7 @@ namespace FilmDataAccess.EFCore.Repositories
             return _context.Set<TEntity>().Where(predicate);
         }
 
-        // para dar para fazer override, por exemplo no método MovieRepository.GetAll queremos
-        // fazer include dos Genres e Directors
-        public virtual IEnumerable<TEntity> GetAll()
+        public IEnumerable<TEntity> GetAll()
         {
             return _context.Set<TEntity>();
         }

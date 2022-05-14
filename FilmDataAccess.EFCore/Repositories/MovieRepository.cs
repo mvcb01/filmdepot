@@ -12,13 +12,6 @@ namespace FilmDataAccess.EFCore.Repositories
         {
         }
 
-
-        // override para incluir os Genres, Directors e MovieRips
-        public override IEnumerable<Movie> GetAll()
-        {
-            return _context.Movies.Include(m => m.Genres).Include(m => m.Directors).Include(m => m.MovieRips);
-        }
-
         public IEnumerable<Movie> GetMoviesByGenre(params Genre[] genres)
         {
             var moviesWithGenres = GetMoviesWithGenres();
