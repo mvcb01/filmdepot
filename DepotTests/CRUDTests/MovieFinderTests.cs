@@ -170,8 +170,8 @@ namespace DepotTests.CRUDTests
             // arrange
             string movieTitleToSearch = "the fly";
             MovieSearchResult[] searchResults = {
-                new MovieSearchResult() { OriginalTitle = "The Fly", ReleaseDate = 1986},
-                new MovieSearchResult()  { Title = "Curse of the Fly", ReleaseDate = 1965},
+                new MovieSearchResult() { OriginalTitle = "The Fly", ReleaseDate = 1986 },
+                new MovieSearchResult()  { Title = "Curse of the Fly", ReleaseDate = 1965 },
                 };
             this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(movieTitleToSearch)).ReturnsAsync(searchResults);
 
