@@ -47,7 +47,10 @@ namespace DepotTests.CRUDTests
             // nada a fazer
 
             // assert
-            this._movieFinder.Invoking(m => m.FindMovieOnlineAsync(titleWithNoResults)).Should().Throw<NoSearchResultsError>();
+            this._movieFinder
+                .Invoking(m => m.FindMovieOnlineAsync(titleWithNoResults))
+                .Should()
+                .Throw<NoSearchResultsError>();
         }
 
         [Fact]
@@ -92,7 +95,9 @@ namespace DepotTests.CRUDTests
 
             // assert
             // só nos interessa o valor das duas properties Title e ReleaseDate
-            movieFound.Should().BeEquivalentTo(new { Title = "The Fly", ReleaseDate = 1986 });
+            movieFound
+                .Should()
+                .BeEquivalentTo(new { Title = "The Fly", ReleaseDate = 1986 });
         }
 
         [Fact]
@@ -154,8 +159,9 @@ namespace DepotTests.CRUDTests
             Movie movieFound = await this._movieFinder.FindMovieOnlineAsync(movieTitleToSearch);
 
             // assert
-            movieFound.Should().BeEquivalentTo(new { Title = "Sorcerer", ReleaseDate = 1977});
-
+            movieFound
+                .Should()
+                .BeEquivalentTo(new { Title = "Sorcerer", ReleaseDate = 1977 });
         }
 
 
