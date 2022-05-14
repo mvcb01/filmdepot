@@ -69,8 +69,8 @@ namespace FilmCRUD
                         $"Multiple search results for \"{parsedTitle}\"  with release date = {parsedReleaseDate}; count = {resultCount}");
                 }
                 result = searchResultFiltered.First();
-
             }
+
             return new Movie() {
                 Title = result.Title,
                 ExternalId = result.ExternalId,
