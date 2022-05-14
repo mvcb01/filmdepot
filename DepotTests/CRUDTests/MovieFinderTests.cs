@@ -38,6 +38,7 @@ namespace DepotTests.CRUDTests
         public void FindMovieOnlineAsync_WithNoSearchResults_ShouldThrowNoSearchResultsError()
         {
             // arrange
+            string titleWithNoResults = "Some movie";
             this._movieAPIClientMock
                 .Setup(m => m.SearchMovieAsync(It.IsAny<string>()))
                 .ReturnsAsync(new MovieSearchResult[] { });
@@ -46,13 +47,14 @@ namespace DepotTests.CRUDTests
             // nada a fazer
 
             // assert
-            this._movieFinder.Invoking(m => m.FindMovieOnlineAsync(It.IsAny<string>())).Should().Throw<NoSearchResultsError>();
+            this._movieFinder.Invoking(m => m.FindMovieOnlineAsync(titleWithNoResults)).Should().Throw<NoSearchResultsError>();
         }
 
         [Fact]
         public async void FindMovieOnlineAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
         {
             // arrange
+            string movieTitleToSearch = "the fly";
             MovieSearchResult[] searchResults = {
                 new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986 },
                 new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958 },
@@ -66,7 +68,7 @@ namespace DepotTests.CRUDTests
 
             // assert
             await this._movieFinder
-                .Invoking(m => m.FindMovieOnlineAsync(It.IsAny<string>()))
+                .Invoking(m => m.FindMovieOnlineAsync(movieTitleToSearch))
                 .Should()
                 .ThrowAsync<MultipleSearchResultsError>();
         }
@@ -101,7 +103,7 @@ namespace DepotTests.CRUDTests
             string movieReleaseDateToSearch = "1900";
             MovieSearchResult[] searchResults = {
                 new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986, ExternalId = 1 },
-                new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1986, ExternalId = 2 },
+                new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958, ExternalId = 2 },
                 };
             this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(movieTitleToSearch)).ReturnsAsync(searchResults);
 
@@ -135,6 +137,25 @@ namespace DepotTests.CRUDTests
                 .Invoking(m => m.FindMovieOnlineAsync(movieTitleToSearch, movieReleaseDateToSearch))
                 .Should()
                 .ThrowAsync<MultipleSearchResultsError>();
+        }
+
+        [Fact]
+        public async void FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithExactMatch()
+        {
+            // arrange
+            string movieTitleToSearch = "sorcerer";
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "Sorcerer", ReleaseDate = 1977},
+                new MovieSearchResult()  { Title = "Highlander III: The Sorcerer", ReleaseDate = 1994},
+                };
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(movieTitleToSearch)).ReturnsAsync(searchResults);
+
+            // act
+            Movie movieFound = await this._movieFinder.FindMovieOnlineAsync(movieTitleToSearch);
+
+            // assert
+            movieFound.Should().BeEquivalentTo(new { Title = "Sorcerer", ReleaseDate = 1977});
+
         }
 
 

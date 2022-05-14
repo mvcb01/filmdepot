@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Collections.Generic;
+using System;
 
 using FilmCRUD.CustomExceptions;
 using FilmDomain.Entities;
@@ -8,6 +9,7 @@ using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using FilmDomain.Interfaces;
 using System.Threading.Tasks;
+
 
 namespace FilmCRUD
 {
@@ -28,10 +30,15 @@ namespace FilmCRUD
 
         public async Task<Movie> FindMovieOnlineAsync(string parsedTitle, string parsedReleaseDate = null)
         {
-            List<MovieSearchResult> searchResult = (await _movieAPIClient.SearchMovieAsync(parsedTitle)).ToList();
+            IEnumerable<MovieSearchResult> searchResultAll = await _movieAPIClient.SearchMovieAsync(parsedTitle);
+
+            IEnumerable<string> titleTokens = SplitTitleIntoTokens(parsedTitle);
+            List<MovieSearchResult> searchResult = searchResultAll
+                .Where(r => titleTokens.SequenceEqual(SplitTitleIntoTokens(r.Title)))
+                .ToList();
+
             int resultCount = searchResult.Count();
             MovieSearchResult result;
-
             if (resultCount == 0)
             {
                 throw new NoSearchResultsError($"No search results for \"{parsedTitle}\" ");
@@ -70,6 +77,13 @@ namespace FilmCRUD
                 OriginalTitle = result.OriginalTitle,
                 ReleaseDate = result.ReleaseDate
                 };
+        }
+
+        private static IEnumerable<string> SplitTitleIntoTokens(string parsedTitle)
+        {
+            var movieTitle = parsedTitle.Trim().ToLower();
+            char[] punctuation = movieTitle.Where(Char.IsPunctuation).Distinct().ToArray();
+            return movieTitle.Split().Select(s => s.Trim(punctuation));
         }
     }
 
