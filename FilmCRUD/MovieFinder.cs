@@ -32,9 +32,12 @@ namespace FilmCRUD
         {
             IEnumerable<MovieSearchResult> searchResultAll = await _movieAPIClient.SearchMovieAsync(parsedTitle);
 
+            // filtra usando Title e OriginalTitle
             IEnumerable<string> titleTokens = SplitTitleIntoTokens(parsedTitle);
             List<MovieSearchResult> searchResult = searchResultAll
-                .Where(r => titleTokens.SequenceEqual(SplitTitleIntoTokens(r.Title)))
+                .Where(r => titleTokens.SequenceEqual(SplitTitleIntoTokens(r.Title ?? string.Empty))
+                    ||
+                    titleTokens.SequenceEqual(SplitTitleIntoTokens(r.OriginalTitle ?? string.Empty)))
                 .ToList();
 
             int resultCount = searchResult.Count();

@@ -145,7 +145,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithExactMatch()
+        public async void FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithTitleExactMatch()
         {
             // arrange
             string movieTitleToSearch = "sorcerer";
@@ -162,6 +162,26 @@ namespace DepotTests.CRUDTests
             movieFound
                 .Should()
                 .BeEquivalentTo(new { Title = "Sorcerer", ReleaseDate = 1977 });
+        }
+
+        [Fact]
+        public async void FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithOriginalTitleExactMatch()
+        {
+            // arrange
+            string movieTitleToSearch = "the fly";
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { OriginalTitle = "The Fly", ReleaseDate = 1986},
+                new MovieSearchResult()  { Title = "Curse of the Fly", ReleaseDate = 1965},
+                };
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(movieTitleToSearch)).ReturnsAsync(searchResults);
+
+            // act
+            Movie movieFound = await this._movieFinder.FindMovieOnlineAsync(movieTitleToSearch);
+
+            // assert
+            movieFound
+                .Should()
+                .BeEquivalentTo(new { OriginalTitle = "The Fly", ReleaseDate = 1986 });
         }
 
 
