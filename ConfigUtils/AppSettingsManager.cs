@@ -17,6 +17,8 @@ namespace ConfigUtils
             {
                 throw new InvalidOperationException("Please define the environment variable FILMCRUD_ENVIRONMENT");
             }
+
+            // quando as configs são acedidas os appsettings.ENV.json têm sempre prioridade
             var configBuilder = new ConfigurationBuilder();
             configBuilder
                 .AddJsonFile("appsettings.json")
