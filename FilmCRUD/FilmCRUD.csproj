@@ -4,6 +4,7 @@
     <ProjectReference Include="..\FilmDataAccess.EFCore\FilmDataAccess.EFCore.csproj" />
     <ProjectReference Include="..\FilmDomain\FilmDomain.csproj" />
     <ProjectReference Include="..\ConfigUtils\ConfigUtils.csproj" />
+    <ProjectReference Include="..\MovieAPIClients\MovieAPIClients.csproj" />
   </ItemGroup>
 
   <ItemGroup>
