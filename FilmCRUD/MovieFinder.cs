@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using System.Threading.Tasks;
 
 using FilmCRUD.CustomExceptions;
 using FilmDomain.Entities;
@@ -8,8 +9,6 @@ using MovieAPIClients;
 using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using FilmDomain.Interfaces;
-using System.Threading.Tasks;
-
 
 namespace FilmCRUD
 {
