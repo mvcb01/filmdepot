@@ -8,7 +8,6 @@ namespace ConfigUtils
 {
     public class AppSettingsManager : IAppSettingsManager
     {
-
         public IConfigurationRoot ConfigRoot { get; init; }
 
         public AppSettingsManager(string filename)
