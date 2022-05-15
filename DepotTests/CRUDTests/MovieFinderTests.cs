@@ -3,12 +3,10 @@ using Moq;
 using FluentAssertions;
 
 using MovieAPIClients;
-using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
-using FilmDomain.Interfaces;
 using FilmDomain.Entities;
-using FilmCRUD;
 using FilmCRUD.CustomExceptions;
+using FilmCRUD.Helpers;
 
 namespace DepotTests.CRUDTests
 {
