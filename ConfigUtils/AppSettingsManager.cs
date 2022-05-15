@@ -12,8 +12,16 @@ namespace ConfigUtils
 
         public AppSettingsManager()
         {
+            var env = Environment.GetEnvironmentVariable("FILMCRUD_ENVIRONMENT");
+            if (env == null)
+            {
+                throw new InvalidOperationException("Please define the environment variable FILMCRUD_ENVIRONMENT");
+            }
             var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJsonFile("appsettings.json").AddUserSecrets<AppSettingsManager>();
+            configBuilder
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{env}.json")
+                .AddUserSecrets<AppSettingsManager>();
             this.ConfigRoot = configBuilder.Build();
         }
 
