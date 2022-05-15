@@ -10,7 +10,7 @@ using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using FilmDomain.Interfaces;
 
-namespace FilmCRUD
+namespace FilmCRUD.Helpers
 {
     public class MovieFinder
     {
