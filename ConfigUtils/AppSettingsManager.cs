@@ -10,10 +10,10 @@ namespace ConfigUtils
     {
         public IConfigurationRoot ConfigRoot { get; init; }
 
-        public AppSettingsManager(string filename)
+        public AppSettingsManager()
         {
             var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJsonFile(filename).AddUserSecrets<AppSettingsManager>();
+            configBuilder.AddJsonFile("appsettings.json").AddUserSecrets<AppSettingsManager>();
             this.ConfigRoot = configBuilder.Build();
         }
 

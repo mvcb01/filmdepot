@@ -19,7 +19,7 @@ namespace FilmDataAccess.EFCore
 
         public DbSet<MovieWarehouseVisit> MovieWarehouseVisits { get; set; }
 
-        private static readonly AppSettingsManager _appSettingsManager = new("appsettings.json");
+        private static readonly AppSettingsManager _appSettingsManager = new();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

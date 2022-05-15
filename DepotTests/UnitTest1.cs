@@ -12,7 +12,7 @@ namespace DepotTests
         public async void Test1()
         {
 
-            AppSettingsManager appSettingsManager = new("appsettings.json");
+            var appSettingsManager = new AppSettingsManager();
             string apiKey = appSettingsManager.GetApiKey("TheMovieDb");
             var apiCaller = new TheMovieDbAPIClient(apiKey);
             {}
