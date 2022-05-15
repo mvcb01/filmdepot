@@ -7,6 +7,7 @@
 FilmDataAccess.EFCore/*.db
 FilmDataAccess.EFCore/*.db-shm
 FilmDataAccess.EFCore/*.db-wal
+ConfigUtils/appsettings.Development.json
 _NOTES.txt
 .vscode
 
