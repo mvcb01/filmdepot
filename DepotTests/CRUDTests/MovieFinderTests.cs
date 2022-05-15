@@ -14,24 +14,14 @@ namespace DepotTests.CRUDTests
 {
     public class MovieFinderTests
     {
-
-        private readonly Mock<IAppSettingsManager> _appSettingsManagerMock;
-
-        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
         private readonly MovieFinder _movieFinder;
 
         public MovieFinderTests()
         {
-            this._unitOfWorkMock = new Mock<IUnitOfWork>();
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
-            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
-            this._movieFinder = new MovieFinder(
-                this._unitOfWorkMock.Object,
-                this._movieAPIClientMock.Object,
-                this._appSettingsManagerMock.Object);
+            this._movieFinder = new MovieFinder(this._movieAPIClientMock.Object);
         }
 
         [Fact]

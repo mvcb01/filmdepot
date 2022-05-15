@@ -14,17 +14,11 @@ namespace FilmCRUD
 {
     public class MovieFinder
     {
-        private IUnitOfWork _unitOfWork { get; init; }
-
-        private IAppSettingsManager _appSettingsManager { get; init; }
-
         private IMovieAPIClient _movieAPIClient { get; init; }
 
-        public MovieFinder(IUnitOfWork unitOfWork, IMovieAPIClient movieAPIClient, IAppSettingsManager appSettingsManager)
+        public MovieFinder(IMovieAPIClient movieAPIClient)
         {
-            this._unitOfWork = unitOfWork;
             this._movieAPIClient = movieAPIClient;
-            this._appSettingsManager = appSettingsManager;
         }
 
         public async Task<Movie> FindMovieOnlineAsync(string parsedTitle, string parsedReleaseDate = null)
