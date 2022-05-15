@@ -18,7 +18,12 @@ namespace ConfigUtils
                 throw new InvalidOperationException("Please define the environment variable FILMCRUD_ENVIRONMENT");
             }
 
-            // quando as configs são acedidas os appsettings.ENV.json têm sempre prioridade
+            // ordem de acesso às configs:
+            //    user secrets
+            //    appsettings.ENV.json
+            //    appsettings.json
+            // NOTA: ver qual a ordem de acesso consoante os diferentes ENVs:
+            //      https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-6.0#hi2low
             var configBuilder = new ConfigurationBuilder();
             configBuilder
                 .AddJsonFile("appsettings.json")
