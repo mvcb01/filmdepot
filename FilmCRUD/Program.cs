@@ -35,7 +35,6 @@ namespace FilmCRUD
                 .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager))
                 .WithNotParsed(HandleParseError);
             {}
-
         }
 
         private static void ConfigureServices(IServiceCollection services)
