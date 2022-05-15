@@ -14,5 +14,7 @@ namespace ConfigUtils.Interfaces
 
         Dictionary<string, Dictionary<string, string>> GetManualMovieRips();
 
+        string GetApiKey(string keyName);
+
     }
 }

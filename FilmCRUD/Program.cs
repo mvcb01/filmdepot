@@ -47,7 +47,7 @@ namespace FilmCRUD
             services.AddSingleton<IFileSystemIOWrapper, FileSystemIOWrapper>();
 
             services.AddSingleton<IAppSettingsManager, AppSettingsManager>(
-                _ => new AppSettingsManager("appsettings.json")
+                _ => new AppSettingsManager()
                 );
         }
 
