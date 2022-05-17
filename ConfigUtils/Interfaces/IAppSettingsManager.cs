@@ -16,5 +16,7 @@ namespace ConfigUtils.Interfaces
 
         string GetApiKey(string keyName);
 
+        IEnumerable<string> GetRipFilenamesToIgnoreOnLinking();
+
     }
 }

@@ -1,5 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 using ConfigUtils.Interfaces;
 using FilmCRUD.Helpers;
+using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients.Interfaces;
 
@@ -18,6 +23,10 @@ namespace FilmCRUD
             this._movieFinder = new MovieFinder(movieAPIClient);
             this._unitOfWork = unitOfWork;
             this._appSettingsManager = appSettingsManager;
+        }
+
+        public void LinkMovieRipsToMovies()
+        {
         }
     }
 

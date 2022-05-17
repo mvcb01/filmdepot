@@ -67,5 +67,10 @@ namespace ConfigUtils
             }
             return result;
         }
+
+        public IEnumerable<string> GetRipFilenamesToIgnoreOnLinking()
+        {
+            return ConfigRoot.GetSection("ManualRipToMovieLinks").GetSection("RipFilenamesToIgnore").Get<IEnumerable<string>>();
+        }
     }
 }

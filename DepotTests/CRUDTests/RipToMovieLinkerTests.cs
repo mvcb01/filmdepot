@@ -3,9 +3,12 @@ using Moq;
 using FluentAssertions;
 
 using FilmCRUD;
+using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
+using System.Linq.Expressions;
+using System;
 
 namespace DepotTests.CRUDTests
 {
@@ -48,6 +51,19 @@ namespace DepotTests.CRUDTests
         [Fact]
         public void TestMethod()
         {
+            // arrange
+            MovieRip[] ripsToLink = {
+                new MovieRip() { FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]" },
+                new MovieRip() { FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN" }
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
+                .Returns(ripsToLink);
+
+            // act
+            this._ripToMovieLinker.LinkMovieRipsToMovies();
+
+            // assert
         }
     }
 }
