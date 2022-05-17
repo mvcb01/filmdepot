@@ -25,8 +25,19 @@ namespace FilmCRUD
             this._appSettingsManager = appSettingsManager;
         }
 
+        public IEnumerable<MovieRip> GetMovieRipsToLink()
+        {
+            IEnumerable<string> ripFilenamesToIgnore = _appSettingsManager.GetRipFilenamesToIgnoreOnLinking();
+            return _unitOfWork.MovieRips
+                .Find(r => r.Movie == null)
+                .Where(r => r.ParsedTitle != null && !ripFilenamesToIgnore.Contains(r.FileName));
+        }
+
         public void LinkMovieRipsToMovies()
         {
+
+            IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
+            {}
         }
     }
 

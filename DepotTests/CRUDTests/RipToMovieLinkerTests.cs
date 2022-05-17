@@ -8,6 +8,7 @@ using FilmDomain.Interfaces;
 using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using System.Linq.Expressions;
+using System.Collections.Generic;
 using System;
 
 namespace DepotTests.CRUDTests
@@ -49,21 +50,33 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void TestMethod()
+        public void GetMovieRipsToLink_WithRipFilenamesToIgnore_ShouldReturnTheCorrectMovieRips()
         {
             // arrange
-            MovieRip[] ripsToLink = {
-                new MovieRip() { FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]" },
-                new MovieRip() { FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN" }
+            MovieRip[] allRipsToLink = {
+                new MovieRip() { FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]", ParsedTitle = "khrustalyov my car"},
+                new MovieRip() { FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN", ParsedTitle = "the fly" },
+                new MovieRip() { FileName = "Sorcerer.1977.1080p.BluRay.x264-HD4U", ParsedTitle = "sorcerer"}
             };
             this._movieRipRepositoryMock
                 .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
-                .Returns(ripsToLink);
+                .Returns(allRipsToLink);
+
+            string[] ripFilenamesToIgnore = {
+                "Sorcerer.1977.1080p.BluRay.x264-HD4U",
+                "inexistent.file.480p.x264-DUMMYGROUP"
+            };
+            this._appSettingsManagerMock.Setup(a => a.GetRipFilenamesToIgnoreOnLinking()).Returns(ripFilenamesToIgnore);
 
             // act
-            this._ripToMovieLinker.LinkMovieRipsToMovies();
+            IEnumerable<MovieRip> ripsToLinkResult = this._ripToMovieLinker.GetMovieRipsToLink();
 
             // assert
+             MovieRip[] expectedRipsToLink = {
+                new MovieRip() { FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN", ParsedTitle = "the fly" },
+                new MovieRip() { FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]", ParsedTitle = "khrustalyov my car"}
+             };
+            ripsToLinkResult.Should().BeEquivalentTo(expectedRipsToLink);
         }
     }
 }
