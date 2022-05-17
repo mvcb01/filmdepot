@@ -25,9 +25,6 @@ namespace DepotTests.CRUDTests
 
         public RipToMovieLinkerTests()
         {
-            this._movieAPIClientMock = new Mock<IMovieAPIClient>();
-            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
-
             this._movieRipRepositoryMock = new Mock<IMovieRipRepository>();
             this._movieRepositoryMock = new Mock<IMovieRepository>();
 
@@ -38,6 +35,9 @@ namespace DepotTests.CRUDTests
             this._unitOfWorkMock
                 .SetupGet(u => u.Movies)
                 .Returns(this._movieRepositoryMock.Object);
+
+            this._movieAPIClientMock = new Mock<IMovieAPIClient>();
+            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
 
             this._ripToMovieLinker = new RipToMovieLinker(
                 this._unitOfWorkMock.Object,
