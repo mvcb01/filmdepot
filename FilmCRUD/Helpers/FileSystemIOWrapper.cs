@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using FilmCRUD.Interfaces;
 
-namespace FilmCRUD
+namespace FilmCRUD.Helpers
 {
     public class FileSystemIOWrapper : IFileSystemIOWrapper
     {
