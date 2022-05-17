@@ -19,6 +19,10 @@ namespace FilmDomain.Extensions
 
         private static IEnumerable<string> GetStringTokens(string title)
         {
+            if (title == null)
+            {
+                return Enumerable.Empty<string>();
+            }
             var movieTitle = title.Trim().ToLower();
             char[] punctuation = title.Where(Char.IsPunctuation).Distinct().ToArray();
             return movieTitle.Split().Select(s => s.Trim(punctuation));
@@ -26,22 +30,12 @@ namespace FilmDomain.Extensions
 
         public static IEnumerable<string> GetParsedTitleTokens(this MovieRip movieRip)
         {
-            string title = movieRip.ParsedTitle;
-            if (title == null)
-            {
-                return new string[] {};
-            }
-            return GetStringTokens(title);
+            return GetStringTokens(movieRip.ParsedTitle);
         }
 
         public static IEnumerable<string> GetTitleTokens(this Movie movie)
         {
-            string title = movie.Title;
-            if (title == null)
-            {
-                return new string[] {};
-            }
-            return GetStringTokens(title);
+            return GetStringTokens(movie.Title);
         }
     }
 }

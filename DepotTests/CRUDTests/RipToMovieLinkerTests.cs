@@ -8,7 +8,6 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
-using MovieAPIClients;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using System;
