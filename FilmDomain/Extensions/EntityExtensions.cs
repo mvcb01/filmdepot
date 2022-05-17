@@ -16,5 +16,32 @@ namespace FilmDomain.Extensions
         {
             return visits.Select(v => v.VisitDateTime);
         }
+
+        private static IEnumerable<string> GetStringTokens(string title)
+        {
+            var movieTitle = title.Trim().ToLower();
+            char[] punctuation = title.Where(Char.IsPunctuation).Distinct().ToArray();
+            return movieTitle.Split().Select(s => s.Trim(punctuation));
+        }
+
+        public static IEnumerable<string> GetParsedTitleTokens(this MovieRip movieRip)
+        {
+            string title = movieRip.ParsedTitle;
+            if (title == null)
+            {
+                return new string[] {};
+            }
+            return GetStringTokens(title);
+        }
+
+        public static IEnumerable<string> GetTitleTokens(this Movie movie)
+        {
+            string title = movie.Title;
+            if (title == null)
+            {
+                return new string[] {};
+            }
+            return GetStringTokens(title);
+        }
     }
 }

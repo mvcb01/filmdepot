@@ -6,23 +6,34 @@ using ConfigUtils.Interfaces;
 using FilmCRUD.Helpers;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
+using FilmDomain.Extensions;
+using FilmCRUD.CustomExceptions;
+using FilmCRUD.Interfaces;
 using MovieAPIClients.Interfaces;
+using System.IO;
 
 namespace FilmCRUD
 {
     public class RipToMovieLinker
     {
+        private IFileSystemIOWrapper _fileSystemIOWrapper { get; init; }
+
         private IUnitOfWork _unitOfWork { get; init; }
 
         private IAppSettingsManager _appSettingsManager { get; init; }
 
-        private MovieFinder _movieFinder { get; init; }
+        public MovieFinder MovieFinder { get; init; }
 
-        public RipToMovieLinker(IUnitOfWork unitOfWork, IAppSettingsManager appSettingsManager, IMovieAPIClient movieAPIClient)
+        public RipToMovieLinker(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient)
         {
-            this._movieFinder = new MovieFinder(movieAPIClient);
             this._unitOfWork = unitOfWork;
+            this._fileSystemIOWrapper = fileSystemIOWrapper;
             this._appSettingsManager = appSettingsManager;
+            this.MovieFinder = new MovieFinder(movieAPIClient);
         }
 
         public IEnumerable<MovieRip> GetMovieRipsToLink()
@@ -33,11 +44,49 @@ namespace FilmCRUD
                 .Where(r => r.ParsedTitle != null && !ripFilenamesToIgnore.Contains(r.FileName));
         }
 
+        public Movie FindRelatedMovieEntity(MovieRip movieRip)
+        {
+            // vê se já existe no repo
+            IEnumerable<string> ripTitleTokens = movieRip.GetParsedTitleTokens();
+            var existingMatches = this._unitOfWork.Movies.Find(m => m.GetTitleTokens().SequenceEqual(ripTitleTokens));
+            if (existingMatches.Count() > 0)
+            {
+                return existingMatches.First();
+            }
+
+
+            return new Movie() {Title = "dummy"};
+        }
+
         public void LinkMovieRipsToMovies()
         {
 
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
-            {}
+
+            List<string> errors = new();
+            foreach (var movieRip in ripsToLink)
+            {
+                try
+                {
+                    Movie movie = FindRelatedMovieEntity(movieRip);
+                    movieRip.Movie = movie;
+                }
+                // excepções lançadas na classe MovieFinder
+                catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError)
+                {
+                    var msg = $"Linking exception: {movieRip.FileName}: \n{ex.Message}";
+                    errors.Add(msg);
+                }
+            }
+
+            if (errors.Count() > 0)
+            {
+                string errorsFpath = Path.Combine(this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(), $"linking_errors.txt");
+                System.Console.WriteLine($"Erros no linking, consultar o seguinte ficheiro: {errorsFpath}");
+                this._fileSystemIOWrapper.WriteAllText(errorsFpath, string.Join("\n\n", errors));
+            }
+
+            this._unitOfWork.Complete();
         }
     }
 
