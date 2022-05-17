@@ -123,7 +123,7 @@ namespace FilmCRUD
                 {
                     System.Console.WriteLine("\n----------");
                     System.Console.WriteLine(item.Key + "\n");
-                    System.Console.WriteLine(String.Join('\n', item.Value));
+                    System.Console.WriteLine(String.Join('\n', item.Value.OrderBy(s => s)));
                 }
             }
             else
