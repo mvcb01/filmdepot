@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 using FilmCRUD.CustomExceptions;
 using FilmDomain.Entities;
 using MovieAPIClients;
-using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
-using FilmDomain.Interfaces;
 
 namespace FilmCRUD.Helpers
 {
