@@ -103,25 +103,28 @@ namespace DepotTests.CRUDTests
 
             //assert
             result.Should().Be(movieMatch);
+        }
+
+        [Fact]
+        public void FindRelatedMovieEntity_WhenParsedTitleHasMatchInMovieRepository_ShouldNotCallSearchMovieAsync()
+        {
+            // arrange
+            var movieRip = new MovieRip() {
+                FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
+                ParsedTitle = "khrustalyov my car"
+                };
+            var movieMatch = new Movie() { Title = "Khrustalyov, My Car!", ReleaseDate = 1998 };
+            this._movieRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Returns(new Movie[] { movieMatch });
+
+            // act
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntity(movieRip);
+
+            //assert
             // se já há um match no repo então não deve ser chamado o método SearchMovieAsync do IMovieAPIClient
             this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Never);
         }
 
-        // [Fact]
-        // public void LinkRipToMovie_Tests()
-        // {
-        //     // arrange
-        //     var movieRip = new MovieRip() {
-        //         FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
-        //         ParsedTitle = "khrustalyov my car"
-        //         };
-        //     this._movieAPIClientMock
-        //         .Setup(m => m.SearchMovieAsync(movieRip.ParsedTitle))
-        //         .ReturnsAsync(new MovieSearchResult[] { new MovieSearchResult() { Title = "Khrustalyov, My Car!", ReleaseDate = 1998 } });
-
-        //     // act
-
-        //     // assert
-        // }
     }
 }
