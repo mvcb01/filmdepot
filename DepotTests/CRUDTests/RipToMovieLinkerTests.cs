@@ -12,6 +12,7 @@ using MovieAPIClients.Interfaces;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace DepotTests.CRUDTests
 {
@@ -86,7 +87,24 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void FindRelatedMovieEntity_WhenParsedTitleHasMatchInMovieRepository_ShouldReturnTheMatchedMovie()
+        public void FindRelatedMovieEntityInRepo_WithoutAnyMatchesInRepo_ShouldReturnNull()
+        {
+            // arrange
+            this._movieRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Returns(Enumerable.Empty<Movie>());
+
+            // act
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(
+                new MovieRip() { ParsedTitle = "some.file.480p.x264-DUMMYGROUP" }
+                );
+
+            // assert
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasMatchInMovieRepository_ShouldReturnTheMatchedMovie()
         {
             // arrange
             var movieRip = new MovieRip() {
@@ -99,14 +117,14 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { movieMatch });
 
             // act
-            Movie result = this._ripToMovieLinker.FindRelatedMovieEntity(movieRip);
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
 
             //assert
             result.Should().Be(movieMatch);
         }
 
         [Fact]
-        public void FindRelatedMovieEntity_WhenParsedTitleHasMatchInMovieRepository_ShouldNotCallSearchMovieAsync()
+        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasMatchInMovieRepository_ShouldNotCallSearchMovieAsync()
         {
             // arrange
             var movieRip = new MovieRip() {
@@ -119,7 +137,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { movieMatch });
 
             // act
-            Movie result = this._ripToMovieLinker.FindRelatedMovieEntity(movieRip);
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
 
             //assert
             // se já há um match no repo então não deve ser chamado o método SearchMovieAsync do IMovieAPIClient
@@ -127,7 +145,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void FindRelatedMovieEntity_WhenParsedTitleHasMatchInMovieRepository_ShouldCallMovieRepositoryFindMethodOnce()
+        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasMatchInMovieRepository_ShouldCallMovieRepositoryFindMethodOnce()
         {
             // arrange
             var movieRip = new MovieRip() {
@@ -140,14 +158,14 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { movieMatch });
 
             // act
-            Movie result = this._ripToMovieLinker.FindRelatedMovieEntity(movieRip);
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
 
             // assert
             this._movieRepositoryMock.Verify(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()), Times.Once);
         }
 
         [Fact]
-        public void FindRelatedMovieEntity_WithoutParsedReleaseDate_WithSeveralMatchesInRepo_ShouldThrowMultipleMovieMatchesError()
+        public void FindRelatedMovieEntityInRepo_WithoutParsedReleaseDate_WithSeveralMatchesInRepo_ShouldThrowMultipleMovieMatchesError()
         {
             // arrange
             var movieRip = new MovieRip() {
@@ -168,7 +186,34 @@ namespace DepotTests.CRUDTests
 
             // assert
             this._ripToMovieLinker
-                .Invoking(r => r.FindRelatedMovieEntity(movieRip))
+                .Invoking(r => r.FindRelatedMovieEntityInRepo(movieRip))
+                .Should()
+                .Throw<MultipleMovieMatchesError>();
+        }
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WithParsedReleaseDate_WithSeveralMatchesInRepo_ShouldThrowMultipleMovieMatchesError()
+        {
+            // arrange
+            var movieRip = new MovieRip() {
+                FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN",
+                ParsedTitle = "the fly",
+                ParsedReleaseDate = "1986"
+                };
+            Movie[] movieMatches = {
+                new Movie() { Title = "The Fly", ReleaseDate = 1986 },
+                new Movie() { Title = "The Fly", ReleaseDate = 1986 }
+            };
+            this._movieRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Returns(movieMatches);
+
+            // act
+            // nada a fazer...
+
+            // assert
+            this._ripToMovieLinker
+                .Invoking(r => r.FindRelatedMovieEntityInRepo(movieRip))
                 .Should()
                 .Throw<MultipleMovieMatchesError>();
         }

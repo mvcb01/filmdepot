@@ -44,30 +44,47 @@ namespace FilmCRUD
                 .Where(r => r.ParsedTitle != null && !ripFilenamesToIgnore.Contains(r.FileName));
         }
 
-        public Movie FindRelatedMovieEntity(MovieRip movieRip)
+        public Movie FindRelatedMovieEntityInRepo(MovieRip movieRip)
         {
-            Movie relatedMovie;
+            Movie relatedMovie = null;
 
-            // vai ser releaseDate == 0 e parsed == false sempre que movieRip.ParsedReleaseDate == null
-            int releaseDate;
-            bool parsed = int.TryParse(movieRip.ParsedReleaseDate, out releaseDate);
+            // vai ser ripReleaseDate == 0 e parsed == false sempre que movieRip.ParsedReleaseDate == null
+            int ripReleaseDate;
+            bool releaseDateParsed = Int32.TryParse(movieRip.ParsedReleaseDate, out ripReleaseDate);
 
-            // vê se já existe no repo
             IEnumerable<string> ripTitleTokens = movieRip.GetParsedTitleTokens();
             IEnumerable<Movie> existingMatches = this._unitOfWork.Movies.Find(m => m.GetTitleTokens().SequenceEqual(ripTitleTokens));
             int matchCount = existingMatches.Count();
-
             if (matchCount == 1)
             {
                 relatedMovie = existingMatches.First();
             }
             else if (matchCount > 1)
             {
-
+                if (!releaseDateParsed)
+                {
+                    throw new MultipleMovieMatchesError(
+                        $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\"; count = {matchCount}"
+                        );
+                }
+                else
+                {
+                    IEnumerable<Movie> existingMatchesWithDate = existingMatches.Where(m => m.ReleaseDate == ripReleaseDate);
+                    int matchCountWithDate = existingMatchesWithDate.Count();
+                    if (matchCountWithDate > 1)
+                    {
+                        throw new MultipleMovieMatchesError(
+                            $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\" and ReleaseDate = {ripReleaseDate}; count = {matchCount}"
+                            );
+                    }
+                    else if (matchCountWithDate == 1)
+                    {
+                        relatedMovie = existingMatchesWithDate.First();
+                    }
+                }
             }
 
-
-            return new Movie() {Title = "dummy"};
+            return relatedMovie;
         }
 
         public void LinkMovieRipsToMovies()
@@ -80,7 +97,11 @@ namespace FilmCRUD
             {
                 try
                 {
-                    Movie movie = FindRelatedMovieEntity(movieRip);
+                    Movie movie = FindRelatedMovieEntityInRepo(movieRip);
+                    if (movie == null)
+                    {
+
+                    }
                     movieRip.Movie = movie;
                 }
                 // excepções lançadas na classe MovieFinder
