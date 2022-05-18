@@ -159,13 +159,18 @@ namespace DepotTests.CRUDTests
                 new Movie() { Title = "The Fly", ReleaseDate = 1958 },
                 new Movie() { Title = "The Fly", ReleaseDate = 1986 }
             };
-            this._movieRepositoryMock.Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>())).Returns(movieMatches);
+            this._movieRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Returns(movieMatches);
 
             // act
             // nada a fazer...
 
             // assert
-            this._ripToMovieLinker.Invoking(r => r.FindRelatedMovieEntity(movieRip)).Should().Throw<MultipleMovieMatchesError>();
+            this._ripToMovieLinker
+                .Invoking(r => r.FindRelatedMovieEntity(movieRip))
+                .Should()
+                .Throw<MultipleMovieMatchesError>();
         }
 
     }
