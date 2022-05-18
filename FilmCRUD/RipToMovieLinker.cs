@@ -100,7 +100,7 @@ namespace FilmCRUD
                     Movie movie = FindRelatedMovieEntityInRepo(movieRip);
                     if (movie == null)
                     {
-
+                        // chamar a API!!
                     }
                     movieRip.Movie = movie;
                 }
