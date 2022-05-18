@@ -147,7 +147,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void FindRelatedMovieEntity_WithSeveralMatchesInRepo_WithoutParsedReleaseDate_ShouldThrowMultipleMovieMatchesError()
+        public void FindRelatedMovieEntity_WithoutParsedReleaseDate_WithSeveralMatchesInRepo_ShouldThrowMultipleMovieMatchesError()
         {
             // arrange
             var movieRip = new MovieRip() {
