@@ -87,7 +87,7 @@ namespace FilmCRUD
             return relatedMovie;
         }
 
-        public void LinkMovieRipsToMovies()
+        public async void LinkMovieRipsToMovies()
         {
 
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
@@ -100,7 +100,7 @@ namespace FilmCRUD
                     Movie movie = FindRelatedMovieEntityInRepo(movieRip);
                     if (movie == null)
                     {
-                        // chamar a API!!
+                        movie = await this.MovieFinder.FindMovieOnlineAsync(movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
                     }
                     movieRip.Movie = movie;
                 }
