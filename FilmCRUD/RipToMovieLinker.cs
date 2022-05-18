@@ -104,7 +104,7 @@ namespace FilmCRUD
                     }
                     movieRip.Movie = movie;
                 }
-                // excepções lançadas na classe MovieFinder
+                // excepções lançadas na classe MovieFinder e no método FindRelatedMovieEntityInRepo
                 catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError || ex is MultipleMovieMatchesError)
                 {
                     var msg = $"Linking exception: {movieRip.FileName}: \n{ex.Message}";
