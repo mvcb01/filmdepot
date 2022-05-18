@@ -46,12 +46,24 @@ namespace FilmCRUD
 
         public Movie FindRelatedMovieEntity(MovieRip movieRip)
         {
+            Movie relatedMovie;
+
+            // vai ser releaseDate == 0 e parsed == false sempre que movieRip.ParsedReleaseDate == null
+            int releaseDate;
+            bool parsed = int.TryParse(movieRip.ParsedReleaseDate, out releaseDate);
+
             // vê se já existe no repo
             IEnumerable<string> ripTitleTokens = movieRip.GetParsedTitleTokens();
-            var existingMatches = this._unitOfWork.Movies.Find(m => m.GetTitleTokens().SequenceEqual(ripTitleTokens));
-            if (existingMatches.Count() > 0)
+            IEnumerable<Movie> existingMatches = this._unitOfWork.Movies.Find(m => m.GetTitleTokens().SequenceEqual(ripTitleTokens));
+            int matchCount = existingMatches.Count();
+
+            if (matchCount == 1)
             {
-                return existingMatches.First();
+                relatedMovie = existingMatches.First();
+            }
+            else if (matchCount > 1)
+            {
+
             }
 
 
@@ -72,7 +84,7 @@ namespace FilmCRUD
                     movieRip.Movie = movie;
                 }
                 // excepções lançadas na classe MovieFinder
-                catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError)
+                catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError || ex is MultipleMovieMatchesError)
                 {
                     var msg = $"Linking exception: {movieRip.FileName}: \n{ex.Message}";
                     errors.Add(msg);
