@@ -1,24 +1,27 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using FilmDataAccess.EFCore.UnitOfWork;
-using FilmDomain.Interfaces;
-using FilmDataAccess.EFCore;
-
-using CommandLine;
+﻿using CommandLine;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
+using FilmDataAccess.EFCore.UnitOfWork;
+using FilmDomain.Interfaces;
+using FilmDataAccess.EFCore;
 using FilmCRUD.Verbs;
 using FilmCRUD.Interfaces;
 using FilmCRUD.Helpers;
 using ConfigUtils;
 using ConfigUtils.Interfaces;
+using MovieAPIClients.Interfaces;
+using MovieAPIClients.TheMovieDb;
+
 
 namespace FilmCRUD
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             ServiceCollection services = new();
             ConfigureServices(services);
@@ -27,28 +30,34 @@ namespace FilmCRUD
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
             IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
             IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
+            IMovieAPIClient movieApiClient = serviceProvider.GetRequiredService<IMovieAPIClient>();
 
             VisitCRUDManager visitCrudManager = new(unitOfWork, fileSystemIOWrapper, appSettingsManager);
             ScanManager scanManager = new(unitOfWork);
+            RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieApiClient);
 
-            Parser.Default.ParseArguments<VisitOptions, ScanRipsOptions>(args)
+            var parsed = Parser.Default.ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
+            parsed
                 .WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
-                .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager))
-                .WithNotParsed(HandleParseError);
+                .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager));
+            await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
+
+            parsed.WithNotParsed(HandleParseError);
             {}
+
         }
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IUnitOfWork, SQLiteUnitOfWork>(
-                _ => new SQLiteUnitOfWork(new SQLiteAppContext())
-                );
+            services.AddSingleton<IUnitOfWork, SQLiteUnitOfWork>(_ => new SQLiteUnitOfWork(new SQLiteAppContext()));
 
             services.AddSingleton<IFileSystemIOWrapper, FileSystemIOWrapper>();
 
-            services.AddSingleton<IAppSettingsManager, AppSettingsManager>(
-                _ => new AppSettingsManager()
-                );
+            services.AddSingleton<IAppSettingsManager, AppSettingsManager>(_ => new AppSettingsManager());
+
+            AppSettingsManager _appSettingsManager = new();
+            string apiKey = _appSettingsManager.GetApiKey("TheMovieDb");
+            services.AddSingleton<IMovieAPIClient, TheMovieDbAPIClient>(_ => new TheMovieDbAPIClient(apiKey));
         }
 
         private static void HandleVisitOptions(VisitOptions visitOpts, VisitCRUDManager visitCrudManager)
@@ -80,7 +89,7 @@ namespace FilmCRUD
             }
         }
 
-        public static void HandleScanRipsOptions(ScanRipsOptions scanRipsOpts, ScanManager scanManager)
+        private static void HandleScanRipsOptions(ScanRipsOptions scanRipsOpts, ScanManager scanManager)
         {
             System.Console.WriteLine("----------");
             if (scanRipsOpts.CountByReleaseDate)
@@ -132,7 +141,14 @@ namespace FilmCRUD
             System.Console.WriteLine();
         }
 
-        public static void HandleParseError(IEnumerable<Error> errors)
+        private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
+        {
+            System.Console.WriteLine("-------------");
+            System.Console.WriteLine($"A logar movie rips a filmes...");
+            await ripToMovieLinker.LinkMovieRipsToMoviesAsync();
+        }
+
+        private static void HandleParseError(IEnumerable<Error> errors)
         {
             foreach (var errorObj in errors)
             {
