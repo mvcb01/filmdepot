@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 
 using FilmCRUD.CustomExceptions;
 using FilmDomain.Entities;
+using FilmDomain.Extensions;
 using MovieAPIClients;
-using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
-using FilmDomain.Interfaces;
 
 namespace FilmCRUD.Helpers
 {
@@ -26,11 +25,11 @@ namespace FilmCRUD.Helpers
             IEnumerable<MovieSearchResult> searchResultAll = await _movieAPIClient.SearchMovieAsync(parsedTitle);
 
             // filtra usando Title e OriginalTitle
-            IEnumerable<string> titleTokens = SplitTitleIntoTokens(parsedTitle);
+            IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
             List<MovieSearchResult> searchResult = searchResultAll
-                .Where(r => titleTokens.SequenceEqual(SplitTitleIntoTokens(r.Title ?? string.Empty))
+                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation())
                     ||
-                    titleTokens.SequenceEqual(SplitTitleIntoTokens(r.OriginalTitle ?? string.Empty)))
+                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation()))
                 .ToList();
 
             int resultCount = searchResult.Count();
@@ -75,12 +74,6 @@ namespace FilmCRUD.Helpers
                 };
         }
 
-        private static IEnumerable<string> SplitTitleIntoTokens(string parsedTitle)
-        {
-            var movieTitle = parsedTitle.Trim().ToLower();
-            char[] punctuation = movieTitle.Where(Char.IsPunctuation).Distinct().ToArray();
-            return movieTitle.Split().Select(s => s.Trim(punctuation));
-        }
     }
 
 }
