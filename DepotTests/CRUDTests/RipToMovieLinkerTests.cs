@@ -9,6 +9,7 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
+using MovieAPIClients;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using System;
@@ -216,6 +217,58 @@ namespace DepotTests.CRUDTests
                 .Invoking(r => r.FindRelatedMovieEntityInRepo(movieRip))
                 .Should()
                 .Throw<MultipleMovieMatchesError>();
+        }
+
+        [Fact]
+        public async void LinkMovieRipsToMoviesAsync_WithoutMatchesInRepo_ShouldCallFindMovieOnlineAsyncMethod()
+        {
+            // arrange
+            var movieRip = new MovieRip() {
+                FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
+                ParsedTitle = "khrustalyov my car"
+            };
+            MovieRip[] ripsToLink = { movieRip };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find((It.IsAny<Expression<Func<MovieRip, bool>>>())))
+                .Returns(ripsToLink);
+            this._movieRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Returns(Enumerable.Empty<Movie>());
+            this._appSettingsManagerMock.Setup(a => a.GetWarehouseContentsTextFilesDirectory()).Returns("");
+
+            // act
+            await this._ripToMovieLinker.LinkMovieRipsToMoviesAsync();
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async void LinkMovieRipsToMoviesAsync_WithoutMatchesInRepo_WithOnlineMatch_ShouldLinkRipToOnlineMatch()
+        {
+            // arrange
+            var movieRip = new MovieRip() {
+                FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
+                ParsedTitle = "khrustalyov my car"
+            };
+            var searchResult = new MovieSearchResult() { ExternalId = 1, Title = "Khrustalyov, My Car!", ReleaseDate = 1998 };
+            MovieRip[] ripsToLink = { movieRip };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find((It.IsAny<Expression<Func<MovieRip, bool>>>())))
+                .Returns(ripsToLink);
+            this._movieRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Returns(Enumerable.Empty<Movie>());
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("khrustalyov"))))
+                .ReturnsAsync(new MovieSearchResult[] { searchResult } );
+            this._appSettingsManagerMock.Setup(a => a.GetWarehouseContentsTextFilesDirectory()).Returns("");
+
+            // act
+            await this._ripToMovieLinker.LinkMovieRipsToMoviesAsync();
+
+            // assert
+            movieRip.Movie.Should().BeEquivalentTo(new { Title = "Khrustalyov, My Car!", ReleaseDate = 1998, ExternalId = 1 });
         }
 
     }

@@ -89,29 +89,57 @@ namespace FilmCRUD
             return relatedMovie;
         }
 
-        public async Task LinkMovieRipsToMovies()
+        public async Task LinkMovieRipsToMoviesAsync()
         {
 
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
 
+            Func<MovieRip, Task> linkRipToOnlineSearchAsync = async (MovieRip movieRip) => {
+                movieRip.Movie = await this.MovieFinder.FindMovieOnlineAsync(
+                    movieRip.ParsedTitle,
+                    movieRip.ParsedReleaseDate
+                    );
+            };
+
             List<string> errors = new();
+            List<Task> onlineSearches = new();
             foreach (var movieRip in ripsToLink)
             {
                 try
                 {
                     Movie movie = FindRelatedMovieEntityInRepo(movieRip);
-                    if (movie == null)
+                    if (movie != null)
                     {
-                        movie = await this.MovieFinder.FindMovieOnlineAsync(movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+                        movieRip.Movie = movie;
+
                     }
-                    movieRip.Movie = movie;
+                    else
+                    {
+                        Task onlineSearch = linkRipToOnlineSearchAsync(movieRip);
+                        onlineSearches.Add(onlineSearch);
+                    }
+
                 }
-                // excepções lançadas na classe MovieFinder e no método FindRelatedMovieEntityInRepo
-                catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError || ex is MultipleMovieMatchesError)
+                // excepções lançadas no método FindRelatedMovieEntityInRepo
+                catch (MultipleMovieMatchesError ex)
                 {
-                    var msg = $"Linking exception: {movieRip.FileName}: \n{ex.Message}";
+                    var msg = $"MultipleMovieMatchesError: {movieRip.FileName}: \n{ex.Message}";
                     errors.Add(msg);
                 }
+            }
+
+            try
+            {
+                await Task.WhenAll(onlineSearches);
+            }
+            // excepções lançadas no método MovieFinder.FindMovieOnlineAsync
+            catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError)
+            {}
+
+            foreach (Task task in onlineSearches.Where(t => !t.IsCompletedSuccessfully))
+            {
+                Exception innerExc = task.Exception.InnerException;
+                errors.Add($"ex message: {innerExc.GetType().Name}: {innerExc.Message}");
             }
 
             if (errors.Count() > 0)
