@@ -55,8 +55,7 @@ namespace FilmCRUD
             int ripReleaseDate;
             bool releaseDateParsed = Int32.TryParse(movieRip.ParsedReleaseDate, out ripReleaseDate);
 
-            IEnumerable<string> ripTitleTokens = movieRip.GetParsedTitleTokens();
-            IEnumerable<Movie> existingMatches = this._unitOfWork.Movies.Find(m => m.GetTitleTokens().SequenceEqual(ripTitleTokens));
+            IEnumerable<Movie> existingMatches = this._unitOfWork.Movies.SearchMoviesWithTitle(movieRip.ParsedTitle);
             int matchCount = existingMatches.Count();
             if (matchCount == 1)
             {
