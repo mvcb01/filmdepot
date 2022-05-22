@@ -1,21 +1,21 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using FilmDataAccess.EFCore.UnitOfWork;
-using FilmDomain.Interfaces;
-using FilmDataAccess.EFCore;
-
-using CommandLine;
+﻿using CommandLine;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
+using FilmDataAccess.EFCore.UnitOfWork;
+using FilmDomain.Interfaces;
+using FilmDataAccess.EFCore;
 using FilmCRUD.Verbs;
 using FilmCRUD.Interfaces;
 using FilmCRUD.Helpers;
 using ConfigUtils;
 using ConfigUtils.Interfaces;
-
 using MovieAPIClients.Interfaces;
 using MovieAPIClients.TheMovieDb;
+
 
 namespace FilmCRUD
 {
@@ -36,11 +36,14 @@ namespace FilmCRUD
             ScanManager scanManager = new(unitOfWork);
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieApiClient);
 
-            Parser.Default.ParseArguments<VisitOptions, ScanRipsOptions>(args)
-                .WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
+            var parsed = Parser.Default.ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
+            parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
                 .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager))
-                .WithNotParsed(HandleParseError);
+                .WithParsed<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
+
+            parsed.WithNotParsed(HandleParseError);
             {}
+
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -85,7 +88,7 @@ namespace FilmCRUD
             }
         }
 
-        public static void HandleScanRipsOptions(ScanRipsOptions scanRipsOpts, ScanManager scanManager)
+        private static void HandleScanRipsOptions(ScanRipsOptions scanRipsOpts, ScanManager scanManager)
         {
             System.Console.WriteLine("----------");
             if (scanRipsOpts.CountByReleaseDate)
@@ -137,7 +140,12 @@ namespace FilmCRUD
             System.Console.WriteLine();
         }
 
-        public static void HandleParseError(IEnumerable<Error> errors)
+        private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
+        {
+            await ripToMovieLinker.LinkMovieRipsToMoviesAsync();
+        }
+
+        private static void HandleParseError(IEnumerable<Error> errors)
         {
             foreach (var errorObj in errors)
             {
