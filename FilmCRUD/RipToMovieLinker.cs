@@ -48,6 +48,7 @@ namespace FilmCRUD
 
         public Movie FindRelatedMovieEntityInRepo(MovieRip movieRip)
         {
+
             Movie relatedMovie = null;
 
             // vai ser ripReleaseDate == 0 e parsed == false sempre que movieRip.ParsedReleaseDate == null
