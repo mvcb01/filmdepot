@@ -14,13 +14,7 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Movie> GetMoviesByGenre(params Genre[] genres)
         {
-            var moviesWithGenres = GetMoviesWithGenres();
-            return moviesWithGenres.Where(m => m.Genres.Intersect(genres).Count() > 0);
-        }
-
-        public IEnumerable<Movie> GetMoviesWithGenres()
-        {
-            return _context.Movies.Include(m => m.Genres);
+            return _context.Movies.Where(m => m.Genres.Intersect(genres).Count() > 0);
         }
     }
 }
