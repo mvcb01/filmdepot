@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System.Threading.Tasks;
 
 using ConfigUtils.Interfaces;
 using FilmCRUD.Helpers;
@@ -10,7 +12,7 @@ using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
 using MovieAPIClients.Interfaces;
-using System.IO;
+
 
 namespace FilmCRUD
 {
@@ -87,7 +89,7 @@ namespace FilmCRUD
             return relatedMovie;
         }
 
-        public async void LinkMovieRipsToMovies()
+        public async Task LinkMovieRipsToMovies()
         {
 
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
