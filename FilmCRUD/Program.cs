@@ -21,7 +21,7 @@ namespace FilmCRUD
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             ServiceCollection services = new();
             ConfigureServices(services);
@@ -37,9 +37,10 @@ namespace FilmCRUD
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieApiClient);
 
             var parsed = Parser.Default.ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
-            parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
-                .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager))
-                .WithParsed<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
+            parsed
+                .WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
+                .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager));
+            await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
 
             parsed.WithNotParsed(HandleParseError);
             {}
@@ -142,6 +143,8 @@ namespace FilmCRUD
 
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
+            System.Console.WriteLine("-------------");
+            System.Console.WriteLine($"A logar movie rips a filmes...");
             await ripToMovieLinker.LinkMovieRipsToMoviesAsync();
         }
 
