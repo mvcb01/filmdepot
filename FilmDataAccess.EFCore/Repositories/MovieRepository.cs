@@ -2,6 +2,7 @@ using System.Linq;
 using System.Collections.Generic;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
+using FilmDomain.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace FilmDataAccess.EFCore.Repositories
@@ -14,13 +15,17 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Movie> GetMoviesByGenre(params Genre[] genres)
         {
-            var moviesWithGenres = GetMoviesWithGenres();
-            return moviesWithGenres.Where(m => m.Genres.Intersect(genres).Count() > 0);
+            return _context.Movies.Where(m => m.Genres.Intersect(genres).Count() > 0);
         }
 
-        public IEnumerable<Movie> GetMoviesWithGenres()
+
+        public IEnumerable<Movie> SearchMoviesWithTitle(string title)
         {
-            return _context.Movies.Include(m => m.Genres);
+            IEnumerable<string> titleTokens = title.GetStringTokensWithoutPunctuation();
+            string titleLike = "%" + string.Join('%', titleTokens) + "%";
+
+            // obs: no EF Core 6 já podemos usar Regex.IsMatch no Where
+            return _context.Movies.Where(m => EF.Functions.Like(m.Title, titleLike));
         }
     }
 }

@@ -28,14 +28,5 @@ namespace FilmDomain.Extensions
             return movieTitle.Split().Select(s => s.Trim(punctuation));
         }
 
-        public static IEnumerable<string> GetParsedTitleTokens(this MovieRip movieRip)
-        {
-            return GetStringTokensWithoutPunctuation(movieRip.ParsedTitle);
-        }
-
-        public static IEnumerable<string> GetTitleTokens(this Movie movie)
-        {
-            return GetStringTokensWithoutPunctuation(movie.Title);
-        }
     }
 }

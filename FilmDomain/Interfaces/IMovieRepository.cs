@@ -7,7 +7,7 @@ namespace FilmDomain.Interfaces
     {
         IEnumerable<Movie> GetMoviesByGenre(params Genre[] genres);
 
-        IEnumerable<Movie> GetMoviesWithGenres();
+        IEnumerable<Movie> SearchMoviesWithTitle(string title);
 
     }
 }

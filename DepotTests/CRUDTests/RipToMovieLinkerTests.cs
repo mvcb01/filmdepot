@@ -92,7 +92,7 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             this._movieRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
                 .Returns(Enumerable.Empty<Movie>());
 
             // act
@@ -114,7 +114,7 @@ namespace DepotTests.CRUDTests
                 };
             var movieMatch = new Movie() { Title = "Khrustalyov, My Car!", ReleaseDate = 1998 };
             this._movieRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
                 .Returns(new Movie[] { movieMatch });
 
             // act
@@ -125,44 +125,19 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasMatchInMovieRepository_ShouldNotCallSearchMovieAsync()
+        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasMatchInMovieRepository_ShouldCallMovieRepositorySearchMoviesWithTitleMethodOnce()
         {
             // arrange
             var movieRip = new MovieRip() {
                 FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
                 ParsedTitle = "khrustalyov my car"
                 };
-            var movieMatch = new Movie() { Title = "Khrustalyov, My Car!", ReleaseDate = 1998 };
-            this._movieRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
-                .Returns(new Movie[] { movieMatch });
-
-            // act
-            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
-
-            //assert
-            // se já há um match no repo então não deve ser chamado o método SearchMovieAsync do IMovieAPIClient
-            this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Never);
-        }
-
-        [Fact]
-        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasMatchInMovieRepository_ShouldCallMovieRepositoryFindMethodOnce()
-        {
-            // arrange
-            var movieRip = new MovieRip() {
-                FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
-                ParsedTitle = "khrustalyov my car"
-                };
-            var movieMatch = new Movie() { Title = "Khrustalyov, My Car!", ReleaseDate = 1998 };
-            this._movieRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
-                .Returns(new Movie[] { movieMatch });
 
             // act
             Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
 
             // assert
-            this._movieRepositoryMock.Verify(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()), Times.Once);
+            this._movieRepositoryMock.Verify(m => m.SearchMoviesWithTitle(movieRip.ParsedTitle), Times.Once);
         }
 
         [Fact]
@@ -179,7 +154,7 @@ namespace DepotTests.CRUDTests
                 new Movie() { Title = "The Fly", ReleaseDate = 1986 }
             };
             this._movieRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Setup(m => m.SearchMoviesWithTitle(movieRip.ParsedTitle))
                 .Returns(movieMatches);
 
             // act
@@ -206,7 +181,7 @@ namespace DepotTests.CRUDTests
                 new Movie() { Title = "The Fly", ReleaseDate = 1986 }
             };
             this._movieRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Setup(m => m.SearchMoviesWithTitle(movieRip.ParsedTitle))
                 .Returns(movieMatches);
 
             // act
@@ -232,7 +207,7 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.Find((It.IsAny<Expression<Func<MovieRip, bool>>>())))
                 .Returns(ripsToLink);
             this._movieRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
                 .Returns(Enumerable.Empty<Movie>());
             this._appSettingsManagerMock.Setup(a => a.GetWarehouseContentsTextFilesDirectory()).Returns("");
 
@@ -257,7 +232,7 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.Find((It.IsAny<Expression<Func<MovieRip, bool>>>())))
                 .Returns(ripsToLink);
             this._movieRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
                 .Returns(Enumerable.Empty<Movie>());
             this._movieAPIClientMock
                 .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("khrustalyov"))))
