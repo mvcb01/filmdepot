@@ -14,6 +14,9 @@ using FilmCRUD.Helpers;
 using ConfigUtils;
 using ConfigUtils.Interfaces;
 
+using MovieAPIClients.Interfaces;
+using MovieAPIClients.TheMovieDb;
+
 namespace FilmCRUD
 {
     class Program
@@ -27,9 +30,11 @@ namespace FilmCRUD
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
             IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
             IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
+            IMovieAPIClient movieApiClient = serviceProvider.GetRequiredService<IMovieAPIClient>();
 
             VisitCRUDManager visitCrudManager = new(unitOfWork, fileSystemIOWrapper, appSettingsManager);
             ScanManager scanManager = new(unitOfWork);
+            RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieApiClient);
 
             Parser.Default.ParseArguments<VisitOptions, ScanRipsOptions>(args)
                 .WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
@@ -40,15 +45,15 @@ namespace FilmCRUD
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IUnitOfWork, SQLiteUnitOfWork>(
-                _ => new SQLiteUnitOfWork(new SQLiteAppContext())
-                );
+            services.AddSingleton<IUnitOfWork, SQLiteUnitOfWork>(_ => new SQLiteUnitOfWork(new SQLiteAppContext()));
 
             services.AddSingleton<IFileSystemIOWrapper, FileSystemIOWrapper>();
 
-            services.AddSingleton<IAppSettingsManager, AppSettingsManager>(
-                _ => new AppSettingsManager()
-                );
+            services.AddSingleton<IAppSettingsManager, AppSettingsManager>(_ => new AppSettingsManager());
+
+            AppSettingsManager _appSettingsManager = new();
+            string apiKey = _appSettingsManager.GetApiKey("TheMovieDb");
+            services.AddSingleton<IMovieAPIClient, TheMovieDbAPIClient>(_ => new TheMovieDbAPIClient(apiKey));
         }
 
         private static void HandleVisitOptions(VisitOptions visitOpts, VisitCRUDManager visitCrudManager)
