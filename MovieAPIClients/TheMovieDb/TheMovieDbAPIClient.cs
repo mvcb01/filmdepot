@@ -66,5 +66,6 @@ namespace MovieAPIClients.TheMovieDb
             var resultObj = JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
             return resultObj.Crew.Where(c => c.Job.Trim().ToLower() == "director").Select(c => c.Name);
         }
+
     }
 }
