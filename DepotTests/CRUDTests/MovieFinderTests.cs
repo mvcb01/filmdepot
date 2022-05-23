@@ -1,12 +1,14 @@
 using Xunit;
 using Moq;
 using FluentAssertions;
+using System.Threading.Tasks;
 
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
 using FilmDomain.Entities;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Helpers;
+
 
 namespace DepotTests.CRUDTests
 {
@@ -42,7 +44,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
         {
             // arrange
             string movieTitleToSearch = "the fly";
@@ -65,7 +67,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResultsAndProvidedReleaseDate_ShouldReturnMatchingMovieRip()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResultsAndProvidedReleaseDate_ShouldReturnMatchingMovieRip()
         {
             // arrange
             string movieTitleToSearch = "the fly";
@@ -89,7 +91,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResultsAndProvidedReleaseDateWithoutMatch_ShouldThrowNoSearchResultsError()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResultsAndProvidedReleaseDateWithoutMatch_ShouldThrowNoSearchResultsError()
         {
             // arrange
             string movieTitleToSearch = "the fly";
@@ -111,7 +113,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResultsWithSameReleaseDate_ShouldThrowMultipleSearchResultsError()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResultsWithSameReleaseDate_ShouldThrowMultipleSearchResultsError()
         {
             // arrange
             string movieTitleToSearch = "the fly";
@@ -133,7 +135,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithTitleExactMatch()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithTitleExactMatch()
         {
             // arrange
             string movieTitleToSearch = "sorcerer";
@@ -153,7 +155,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithOriginalTitleExactMatch()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithOriginalTitleExactMatch()
         {
             // arrange
             string movieTitleToSearch = "the fly";
