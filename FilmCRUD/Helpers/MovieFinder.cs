@@ -15,8 +15,6 @@ namespace FilmCRUD.Helpers
     {
         private IMovieAPIClient _movieAPIClient { get; init; }
 
-        public const int ReleaseDateTolerance = 1;
-
         public MovieFinder(IMovieAPIClient movieAPIClient)
         {
             this._movieAPIClient = movieAPIClient;
@@ -50,20 +48,36 @@ namespace FilmCRUD.Helpers
             }
             else
             {
+                int releaseDate;
+                bool parseSuccess = int.TryParse(parsedReleaseDate, out releaseDate);
+                string[] admissibleDates;
+                if (parseSuccess)
+                {
+                    admissibleDates = new string[] {
+                        releaseDate.ToString(),
+                        (releaseDate + 1).ToString(),
+                        (releaseDate - 1).ToString()
+                    };
+                }
+                else
+                {
+                    admissibleDates = new string[] { parsedReleaseDate };
+                }
+
                 List<MovieSearchResult> searchResultFiltered = searchResult
-                    .Where(r => r.ReleaseDate.ToString() == parsedReleaseDate.Trim())
+                    .Where(r => admissibleDates.Contains(r.ReleaseDate.ToString()))
                     .ToList();
                 int resultCountFiltered = searchResultFiltered.Count();
 
                 if (resultCountFiltered == 0)
                 {
                     throw new NoSearchResultsError(
-                        $"No search results for \"{parsedTitle}\" with release date = {parsedReleaseDate}");
+                        $"No search results for \"{parsedTitle}\" with release date in {string.Join(", ", admissibleDates)}");
                 }
                 else if (resultCountFiltered > 1)
                 {
                     throw new MultipleSearchResultsError(
-                        $"Multiple search results for \"{parsedTitle}\"  with release date = {parsedReleaseDate}; count = {resultCount}");
+                        $"Multiple search results for \"{parsedTitle}\"  with release date in {string.Join(", ", admissibleDates)}; count = {resultCount}");
                 }
                 result = searchResultFiltered.First();
             }
