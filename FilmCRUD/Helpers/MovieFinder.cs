@@ -15,6 +15,8 @@ namespace FilmCRUD.Helpers
     {
         private IMovieAPIClient _movieAPIClient { get; init; }
 
+        public const int ReleaseDateTolerance = 1;
+
         public MovieFinder(IMovieAPIClient movieAPIClient)
         {
             this._movieAPIClient = movieAPIClient;
