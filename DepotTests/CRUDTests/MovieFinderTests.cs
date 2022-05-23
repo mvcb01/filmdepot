@@ -1,12 +1,15 @@
 using Xunit;
 using Moq;
 using FluentAssertions;
+using System;
+using System.Threading.Tasks;
 
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
 using FilmDomain.Entities;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Helpers;
+
 
 namespace DepotTests.CRUDTests
 {
@@ -42,7 +45,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
         {
             // arrange
             string movieTitleToSearch = "the fly";
@@ -65,7 +68,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResultsAndProvidedReleaseDate_ShouldReturnMatchingMovieRip()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResultsAndProvidedReleaseDate_ShouldReturnMatchingMovieRip()
         {
             // arrange
             string movieTitleToSearch = "the fly";
@@ -89,7 +92,30 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResultsAndProvidedReleaseDateWithoutMatch_ShouldThrowNoSearchResultsError()
+        public async Task FindMovieOnlineAsync_WithProvidedReleaseDate_WithoutDateMatch_ShouldReturnResultWithinDateTolerance()
+        {
+            // arrange
+            string movieTitleToSearch = "adoration";
+            string movieReleaseDateToSearch = "2019";
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "Adoration", ReleaseDate = 2013 },
+                new MovieSearchResult()  { Title = "Adoration", ReleaseDate = 2020 },
+                };
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains(movieTitleToSearch))))
+                .ReturnsAsync(searchResults);
+
+            // act
+            Movie movieFound = await this._movieFinder.FindMovieOnlineAsync(movieTitleToSearch, movieReleaseDateToSearch);
+
+            // assert
+            movieFound.Should().BeEquivalentTo(new { Title = "Adoration", ReleaseDate = 2020 });
+        }
+
+
+
+        [Fact]
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResultsAndProvidedReleaseDateWithoutMatch_ShouldThrowNoSearchResultsError()
         {
             // arrange
             string movieTitleToSearch = "the fly";
@@ -98,7 +124,9 @@ namespace DepotTests.CRUDTests
                 new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986, ExternalId = 1 },
                 new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958, ExternalId = 2 },
                 };
-            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(movieTitleToSearch)).ReturnsAsync(searchResults);
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(movieTitleToSearch))
+                .ReturnsAsync(searchResults);
 
             // act
             // nada a fazer
@@ -111,7 +139,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResultsWithSameReleaseDate_ShouldThrowMultipleSearchResultsError()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResultsWithSameReleaseDate_ShouldThrowMultipleSearchResultsError()
         {
             // arrange
             string movieTitleToSearch = "the fly";
@@ -120,7 +148,9 @@ namespace DepotTests.CRUDTests
                 new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986, ExternalId = 1 },
                 new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1986, ExternalId = 2 },
                 };
-            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(movieTitleToSearch)).ReturnsAsync(searchResults);
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(movieTitleToSearch))
+                .ReturnsAsync(searchResults);
 
             // act
             // nada a fazer
@@ -133,7 +163,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithTitleExactMatch()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithTitleExactMatch()
         {
             // arrange
             string movieTitleToSearch = "sorcerer";
@@ -141,7 +171,9 @@ namespace DepotTests.CRUDTests
                 new MovieSearchResult() { Title = "Sorcerer", ReleaseDate = 1977},
                 new MovieSearchResult()  { Title = "Highlander III: The Sorcerer", ReleaseDate = 1994},
                 };
-            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(movieTitleToSearch)).ReturnsAsync(searchResults);
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(movieTitleToSearch))
+                .ReturnsAsync(searchResults);
 
             // act
             Movie movieFound = await this._movieFinder.FindMovieOnlineAsync(movieTitleToSearch);
@@ -153,7 +185,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithOriginalTitleExactMatch()
+        public async Task FindMovieOnlineAsync_WithSeveralSearchResults_ShouldReturnTheResultWithOriginalTitleExactMatch()
         {
             // arrange
             string movieTitleToSearch = "the fly";
