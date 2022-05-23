@@ -8,7 +8,6 @@ using ConfigUtils.Interfaces;
 using FilmCRUD.Helpers;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
-using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
 using MovieAPIClients.Interfaces;
