@@ -144,7 +144,7 @@ namespace FilmCRUD
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
             System.Console.WriteLine("-------------");
-            System.Console.WriteLine($"A logar movie rips a filmes...");
+            System.Console.WriteLine($"A ligar movie rips a filmes...");
             await ripToMovieLinker.LinkMovieRipsToMoviesAsync();
         }
 
