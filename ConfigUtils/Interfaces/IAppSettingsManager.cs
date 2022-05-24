@@ -18,5 +18,7 @@ namespace ConfigUtils.Interfaces
 
         IEnumerable<string> GetRipFilenamesToIgnoreOnLinking();
 
+        Dictionary<string, int> GetManualExternalIds();
+
     }
 }

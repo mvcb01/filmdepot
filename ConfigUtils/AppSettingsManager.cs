@@ -72,5 +72,10 @@ namespace ConfigUtils
         {
             return ConfigRoot.GetSection("ManualRipToMovieLinks").GetSection("RipFilenamesToIgnore").Get<IEnumerable<string>>();
         }
+
+        public Dictionary<string, int> GetManualExternalIds()
+        {
+            return ConfigRoot.GetSection("ManualRipToMovieLinks").GetSection("ManualExternalIds").Get<Dictionary<string, int>>();
+        }
     }
 }
