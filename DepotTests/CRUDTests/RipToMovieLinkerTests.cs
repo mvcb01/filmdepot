@@ -302,5 +302,27 @@ namespace DepotTests.CRUDTests
             this._movieAPIClientMock.Verify(m => m.GetMovieInfo(It.IsAny<int>()), Times.Never);
         }
 
+        [Fact]
+        public async void LinkFromManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotLinkMovieRip()
+        {
+            // arrange
+            var movieRip = new MovieRip() {
+                FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
+                ParsedTitle = "khrustalyov my car"
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
+                .Returns(new MovieRip[] { movieRip } );
+            this._appSettingsManagerMock
+                .Setup(a => a.GetManualExternalIds())
+                .Returns(new Dictionary<string, int>());
+
+            // act
+            await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
+
+            // assert
+            movieRip.Movie.Should().BeNull();
+        }
+
     }
 }
