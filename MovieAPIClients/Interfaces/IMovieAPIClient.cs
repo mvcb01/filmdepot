@@ -7,6 +7,8 @@ namespace MovieAPIClients.Interfaces
     {
         Task<IEnumerable<MovieSearchResult>> SearchMovieAsync(string title);
 
+        Task<bool> ExternalIdExists(int externalId);
+
         Task<IEnumerable<string>> GetMovieGenresAsync(int externalId);
 
         Task<IEnumerable<string>> GetMovieActorsAsync(int externalId);

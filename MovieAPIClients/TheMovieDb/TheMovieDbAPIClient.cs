@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -41,6 +42,31 @@ namespace MovieAPIClients.TheMovieDb
 
             var searchResultTMDB = JsonSerializer.Deserialize<SearchResultTMDB>(resultString);
             return searchResultTMDB.Results.Select(res => res.ToMovieSearchResult());
+        }
+
+        public async Task<bool> ExternalIdExists(int externalId)
+        {
+            bool exists;
+            HttpResponseMessage result = await _httpClient.GetAsync($"movie/{externalId}?api_key={_apiKey}");
+            if (result.IsSuccessStatusCode)
+            {
+                exists = true;
+            }
+            else
+            {
+                HttpStatusCode code = result.StatusCode;
+                if (code == HttpStatusCode.NotFound)
+                {
+                    exists = false;
+                }
+                else
+                {
+                    string msg = $"Error when calling TheMovieDbAPIClient.ExternalIdExists with externalId = {externalId};" +
+                        $" StatusCode: {code}, Message: {result.ReasonPhrase}";
+                    throw new HttpRequestException(msg);
+                }
+            }
+            return exists;
         }
 
         public async Task<IEnumerable<string>> GetMovieGenresAsync(int externalId)
