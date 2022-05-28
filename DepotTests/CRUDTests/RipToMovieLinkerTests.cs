@@ -58,7 +58,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void GetMovieRipsToLink_WithRipFilenamesToIgnore_ShouldReturnTheCorrectMovieRips()
+        public void GetMovieRipsToLink_WithRipFilenamesToIgnore_ShouldNotReturnThem()
         {
             // arrange
             MovieRip[] allRipsToLink = {
