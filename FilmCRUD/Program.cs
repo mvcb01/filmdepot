@@ -144,7 +144,7 @@ namespace FilmCRUD
         {
             System.Console.WriteLine("-------------");
             System.Console.WriteLine($"A ligar movie rips a filmes...");
-            await ripToMovieLinker.LinkMovieRipsToMoviesAsync();
+            await ripToMovieLinker.SearchAndLinkMovieRipsToMoviesAsync();
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)

@@ -93,7 +93,7 @@ namespace FilmCRUD
             return relatedMovie;
         }
 
-        public async Task LinkMovieRipsToMoviesAsync()
+        public async Task SearchAndLinkMovieRipsToMoviesAsync()
         {
 
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();

@@ -228,7 +228,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void LinkMovieRipsToMoviesAsync_WithoutMatchesInRepo_ShouldCallFindMovieOnlineAsyncMethod()
+        public async void SearchAndLinkMovieRipsToMoviesAsync_WithoutMatchesInRepo_ShouldCallFindMovieOnlineAsyncMethod()
         {
             // arrange
             var movieRip = new MovieRip() {
@@ -245,14 +245,14 @@ namespace DepotTests.CRUDTests
             this._appSettingsManagerMock.Setup(a => a.GetWarehouseContentsTextFilesDirectory()).Returns("");
 
             // act
-            await this._ripToMovieLinker.LinkMovieRipsToMoviesAsync();
+            await this._ripToMovieLinker.SearchAndLinkMovieRipsToMoviesAsync();
 
             // assert
             this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
-        public async void LinkMovieRipsToMoviesAsync_WithoutMatchesInRepo_WithOnlineMatch_ShouldLinkRipToOnlineMatch()
+        public async void SearchAndLinkMovieRipsToMoviesAsync_WithoutMatchesInRepo_WithOnlineMatch_ShouldLinkRipToOnlineMatch()
         {
             // arrange
             var movieRip = new MovieRip() {
@@ -273,7 +273,7 @@ namespace DepotTests.CRUDTests
             this._appSettingsManagerMock.Setup(a => a.GetWarehouseContentsTextFilesDirectory()).Returns("");
 
             // act
-            await this._ripToMovieLinker.LinkMovieRipsToMoviesAsync();
+            await this._ripToMovieLinker.SearchAndLinkMovieRipsToMoviesAsync();
 
             // assert
             movieRip.Movie.Should().BeEquivalentTo(new { Title = "Khrustalyov, My Car!", ReleaseDate = 1998, ExternalId = 1 });
