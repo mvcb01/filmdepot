@@ -69,11 +69,33 @@ namespace MovieAPIClients.TheMovieDb
             return exists;
         }
 
+        public async Task<string> GetMovieTitle(int externalId)
+        {
+            var resultObj = await GetMovieDetailsFromExternalId<MovieSearchResultTMDB>(externalId);
+            return resultObj.Title;
+        }
+
+        public async Task<string> GetMovieOriginalTitle(int externalId)
+        {
+            var resultObj = await GetMovieDetailsFromExternalId<MovieSearchResultTMDB>(externalId);
+            return resultObj.OriginalTitle;
+        }
+
+        public async Task<int> GetMovieReleaseDate(int externalId)
+        {
+            var resultObj = await GetMovieDetailsFromExternalId<MovieSearchResultTMDB>(externalId);
+            return resultObj.ReleaseDate;
+        }
+
+        public async Task<(string Title, string OriginalTitle, int ReleaseDate)> GetMovieInfo(int externalId)
+        {
+            var resultObj = await GetMovieDetailsFromExternalId<MovieSearchResultTMDB>(externalId);
+            return (resultObj.Title, resultObj.OriginalTitle, resultObj.ReleaseDate);
+        }
+
         public async Task<IEnumerable<string>> GetMovieGenresAsync(int externalId)
         {
-            // vamos buscar aos movie details
-            string resultString = await _httpClient.GetStringAsync($"movie/{externalId}?api_key={_apiKey}");
-            var resultObj = JsonSerializer.Deserialize<MovieGenresResultTMDB>(resultString);
+            var resultObj = await GetMovieDetailsFromExternalId<MovieGenresResultTMDB>(externalId);
             return resultObj.Genres.Select(g => g.Name);
         }
 
@@ -92,5 +114,12 @@ namespace MovieAPIClients.TheMovieDb
             var resultObj = JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
             return resultObj.Crew.Where(c => c.Job.Trim().ToLower() == "director").Select(c => c.Name);
         }
+
+        private async Task<T> GetMovieDetailsFromExternalId<T>(int externalId)
+        {
+            string resultString = await _httpClient.GetStringAsync($"movie/{externalId}?api_key={_apiKey}");
+            return JsonSerializer.Deserialize<T>(resultString);
+        }
+
     }
 }
