@@ -77,14 +77,47 @@ namespace DepotTests.CRUDTests
             this._appSettingsManagerMock.Setup(a => a.GetRipFilenamesToIgnoreOnLinking()).Returns(ripFilenamesToIgnore);
 
             // act
-            IEnumerable<MovieRip> ripsToLinkResult = this._ripToMovieLinker.GetMovieRipsToLink();
+            IEnumerable<MovieRip> ripsToLinkActual = this._ripToMovieLinker.GetMovieRipsToLink();
 
             // assert
-             MovieRip[] expectedRipsToLink = {
+            MovieRip[] ripsToLinkExpected = {
                 new MovieRip() { FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN", ParsedTitle = "the fly" },
                 new MovieRip() { FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]", ParsedTitle = "khrustalyov my car"}
-             };
-            ripsToLinkResult.Should().BeEquivalentTo(expectedRipsToLink);
+            };
+            ripsToLinkActual.Should().BeEquivalentTo(ripsToLinkExpected);
+        }
+
+        [Fact]
+        public void GetMovieRipsToLink_WithManualExternalIds_ShouldNotReturnThem()
+        {
+            // arrange
+            MovieRip[] allRipsToLink = {
+                new MovieRip() { FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]", ParsedTitle = "khrustalyov my car"},
+                new MovieRip() { FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN", ParsedTitle = "the fly" },
+                new MovieRip() { FileName = "Sorcerer.1977.1080p.BluRay.x264-HD4U", ParsedTitle = "sorcerer"}
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
+                .Returns(allRipsToLink);
+
+            var manualExternalIds = new Dictionary<string, int>() {
+                { "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]", 100784 },
+                { "inexistent.file.480p.x264-DUMMYGROUP", 999}
+            };
+            this._appSettingsManagerMock
+                .Setup(a => a.GetManualExternalIds())
+                .Returns(manualExternalIds);
+
+            // act
+            IEnumerable<MovieRip> ripsToLinkActual = this._ripToMovieLinker.GetMovieRipsToLink();
+
+            // assert
+            MovieRip[] ripsToLinkExpected = {
+                new MovieRip() { FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN", ParsedTitle = "the fly" },
+                new MovieRip() { FileName = "Sorcerer.1977.1080p.BluRay.x264-HD4U", ParsedTitle = "sorcerer"}
+            };
+            ripsToLinkActual.Should().BeEquivalentTo(ripsToLinkExpected);
+
         }
 
         [Fact]

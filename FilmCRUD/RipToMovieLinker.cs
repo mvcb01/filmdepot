@@ -37,12 +37,17 @@ namespace FilmCRUD
             this.MovieFinder = new MovieFinder(movieAPIClient);
         }
 
+        /// <summary>
+        /// Gets MovieRips not linked to a Movie, excluding RipFilenamesToIgnore and also those with ManualExternalIds
+        /// </summary>
         public IEnumerable<MovieRip> GetMovieRipsToLink()
         {
-            IEnumerable<string> ripFilenamesToIgnore = _appSettingsManager.GetRipFilenamesToIgnoreOnLinking();
+            IEnumerable<string> toIgnore = _appSettingsManager.GetRipFilenamesToIgnoreOnLinking();
+            Dictionary<string, int> externalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
+            IEnumerable<string> ripNamesToExclude = Enumerable.Concat<string>(toIgnore, externalIds.Keys);
             return _unitOfWork.MovieRips
                 .Find(r => r.Movie == null)
-                .Where(r => r.ParsedTitle != null && !ripFilenamesToIgnore.Contains(r.FileName));
+                .Where(r => r.ParsedTitle != null && !ripNamesToExclude.Contains(r.FileName));
         }
 
         public Movie FindRelatedMovieEntityInRepo(MovieRip movieRip)
