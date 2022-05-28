@@ -156,7 +156,7 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
-        public async Task LinkMovieRipsToMoviesFromManualExternalIdsAsync()
+        public async Task LinkFromManualExternalIdsAsync()
         {
 
         }

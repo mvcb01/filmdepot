@@ -14,6 +14,7 @@ using System.Linq.Expressions;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using FluentAssertions.Execution;
 
 namespace DepotTests.CRUDTests
 {
@@ -280,7 +281,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void LinkMovieRipsToMoviesFromManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiClient()
+        public async void LinkFromManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiClient()
         {
             // arrange
             var movieRip = new MovieRip() {
@@ -295,8 +296,10 @@ namespace DepotTests.CRUDTests
                 .Returns(new Dictionary<string, int>());
 
             // act
+            await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
 
             // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieInfo(It.IsAny<int>()), Times.Never);
         }
 
     }
