@@ -299,7 +299,7 @@ namespace DepotTests.CRUDTests
             await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
 
             // assert
-            this._movieAPIClientMock.Verify(m => m.GetMovieInfo(It.IsAny<int>()), Times.Never);
+            this._movieAPIClientMock.Verify(m => m.GetMovieInfoAsync(It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
@@ -322,6 +322,28 @@ namespace DepotTests.CRUDTests
 
             // assert
             movieRip.Movie.Should().BeNull();
+        }
+
+        [Fact]
+        public async void LinkFromManualExternalIdsAsync_WithManualExternalIds_ShouldLinkMovieRipsCorrectly()
+        {
+            // arrange
+            MovieRip[] ripsToLink = {
+                new MovieRip() { FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]", ParsedTitle = "khrustalyov my car"},
+                new MovieRip() { FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN", ParsedTitle = "the fly" },
+                new MovieRip() { FileName = "Sorcerer.1977.1080p.BluRay.x264-HD4U", ParsedTitle = "sorcerer"}
+            };
+            var manualExternalIds = new Dictionary<string, int>() {
+                { "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]", 101 },
+                { "The.Fly.1986.1080p.BluRay.x264-TFiN", 102 }
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
+                .Returns(ripsToLink);
+
+            // act
+
+            // assert
         }
 
     }

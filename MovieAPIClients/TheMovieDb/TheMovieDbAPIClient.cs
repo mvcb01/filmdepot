@@ -44,7 +44,7 @@ namespace MovieAPIClients.TheMovieDb
             return searchResultTMDB.Results.Select(res => res.ToMovieSearchResult());
         }
 
-        public async Task<bool> ExternalIdExists(int externalId)
+        public async Task<bool> ExternalIdExistsAsync(int externalId)
         {
             bool exists;
             HttpResponseMessage result = await _httpClient.GetAsync($"movie/{externalId}?api_key={_apiKey}");
@@ -69,33 +69,33 @@ namespace MovieAPIClients.TheMovieDb
             return exists;
         }
 
-        public async Task<string> GetMovieTitle(int externalId)
+        public async Task<string> GetMovieTitleAsync(int externalId)
         {
-            var resultObj = await GetMovieDetailsFromExternalId<MovieSearchResultTMDB>(externalId);
+            var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieSearchResultTMDB>(externalId);
             return resultObj.Title;
         }
 
-        public async Task<string> GetMovieOriginalTitle(int externalId)
+        public async Task<string> GetMovieOriginalTitleAsync(int externalId)
         {
-            var resultObj = await GetMovieDetailsFromExternalId<MovieSearchResultTMDB>(externalId);
+            var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieSearchResultTMDB>(externalId);
             return resultObj.OriginalTitle;
         }
 
-        public async Task<int> GetMovieReleaseDate(int externalId)
+        public async Task<int> GetMovieReleaseDateAsync(int externalId)
         {
-            var resultObj = await GetMovieDetailsFromExternalId<MovieSearchResultTMDB>(externalId);
+            var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieSearchResultTMDB>(externalId);
             return resultObj.ReleaseDate;
         }
 
-        public async Task<(string Title, string OriginalTitle, int ReleaseDate)> GetMovieInfo(int externalId)
+        public async Task<(string Title, string OriginalTitle, int ReleaseDate)> GetMovieInfoAsync(int externalId)
         {
-            var resultObj = await GetMovieDetailsFromExternalId<MovieSearchResultTMDB>(externalId);
+            var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieSearchResultTMDB>(externalId);
             return (resultObj.Title, resultObj.OriginalTitle, resultObj.ReleaseDate);
         }
 
         public async Task<IEnumerable<string>> GetMovieGenresAsync(int externalId)
         {
-            var resultObj = await GetMovieDetailsFromExternalId<MovieGenresResultTMDB>(externalId);
+            var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieGenresResultTMDB>(externalId);
             return resultObj.Genres.Select(g => g.Name);
         }
 
@@ -115,7 +115,7 @@ namespace MovieAPIClients.TheMovieDb
             return resultObj.Crew.Where(c => c.Job.Trim().ToLower() == "director").Select(c => c.Name);
         }
 
-        private async Task<T> GetMovieDetailsFromExternalId<T>(int externalId)
+        private async Task<T> GetMovieDetailsFromExternalIdAsync<T>(int externalId)
         {
             string resultString = await _httpClient.GetStringAsync($"movie/{externalId}?api_key={_apiKey}");
             return JsonSerializer.Deserialize<T>(resultString);

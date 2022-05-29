@@ -7,15 +7,15 @@ namespace MovieAPIClients.Interfaces
     {
         Task<IEnumerable<MovieSearchResult>> SearchMovieAsync(string title);
 
-        Task<bool> ExternalIdExists(int externalId);
+        Task<bool> ExternalIdExistsAsync(int externalId);
 
-        Task<string> GetMovieTitle(int externalId);
+        Task<string> GetMovieTitleAsync(int externalId);
 
-        Task<string> GetMovieOriginalTitle(int externalId);
+        Task<string> GetMovieOriginalTitleAsync(int externalId);
 
-        Task<int> GetMovieReleaseDate(int externalId);
+        Task<int> GetMovieReleaseDateAsync(int externalId);
 
-        Task<(string Title, string OriginalTitle, int ReleaseDate)> GetMovieInfo(int externalId);
+        Task<(string Title, string OriginalTitle, int ReleaseDate)> GetMovieInfoAsync(int externalId);
 
         Task<IEnumerable<string>> GetMovieGenresAsync(int externalId);
 
