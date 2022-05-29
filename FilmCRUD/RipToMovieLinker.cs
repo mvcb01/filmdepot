@@ -23,6 +23,8 @@ namespace FilmCRUD
 
         private IAppSettingsManager _appSettingsManager { get; init; }
 
+        private IMovieAPIClient _movieAPIClient { get; init; }
+
         public MovieFinder MovieFinder { get; init; }
 
         public RipToMovieLinker(
@@ -34,7 +36,8 @@ namespace FilmCRUD
             this._unitOfWork = unitOfWork;
             this._fileSystemIOWrapper = fileSystemIOWrapper;
             this._appSettingsManager = appSettingsManager;
-            this.MovieFinder = new MovieFinder(movieAPIClient);
+            this._movieAPIClient = movieAPIClient;
+            this.MovieFinder = new MovieFinder(this._movieAPIClient);
         }
 
         /// <summary>
@@ -43,8 +46,8 @@ namespace FilmCRUD
         public IEnumerable<MovieRip> GetMovieRipsToLink()
         {
             IEnumerable<string> toIgnore = _appSettingsManager.GetRipFilenamesToIgnoreOnLinking();
-            Dictionary<string, int> externalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
-            IEnumerable<string> ripNamesToExclude = Enumerable.Concat<string>(toIgnore, externalIds.Keys);
+            Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
+            IEnumerable<string> ripNamesToExclude = Enumerable.Concat<string>(toIgnore, manualExternalIds.Keys);
             return _unitOfWork.MovieRips
                 .Find(r => r.Movie == null)
                 .Where(r => r.ParsedTitle != null && !ripNamesToExclude.Contains(r.FileName));
@@ -146,19 +149,66 @@ namespace FilmCRUD
                 errors.Add($"ex message: {innerExc.GetType().Name}: {innerExc.Message}");
             }
 
-            if (errors.Count() > 0)
-            {
-                string errorsFpath = Path.Combine(this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(), $"linking_errors.txt");
-                System.Console.WriteLine($"Erros no linking, consultar o seguinte ficheiro: {errorsFpath}");
-                this._fileSystemIOWrapper.WriteAllText(errorsFpath, string.Join("\n\n", errors));
-            }
+            PersistErrorInfo("linking_errors.txt", errors);
 
-            this._unitOfWork.Complete();
+            _unitOfWork.Complete();
         }
 
         public async Task LinkFromManualExternalIdsAsync()
         {
+            Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
+            IEnumerable<MovieRip> ripsToLinkManually = _unitOfWork.MovieRips
+                .Find(m => manualExternalIds.Keys.Contains(m.FileName));
+
+            // Movie objects in repo that have one of the manually configured external ids
+            IEnumerable<Movie> existingMoviesWithManualExternalIds = _unitOfWork.Movies
+                .Find(m => manualExternalIds.Values.Contains(m.ExternalId));
+
+            // we only need to manually link those MovieRip objects not yet linked or where the linked Movie.ExternalId does
+            // not match the one given manually
+            IEnumerable<MovieRip> ripsToLinkManuallyFiltered = ripsToLinkManually
+                .Where(m => m.Movie == null || m.Movie.ExternalId != manualExternalIds[m.FileName]);
+
+            Func<MovieRip, int, Task> getMovieInfoOnlineAndLinkAsync = async (movieRip, externalId) => {
+                (string Title, string OriginalTitle, int ReleaseDate) movieInfo = await _movieAPIClient.GetMovieInfoAsync(externalId);
+                movieRip.Movie = new Movie() {
+                    ExternalId = externalId,
+                    Title = movieInfo.Title,
+                    OriginalTitle = movieInfo.OriginalTitle,
+                    ReleaseDate = movieInfo.ReleaseDate
+                };
+            };
+
+
+            List<Task> onlineInfoTasks = new();
+            foreach (var movieRip in ripsToLinkManuallyFiltered)
+            {
+                int externalId = manualExternalIds[movieRip.FileName];
+                Movie existingMovie = existingMoviesWithManualExternalIds
+                    .Where(m => m.ExternalId == externalId).FirstOrDefault();
+                if (existingMovie == null)
+                {
+                    Task onlineinfoTask = getMovieInfoOnlineAndLinkAsync(movieRip, externalId);
+                    onlineInfoTasks.Add(onlineinfoTask);
+                }
+                else
+                {
+                    movieRip.Movie = existingMovie;
+                }
+            }
+
+            await Task.WhenAll(onlineInfoTasks);
+            _unitOfWork.Complete();
+        }
+
+        private void PersistErrorInfo(string filename, IEnumerable<string> errors)
+        {
+            if (errors.Count() == 0) { return; }
+
+            string errorsFpath = Path.Combine(this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(), filename);
+            System.Console.WriteLine($"Erros no linking, consultar o seguinte ficheiro: {errorsFpath}");
+            this._fileSystemIOWrapper.WriteAllText(errorsFpath, string.Join("\n\n", errors));
         }
     }
 
