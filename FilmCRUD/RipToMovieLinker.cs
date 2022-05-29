@@ -201,6 +201,11 @@ namespace FilmCRUD
             _unitOfWork.Complete();
         }
 
+        private async Task GetMovieInfoOnlineAndLinkAsync(MovieRip movieRip, int externalId)
+        {
+            await Task.Delay(1000);
+        }
+
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
         {
             if (errors.Count() == 0) { return; }
