@@ -180,7 +180,6 @@ namespace FilmCRUD
                 };
             };
 
-
             List<Task> onlineInfoTasks = new();
             foreach (var movieRip in ripsToLinkManuallyFiltered)
             {

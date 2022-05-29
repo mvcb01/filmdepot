@@ -432,5 +432,40 @@ namespace DepotTests.CRUDTests
                         ExternalId = newExternalId });
         }
 
+        [Fact]
+        public async void LinkFromManualExternalIdsAsync_WithManualExternalIds_WithExistingMatchInMovieRepo_ShouldUseExistingMatchToLink()
+        {
+            // arrange
+            int externalIdInRepo = 104;
+            var movieRipToLinkManually = new MovieRip() {
+                FileName = "Sorcerer.1977.1080p.BluRay.x264-HD4U"
+            };
+            var movieInRepo = new Movie() {
+                Title = "Sorcerer",
+                OriginalTitle = "Sorcerer",
+                ReleaseDate = 1977,
+                ExternalId = externalIdInRepo
+            };
+            var manualExternalIds = new Dictionary<string, int>() {
+                { "Sorcerer.1977.1080p.BluRay.x264-HD4U", externalIdInRepo }
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
+                .Returns(new MovieRip[] { movieRipToLinkManually });
+            this._movieRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Returns(new Movie[] { movieInRepo });
+            this._appSettingsManagerMock
+                .Setup(a => a.GetManualExternalIds())
+                .Returns(manualExternalIds);
+
+            // act
+            await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
+
+            // assert
+            // points to the same object in memory
+            movieRipToLinkManually.Movie.Should().BeSameAs(movieInRepo);
+        }
+
     }
 }
