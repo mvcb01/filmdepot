@@ -101,13 +101,6 @@ namespace FilmCRUD
 
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
 
-            Func<MovieRip, Task> linkRipToOnlineSearchAsync = async (MovieRip movieRip) => {
-                movieRip.Movie = await this.MovieFinder.FindMovieOnlineAsync(
-                    movieRip.ParsedTitle,
-                    movieRip.ParsedReleaseDate
-                    );
-            };
-
             List<string> errors = new();
             List<Task> onlineSearches = new();
             foreach (var movieRip in ripsToLink)
@@ -122,7 +115,7 @@ namespace FilmCRUD
                     }
                     else
                     {
-                        Task onlineSearch = linkRipToOnlineSearchAsync(movieRip);
+                        Task onlineSearch = LinkRipToOnlineSearchAsync(movieRip);
                         onlineSearches.Add(onlineSearch);
                     }
 
@@ -200,6 +193,14 @@ namespace FilmCRUD
                     OriginalTitle = movieInfo.OriginalTitle,
                     ReleaseDate = movieInfo.ReleaseDate
                 };
+        }
+
+        private async Task LinkRipToOnlineSearchAsync(MovieRip movieRip)
+        {
+            movieRip.Movie = await this.MovieFinder.FindMovieOnlineAsync(
+                    movieRip.ParsedTitle,
+                    movieRip.ParsedReleaseDate
+                    );
         }
 
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
