@@ -44,7 +44,6 @@ namespace FilmCRUD
 
             parsed.WithNotParsed(HandleParseError);
             {}
-
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -145,7 +144,7 @@ namespace FilmCRUD
         {
             System.Console.WriteLine("-------------");
             System.Console.WriteLine($"A ligar movie rips a filmes...");
-            await ripToMovieLinker.LinkMovieRipsToMoviesAsync();
+            await ripToMovieLinker.SearchAndLinkAsync();
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)
