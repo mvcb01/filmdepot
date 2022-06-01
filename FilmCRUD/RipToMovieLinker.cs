@@ -8,6 +8,7 @@ using ConfigUtils.Interfaces;
 using FilmCRUD.Helpers;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
+using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
 using MovieAPIClients.Interfaces;
@@ -182,6 +183,11 @@ namespace FilmCRUD
 
             await Task.WhenAll(onlineInfoTasks);
             _unitOfWork.Complete();
+        }
+
+        public IEnumerable<string> GetAllUnlinkedMovieRips()
+        {
+            return this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
         }
 
         private async Task GetMovieInfoOnlineAndLinkAsync(MovieRip movieRip, int externalId)

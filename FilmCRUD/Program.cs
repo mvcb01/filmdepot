@@ -145,8 +145,35 @@ namespace FilmCRUD
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
             System.Console.WriteLine("-------------");
-            System.Console.WriteLine($"A ligar movie rips a filmes...");
-            await ripToMovieLinker.SearchAndLinkAsync();
+            if (opts.Search)
+            {
+                System.Console.WriteLine($"A linkar...");
+                await ripToMovieLinker.SearchAndLinkAsync();
+            }
+            else if (opts.FromManualExtIds)
+            {
+                System.Console.WriteLine($"A linkar a partir de external ids manuais...");
+                await ripToMovieLinker.LinkFromManualExternalIdsAsync();
+            }
+            else if (opts.GetUnlinkedRips)
+            {
+                IEnumerable<string> unlinked = ripToMovieLinker.GetAllUnlinkedMovieRips();
+                System.Console.WriteLine($"MovieRips não linkados:");
+                System.Console.WriteLine();
+                unlinked.ToList().ForEach(s => System.Console.WriteLine(s));
+
+            }
+            else if (opts.ValidateManualExtIds)
+            {
+                System.Console.WriteLine($"A validar external ids manuais:");
+                throw new NotImplementedException();
+            }
+            else
+            {
+                System.Console.WriteLine("Nada a fazer...");
+            }
+            System.Console.WriteLine();
+
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)
