@@ -170,16 +170,6 @@ namespace FilmCRUD
             IEnumerable<MovieRip> ripsToLinkManuallyFiltered = ripsToLinkManually
                 .Where(m => m.Movie == null || m.Movie.ExternalId != manualExternalIds[m.FileName]);
 
-            Func<MovieRip, int, Task> getMovieInfoOnlineAndLinkAsync = async (movieRip, externalId) => {
-                (string Title, string OriginalTitle, int ReleaseDate) movieInfo = await _movieAPIClient.GetMovieInfoAsync(externalId);
-                movieRip.Movie = new Movie() {
-                    ExternalId = externalId,
-                    Title = movieInfo.Title,
-                    OriginalTitle = movieInfo.OriginalTitle,
-                    ReleaseDate = movieInfo.ReleaseDate
-                };
-            };
-
             List<Task> onlineInfoTasks = new();
             foreach (var movieRip in ripsToLinkManuallyFiltered)
             {
@@ -188,7 +178,7 @@ namespace FilmCRUD
                     .Where(m => m.ExternalId == externalId).FirstOrDefault();
                 if (existingMovie == null)
                 {
-                    Task onlineinfoTask = getMovieInfoOnlineAndLinkAsync(movieRip, externalId);
+                    Task onlineinfoTask = GetMovieInfoOnlineAndLinkAsync(movieRip, externalId);
                     onlineInfoTasks.Add(onlineinfoTask);
                 }
                 else
@@ -203,7 +193,13 @@ namespace FilmCRUD
 
         private async Task GetMovieInfoOnlineAndLinkAsync(MovieRip movieRip, int externalId)
         {
-            await Task.Delay(1000);
+            (string Title, string OriginalTitle, int ReleaseDate) movieInfo = await _movieAPIClient.GetMovieInfoAsync(externalId);
+                movieRip.Movie = new Movie() {
+                    ExternalId = externalId,
+                    Title = movieInfo.Title,
+                    OriginalTitle = movieInfo.OriginalTitle,
+                    ReleaseDate = movieInfo.ReleaseDate
+                };
         }
 
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
