@@ -36,7 +36,9 @@ namespace FilmCRUD
             ScanManager scanManager = new(unitOfWork);
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieApiClient);
 
-            var parsed = Parser.Default.ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
+            ParserResult<object> parsed = Parser
+                .Default
+                .ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
             parsed
                 .WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
                 .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager));
