@@ -36,7 +36,9 @@ namespace FilmCRUD
             ScanManager scanManager = new(unitOfWork);
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieApiClient);
 
-            var parsed = Parser.Default.ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
+            ParserResult<object> parsed = Parser
+                .Default
+                .ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
             parsed
                 .WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
                 .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager));
@@ -143,8 +145,45 @@ namespace FilmCRUD
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
             System.Console.WriteLine("-------------");
-            System.Console.WriteLine($"A ligar movie rips a filmes...");
-            await ripToMovieLinker.SearchAndLinkAsync();
+            if (opts.Search)
+            {
+                System.Console.WriteLine($"A linkar...");
+                await ripToMovieLinker.SearchAndLinkAsync();
+            }
+            else if (opts.FromManualExtIds)
+            {
+                System.Console.WriteLine($"A linkar a partir de external ids manuais...");
+                await ripToMovieLinker.LinkFromManualExternalIdsAsync();
+            }
+            else if (opts.GetUnlinkedRips)
+            {
+                IEnumerable<string> unlinked = ripToMovieLinker.GetAllUnlinkedMovieRips();
+                System.Console.WriteLine($"MovieRips não linkados:");
+                System.Console.WriteLine();
+                unlinked.ToList().ForEach(s => System.Console.WriteLine(s));
+
+            }
+            else if (opts.ValidateManualExtIds)
+            {
+                System.Console.WriteLine($"A validar external ids manuais:");
+                System.Console.WriteLine();
+                Dictionary<string, Dictionary<string, int>> validStatus = await ripToMovieLinker.ValidateManualExternalIdsAsync();
+                foreach (var item in validStatus)
+                {
+                    Dictionary<string, int> innerDict = item.Value;
+
+                    System.Console.WriteLine(item.Key);
+                    IEnumerable<string> linesToPrint = innerDict.Select(kvp => $"{kvp.Key} : {kvp.Value}");
+                    System.Console.WriteLine(string.Join('\n', linesToPrint));
+                    System.Console.WriteLine();
+                }
+            }
+            else
+            {
+                System.Console.WriteLine("Nada a fazer...");
+            }
+            System.Console.WriteLine();
+
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)

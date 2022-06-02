@@ -8,6 +8,7 @@ using ConfigUtils.Interfaces;
 using FilmCRUD.Helpers;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
+using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
 using MovieAPIClients.Interfaces;
@@ -182,6 +183,32 @@ namespace FilmCRUD
 
             await Task.WhenAll(onlineInfoTasks);
             _unitOfWork.Complete();
+        }
+
+        public IEnumerable<string> GetAllUnlinkedMovieRips()
+        {
+            return this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
+        }
+
+        public async Task<Dictionary<string, Dictionary<string, int>>> ValidateManualExternalIdsAsync()
+        {
+            Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
+
+            var validationTasks = new Dictionary<string, Task<bool>>();
+            foreach (var item in manualExternalIds)
+            {
+                validationTasks.Add(item.Key, this._movieAPIClient.ExternalIdExistsAsync(item.Value));
+            }
+
+            await Task.WhenAll(validationTasks.Values);
+
+            // keys of the original dict `manualExternalIds` for valid external ids
+            IEnumerable<string> validIdKeys = validationTasks.Where(kvp => kvp.Value.Result).Select(kvp => kvp.Key);
+
+            return new Dictionary<string, Dictionary<string, int>>() {
+                ["valid"] = manualExternalIds.Where(kvp => validIdKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
+                ["invalid"] = manualExternalIds.Where(kvp => !validIdKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+            };
         }
 
         private async Task GetMovieInfoOnlineAndLinkAsync(MovieRip movieRip, int externalId)
