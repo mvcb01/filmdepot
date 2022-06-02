@@ -166,7 +166,17 @@ namespace FilmCRUD
             else if (opts.ValidateManualExtIds)
             {
                 System.Console.WriteLine($"A validar external ids manuais:");
-                throw new NotImplementedException();
+                System.Console.WriteLine();
+                Dictionary<string, Dictionary<string, int>> validStatus = await ripToMovieLinker.ValidateManualExternalIdsAsync();
+                foreach (var item in validStatus)
+                {
+                    Dictionary<string, int> innerDict = item.Value;
+
+                    System.Console.WriteLine(item.Key);
+                    IEnumerable<string> linesToPrint = innerDict.Select(kvp => $"{kvp.Key} : {kvp.Value}");
+                    System.Console.WriteLine(string.Join('\n', linesToPrint));
+                    System.Console.WriteLine();
+                }
             }
             else
             {
