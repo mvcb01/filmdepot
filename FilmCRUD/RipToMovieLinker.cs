@@ -190,6 +190,14 @@ namespace FilmCRUD
             return this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
         }
 
+        public async Task<Dictionary<string, Dictionary<string, int>>> ValidateManualExternalIdsAsync()
+        {
+            Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
+            var result = new Dictionary<string, Dictionary<string, int>>();
+            await Task.Delay(1000);
+            return result;
+        }
+
         private async Task GetMovieInfoOnlineAndLinkAsync(MovieRip movieRip, int externalId)
         {
             (string Title, string OriginalTitle, int ReleaseDate) movieInfo = await _movieAPIClient.GetMovieInfoAsync(externalId);
