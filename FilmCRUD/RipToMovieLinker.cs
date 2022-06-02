@@ -193,9 +193,22 @@ namespace FilmCRUD
         public async Task<Dictionary<string, Dictionary<string, int>>> ValidateManualExternalIdsAsync()
         {
             Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
-            var result = new Dictionary<string, Dictionary<string, int>>();
-            await Task.Delay(1000);
-            return result;
+
+            var validationTasks = new Dictionary<string, Task<bool>>();
+            foreach (var item in manualExternalIds)
+            {
+                validationTasks.Add(item.Key, this._movieAPIClient.ExternalIdExistsAsync(item.Value));
+            }
+
+            await Task.WhenAll(validationTasks.Values);
+
+            // keys of the original dict `manualExternalIds` for valid external ids
+            IEnumerable<string> validIdKeys = validationTasks.Where(kvp => kvp.Value.Result).Select(kvp => kvp.Key);
+
+            return new Dictionary<string, Dictionary<string, int>>() {
+                ["valid"] = manualExternalIds.Where(kvp => validIdKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
+                ["invalid"] = manualExternalIds.Where(kvp => !validIdKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+            };
         }
 
         private async Task GetMovieInfoOnlineAndLinkAsync(MovieRip movieRip, int externalId)
