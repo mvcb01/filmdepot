@@ -93,6 +93,13 @@ namespace MovieAPIClients.TheMovieDb
             return (resultObj.Title, resultObj.OriginalTitle, resultObj.ReleaseDate);
         }
 
+        public async Task<string> GetMovieIMDBIdAsync(int externalId)
+        {
+            // too simple to create a new class just to get the result...
+            var resultDict = await GetMovieDetailsFromExternalIdAsync<Dictionary<string, object>>(externalId);
+            return resultDict["imdb_id"].ToString();
+        }
+
         public async Task<IEnumerable<string>> GetMovieGenresAsync(int externalId)
         {
             var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieGenresResultTMDB>(externalId);
