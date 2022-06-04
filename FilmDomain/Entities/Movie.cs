@@ -15,6 +15,8 @@ namespace FilmDomain.Entities
 
         public int ReleaseDate { get; set; }
 
+        public string IMDBId { get; set; }
+
         public ICollection<Genre> Genres { get; set; }
 
         public ICollection<Director> Directors { get; set; }
