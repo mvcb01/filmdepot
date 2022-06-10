@@ -100,6 +100,13 @@ namespace MovieAPIClients.TheMovieDb
             return resultDict["imdb_id"].ToString();
         }
 
+        public async Task<IEnumerable<string>> GetMovieKeywordsAsync(int externalId)
+        {
+            string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/keywords?api_key={_apiKey}");
+            var resultObj = JsonSerializer.Deserialize<MovieKeywordsResult>(resultString);
+            return resultObj.Keywords.Select(k => k.Name);
+        }
+
         public async Task<IEnumerable<string>> GetMovieGenresAsync(int externalId)
         {
             var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieGenresResultTMDB>(externalId);
@@ -127,6 +134,7 @@ namespace MovieAPIClients.TheMovieDb
             string resultString = await _httpClient.GetStringAsync($"movie/{externalId}?api_key={_apiKey}");
             return JsonSerializer.Deserialize<T>(resultString);
         }
+
 
     }
 }
