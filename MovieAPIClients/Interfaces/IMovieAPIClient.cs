@@ -19,6 +19,8 @@ namespace MovieAPIClients.Interfaces
 
         Task<string> GetMovieIMDBIdAsync(int externalId);
 
+        Task<IEnumerable<string>> GetMovieKeywordsAsync(int externalId);
+
         Task<IEnumerable<string>> GetMovieGenresAsync(int externalId);
 
         Task<IEnumerable<string>> GetMovieActorsAsync(int externalId);
