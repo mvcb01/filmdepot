@@ -3,9 +3,6 @@ using FilmDomain.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Text.Json;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System.Linq;
-using System;
 
 namespace FilmDataAccess.EFCore.ModelConfiguration
 {
