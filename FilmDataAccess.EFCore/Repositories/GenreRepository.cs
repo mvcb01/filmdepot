@@ -11,9 +11,9 @@ namespace FilmDataAccess.EFCore.Repositories
         {
         }
 
-        public IEnumerable<Genre> GetGenresFromName(string name)
+        public Genre GetGenreFromName(string name)
         {
-            return Find(g => g.Name.Contains(name));
+            return Find(g => g.Name.Contains(name)).FirstOrDefault();
         }
 
     }
