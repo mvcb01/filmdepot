@@ -109,26 +109,31 @@ namespace MovieAPIClients.TheMovieDb
             return resultObj.Keywords.Select(k => k.Name);
         }
 
-        public async Task<IEnumerable<string>> GetMovieGenresAsync(int externalId)
+        public async Task<IEnumerable<MovieGenreResult>> GetMovieGenresAsync(int externalId)
         {
             var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieGenresResultTMDB>(externalId);
-            return resultObj.Genres.Select(g => g.Name);
+            return resultObj.Genres.Select(g => g.ToMovieGenreResult());
         }
 
-        public async Task<IEnumerable<string>> GetMovieActorsAsync(int externalId)
+        public async Task<IEnumerable<MovieActorResult>> GetMovieActorsAsync(int externalId)
         {
-            // vamos buscar aos movie credits
-            string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/credits?api_key={_apiKey}");
-            var resultObj = JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
-            return resultObj.Cast.Select(c => c.Name);
+            // // vamos buscar aos movie credits
+            // string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/credits?api_key={_apiKey}");
+            // var resultObj = JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
+            // return resultObj.Cast.Select(c => c.Name);
+
+            throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<string>> GetMovieDirectorsAsync(int externalId)
+        public async Task<IEnumerable<MovieDirectorResult>> GetMovieDirectorsAsync(int externalId)
         {
             // vamos buscar aos movie credits
-            string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/credits?api_key={_apiKey}");
-            var resultObj = JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
-            return resultObj.Crew.Where(c => c.Job.Trim().ToLower() == "director").Select(c => c.Name);
+            // string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/credits?api_key={_apiKey}");
+            // var resultObj = JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
+            // return resultObj.Crew.Where(c => c.Job.Trim().ToLower() == "director").Select(c => c.Name);
+
+            throw new NotImplementedException();
+
         }
 
         private async Task<T> GetMovieDetailsFromExternalIdAsync<T>(int externalId)

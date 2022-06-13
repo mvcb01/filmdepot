@@ -13,5 +13,13 @@ namespace MovieAPIClients.Extensions
                 ReleaseDate = movieSearchResultTMDB.ReleaseDate
                 };
         }
+
+        public static MovieGenreResult ToMovieGenreResult(this MovieGenreResultTMDB movieGenreResultTMDB)
+        {
+            return new MovieGenreResult() {
+                ExternalId = movieGenreResultTMDB.ExternalId,
+                Name = movieGenreResultTMDB.Name
+                };
+        }
     }
 }
