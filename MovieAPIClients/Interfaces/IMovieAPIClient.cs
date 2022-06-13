@@ -15,7 +15,7 @@ namespace MovieAPIClients.Interfaces
 
         Task<int> GetMovieReleaseDateAsync(int externalId);
 
-        Task<(string Title, string OriginalTitle, int ReleaseDate)> GetMovieInfoAsync(int externalId);
+        Task<MovieSearchResult> GetMovieInfoAsync(int externalId);
 
         Task<string> GetMovieIMDBIdAsync(int externalId);
 

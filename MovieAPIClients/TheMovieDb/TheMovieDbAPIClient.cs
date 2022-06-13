@@ -88,10 +88,10 @@ namespace MovieAPIClients.TheMovieDb
             return resultObj.ReleaseDate;
         }
 
-        public async Task<(string Title, string OriginalTitle, int ReleaseDate)> GetMovieInfoAsync(int externalId)
+        public async Task<MovieSearchResult> GetMovieInfoAsync(int externalId)
         {
             var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieSearchResultTMDB>(externalId);
-            return (resultObj.Title, resultObj.OriginalTitle, resultObj.ReleaseDate);
+            return (MovieSearchResult)resultObj;
         }
 
         public async Task<string> GetMovieIMDBIdAsync(int externalId)
