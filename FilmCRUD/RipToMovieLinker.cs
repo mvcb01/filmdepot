@@ -214,13 +214,8 @@ namespace FilmCRUD
 
         private async Task GetMovieInfoOnlineAndLinkAsync(MovieRip movieRip, int externalId)
         {
-            MovieSearchResult movieInfo = await _movieAPIClient.GetMovieInfoAsync(externalId);
-                movieRip.Movie = new Movie() {
-                    ExternalId = externalId,
-                    Title = movieInfo.Title,
-                    OriginalTitle = movieInfo.OriginalTitle,
-                    ReleaseDate = movieInfo.ReleaseDate
-                };
+            MovieSearchResult movieSearchResult = await _movieAPIClient.GetMovieInfoAsync(externalId);
+            movieRip.Movie = (Movie)movieSearchResult;
         }
 
         private async Task LinkRipToOnlineSearchAsync(MovieRip movieRip)

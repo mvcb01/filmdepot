@@ -316,11 +316,13 @@ namespace DepotTests.CRUDTests
             };
 
             var firstMovieInfo = new MovieSearchResult() {
+                ExternalId = firstExternalId,
                 Title = "Khrustalyov, My Car!",
                 OriginalTitle = "Хрусталёв, машину!",
                 ReleaseDate = 1998
                 };
             var secondMovieInfo = new MovieSearchResult() {
+                ExternalId = secondExternalId,
                 Title = "The Fly",
                 OriginalTitle = "The Fly",
                 ReleaseDate = 1986
@@ -416,6 +418,7 @@ namespace DepotTests.CRUDTests
                 { "The.Fly.1986.1080p.BluRay.x264-TFiN", newExternalId }
             };
             var correctMovieInfo = new MovieSearchResult() {
+                ExternalId = newExternalId,
                 Title = "The Fly",
                 OriginalTitle = "The Fly",
                 ReleaseDate = 1986
