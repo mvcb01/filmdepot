@@ -314,8 +314,17 @@ namespace DepotTests.CRUDTests
                 { "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]", firstExternalId },
                 { "The.Fly.1986.1080p.BluRay.x264-TFiN", secondExternalId }
             };
-            (string Title, string OriginalTitle, int ReleaseDate) firstMovieInfo = ("Khrustalyov, My Car!", "Хрусталёв, машину!", 1998);
-            (string Title, string OriginalTitle, int ReleaseDate) secondMovieInfo = ("The Fly", "The Fly", 1986);
+
+            var firstMovieInfo = new MovieSearchResult() {
+                Title = "Khrustalyov, My Car!",
+                OriginalTitle = "Хрусталёв, машину!",
+                ReleaseDate = 1998
+                };
+            var secondMovieInfo = new MovieSearchResult() {
+                Title = "The Fly",
+                OriginalTitle = "The Fly",
+                ReleaseDate = 1986
+                };
             this._movieRipRepositoryMock
                 .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
                 .Returns(new MovieRip[] { firstMovieRipToLink, secondMovieRipToLink });
@@ -406,7 +415,11 @@ namespace DepotTests.CRUDTests
             var manualExternalIds = new Dictionary<string, int>() {
                 { "The.Fly.1986.1080p.BluRay.x264-TFiN", newExternalId }
             };
-            (string Title, string OriginalTitle, int ReleaseDate) correctMovieInfo = ("The Fly", "The Fly", 1986);
+            var correctMovieInfo = new MovieSearchResult() {
+                Title = "The Fly",
+                OriginalTitle = "The Fly",
+                ReleaseDate = 1986
+                };
             this._movieRipRepositoryMock
                 .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
                 .Returns(new MovieRip[] { movieRipToLinkManually });
