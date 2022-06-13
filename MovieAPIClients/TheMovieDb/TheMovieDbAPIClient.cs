@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Text.Json;
 
-using MovieAPIClients.Extensions;
 using MovieAPIClients.Interfaces;
 
 namespace MovieAPIClients.TheMovieDb
@@ -112,7 +111,7 @@ namespace MovieAPIClients.TheMovieDb
         public async Task<IEnumerable<MovieGenreResult>> GetMovieGenresAsync(int externalId)
         {
             var resultObj = await GetMovieDetailsFromExternalIdAsync<MovieGenresResultTMDB>(externalId);
-            return resultObj.Genres.Select(g => g.ToMovieGenreResult());
+            return resultObj.Genres.Select(g => (MovieGenreResult)g);
         }
 
         public async Task<IEnumerable<MovieActorResult>> GetMovieActorsAsync(int externalId)
