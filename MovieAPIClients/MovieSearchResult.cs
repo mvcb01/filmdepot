@@ -1,3 +1,5 @@
+using FilmDomain.Entities;
+
 namespace MovieAPIClients
 {
     public class MovieSearchResult
@@ -10,6 +12,14 @@ namespace MovieAPIClients
 
         public int ReleaseDate { get; set; }
 
-
+        public static explicit operator Movie(MovieSearchResult movieSearchResult)
+        {
+            return new Movie() {
+                ExternalId = movieSearchResult.ExternalId,
+                Title = movieSearchResult.Title,
+                OriginalTitle = movieSearchResult.OriginalTitle,
+                ReleaseDate = movieSearchResult.ReleaseDate
+                };
+        }
     }
 }
