@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using FluentAssertions.Execution;
+using System.Threading.Tasks;
 
 namespace DepotTests.CRUDTests
 {
@@ -229,7 +230,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void SearchAndLinkAsync_WithoutMatchesInRepo_ShouldCallFindMovieOnlineAsyncMethod()
+        public async Task SearchAndLinkAsync_WithoutMatchesInRepo_ShouldCallFindMovieOnlineAsyncMethod()
         {
             // arrange
             var movieRip = new MovieRip() {
@@ -253,7 +254,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void SearchAndLinkAsync_WithoutMatchesInRepo_WithOnlineMatch_ShouldLinkRipToOnlineMatch()
+        public async Task SearchAndLinkAsync_WithoutMatchesInRepo_WithOnlineMatch_ShouldLinkRipToOnlineMatch()
         {
             // arrange
             var movieRip = new MovieRip() {
@@ -280,7 +281,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void LinkFromManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiClient()
+        public async Task LinkFromManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiClient()
         {
             // arrange
             this._movieRipRepositoryMock
@@ -298,7 +299,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void LinkFromManualExternalIdsAsync_WithManualExternalIds_ShouldLinkUnlinkedMovieRipsCorrectly()
+        public async Task LinkFromManualExternalIdsAsync_WithManualExternalIds_ShouldLinkUnlinkedMovieRipsCorrectly()
         {
             // arrange
             int firstExternalId = 101;
@@ -357,7 +358,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void LinkFromManualExternalIdsAsync_WithManualExternalIds_ShouldIgnoreMatchingManualExternalIdsInLinkedMovieRips()
+        public async Task LinkFromManualExternalIdsAsync_WithManualExternalIds_ShouldIgnoreMatchingManualExternalIdsInLinkedMovieRips()
         {
             // arrange
             int existingExternalId = 101;
@@ -389,7 +390,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void LinkFromManualExternalIdsAsync_WithManualExternalIds_ShouldOverwriteMismatchingManualExternalIdsInLinkedMovieRips()
+        public async Task LinkFromManualExternalIdsAsync_WithManualExternalIds_ShouldOverwriteMismatchingManualExternalIdsInLinkedMovieRips()
         {
             // arrange
             int existingExternalId = 102;
@@ -433,7 +434,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void LinkFromManualExternalIdsAsync_WithManualExternalIds_WithExistingMatchInMovieRepo_ShouldUseExistingMatchToLink()
+        public async Task LinkFromManualExternalIdsAsync_WithManualExternalIds_WithExistingMatchInMovieRepo_ShouldUseExistingMatchToLink()
         {
             // arrange
             int externalIdInRepo = 104;
@@ -468,7 +469,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void ValidateManualExternalIdsAsync_WithManualExternalIds_ShouldReturnCorrectDictionary()
+        public async Task ValidateManualExternalIdsAsync_WithManualExternalIds_ShouldReturnCorrectDictionary()
         {
             // arrange
             int validExternalId0 = 101;
@@ -507,7 +508,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void ValidateManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiClient()
+        public async Task ValidateManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiClient()
         {
             // arrange
             this._appSettingsManagerMock
