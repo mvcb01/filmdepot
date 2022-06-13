@@ -520,6 +520,5 @@ namespace DepotTests.CRUDTests
             // assert
             this._movieAPIClientMock.Verify(m => m.ExternalIdExistsAsync(It.IsAny<int>()), Times.Never);
         }
-
     }
 }
