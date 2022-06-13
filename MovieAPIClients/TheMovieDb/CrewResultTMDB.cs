@@ -12,5 +12,13 @@ namespace MovieAPIClients.TheMovieDb
 
         [JsonPropertyName("job")]
         public string Job { get; set; }
+
+        // for explicit casts:
+        //    var objTmdb = new CrewResultTMDB();
+        //    var obj = (MovieDirectorResult)objTmdb;
+        public static explicit operator MovieDirectorResult(CrewResultTMDB crewResultTMDB)
+        {
+            return new MovieDirectorResult() { ExternalId = crewResultTMDB.ExternalId, Name = crewResultTMDB.Name };
+        }
     }
 }
