@@ -116,12 +116,8 @@ namespace MovieAPIClients.TheMovieDb
 
         public async Task<IEnumerable<MovieActorResult>> GetMovieActorsAsync(int externalId)
         {
-            // // vamos buscar aos movie credits
-            // string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/credits?api_key={_apiKey}");
-            // var resultObj = JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
-            // return resultObj.Cast.Select(c => c.Name);
-
-            throw new NotImplementedException();
+            MovieCreditsResultTMDB resultObj = await GetMovieCreditsFromExternalIdAsync(externalId);
+            return resultObj.Cast.Select(c => (MovieActorResult)c);
         }
 
         public async Task<IEnumerable<MovieDirectorResult>> GetMovieDirectorsAsync(int externalId)
@@ -141,6 +137,10 @@ namespace MovieAPIClients.TheMovieDb
             return JsonSerializer.Deserialize<T>(resultString);
         }
 
-
+        private async Task<MovieCreditsResultTMDB> GetMovieCreditsFromExternalIdAsync(int externalId)
+        {
+            string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/credits?api_key={_apiKey}");
+            return JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
+        }
     }
 }
