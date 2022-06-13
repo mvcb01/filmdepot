@@ -15,7 +15,7 @@ namespace MovieAPIClients.Interfaces
 
         Task<int> GetMovieReleaseDateAsync(int externalId);
 
-        Task<(string Title, string OriginalTitle, int ReleaseDate)> GetMovieInfoAsync(int externalId);
+        Task<MovieSearchResult> GetMovieInfoAsync(int externalId);
 
         Task<string> GetMovieIMDBIdAsync(int externalId);
 
@@ -26,6 +26,5 @@ namespace MovieAPIClients.Interfaces
         Task<IEnumerable<MovieActorResult>> GetMovieActorsAsync(int externalId);
 
         Task<IEnumerable<MovieDirectorResult>> GetMovieDirectorsAsync(int externalId);
-
     }
 }

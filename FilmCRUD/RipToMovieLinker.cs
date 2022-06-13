@@ -11,6 +11,7 @@ using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
+using MovieAPIClients;
 using MovieAPIClients.Interfaces;
 
 
@@ -213,7 +214,7 @@ namespace FilmCRUD
 
         private async Task GetMovieInfoOnlineAndLinkAsync(MovieRip movieRip, int externalId)
         {
-            (string Title, string OriginalTitle, int ReleaseDate) movieInfo = await _movieAPIClient.GetMovieInfoAsync(externalId);
+            MovieSearchResult movieInfo = await _movieAPIClient.GetMovieInfoAsync(externalId);
                 movieRip.Movie = new Movie() {
                     ExternalId = externalId,
                     Title = movieInfo.Title,
