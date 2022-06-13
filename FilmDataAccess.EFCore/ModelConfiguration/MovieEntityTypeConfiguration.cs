@@ -11,9 +11,7 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
         public void Configure(EntityTypeBuilder<Movie> builder)
         {
             builder.Property(m => m.Title).IsRequired();
-
-            // a combinação (título, título original, release date) deve identificar bem um filme
-            builder.HasAlternateKey(m => new { m.Title, m.OriginalTitle, m.ReleaseDate });
+            builder.HasAlternateKey(m => m.ExternalId);
 
             // see:
             //  https://docs.microsoft.com/en-us/ef/core/modeling/value-conversions?tabs=fluent-api
