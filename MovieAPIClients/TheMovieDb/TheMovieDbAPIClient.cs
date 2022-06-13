@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Text.Json;
 
+using MovieAPIClients.Extensions;
 using MovieAPIClients.Interfaces;
 
 namespace MovieAPIClients.TheMovieDb
