@@ -15,6 +15,7 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
             // a combinação (título, título original, release date) deve identificar bem um filme
             builder.HasAlternateKey(m => new { m.Title, m.OriginalTitle, m.ReleaseDate });
 
+
             // see:
             //  https://docs.microsoft.com/en-us/ef/core/modeling/value-conversions?tabs=fluent-api
             builder
