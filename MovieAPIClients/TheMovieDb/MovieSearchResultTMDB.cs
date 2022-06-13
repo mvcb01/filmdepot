@@ -17,7 +17,7 @@ namespace MovieAPIClients.TheMovieDb
         [JsonPropertyName("release_date")]
         public string ReleaseDateString { get; set; }
 
-        // a release_date vem na forma 2021-03-17
+        // release_date comes in format YYYY-mm-dd
         public int ReleaseDate
         {
             get
