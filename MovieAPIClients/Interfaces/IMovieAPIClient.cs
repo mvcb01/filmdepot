@@ -21,10 +21,11 @@ namespace MovieAPIClients.Interfaces
 
         Task<IEnumerable<string>> GetMovieKeywordsAsync(int externalId);
 
-        Task<IEnumerable<string>> GetMovieGenresAsync(int externalId);
+        Task<IEnumerable<MovieGenreResult>> GetMovieGenresAsync(int externalId);
 
-        Task<IEnumerable<string>> GetMovieActorsAsync(int externalId);
+        Task<IEnumerable<MovieActorResult>> GetMovieActorsAsync(int externalId);
 
-        Task<IEnumerable<string>> GetMovieDirectorsAsync(int externalId);
+        Task<IEnumerable<MovieDirectorResult>> GetMovieDirectorsAsync(int externalId);
+
     }
 }
