@@ -35,5 +35,18 @@ namespace MovieAPIClients.TheMovieDb
             }
         }
 
+        // for explicit casts:
+        //    var objTmdb = new MovieSearchResultTMDB();
+        //    var obj = (MovieSearchResult)objTmdb;
+        public static explicit operator MovieSearchResult(MovieSearchResultTMDB movieSearchResultTMDB)
+        {
+            return new MovieSearchResult() {
+                ExternalId = movieSearchResultTMDB.ExternalId,
+                Title = movieSearchResultTMDB.Title,
+                OriginalTitle = movieSearchResultTMDB.OriginalTitle,
+                ReleaseDate = movieSearchResultTMDB.ReleaseDate
+                };
+        }
+
     }
 }

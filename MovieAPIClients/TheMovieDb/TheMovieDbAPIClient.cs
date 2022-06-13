@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text.Json;
 
 using MovieAPIClients.Interfaces;
-using MovieAPIClients.Extensions;
 
 namespace MovieAPIClients.TheMovieDb
 {
@@ -43,7 +42,7 @@ namespace MovieAPIClients.TheMovieDb
             string resultString = await _httpClient.GetStringAsync($"search/movie?api_key={_apiKey}&query={searchQuery}&page=1");
 
             var searchResultTMDB = JsonSerializer.Deserialize<SearchResultTMDB>(resultString);
-            return searchResultTMDB.Results.Select(res => res.ToMovieSearchResult());
+            return searchResultTMDB.Results.Select(res => (MovieSearchResult)res);
         }
 
         public async Task<bool> ExternalIdExistsAsync(int externalId)
