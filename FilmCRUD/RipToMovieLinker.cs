@@ -169,8 +169,7 @@ namespace FilmCRUD
             foreach (var movieRip in ripsToLinkManuallyFiltered)
             {
                 int externalId = manualExternalIds[movieRip.FileName];
-                Movie existingMovie = existingMoviesWithManualExternalIds
-                    .Where(m => m.ExternalId == externalId).FirstOrDefault();
+                Movie existingMovie = existingMoviesWithManualExternalIds.Where(m => m.ExternalId == externalId).FirstOrDefault();
                 if (existingMovie == null)
                 {
                     Task onlineinfoTask = GetMovieInfoOnlineAndLinkAsync(movieRip, externalId);
