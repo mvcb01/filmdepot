@@ -35,14 +35,5 @@ namespace MovieAPIClients.TheMovieDb
             }
         }
 
-        public MovieSearchResult ToMovieSearchResult()
-        {
-            return new MovieSearchResult() {
-                ExternalId = ExternalId,
-                Title = Title,
-                OriginalTitle = OriginalTitle,
-                ReleaseDate = ReleaseDate
-                };
-        }
     }
 }
