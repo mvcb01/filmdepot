@@ -9,7 +9,7 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
         public void Configure(EntityTypeBuilder<Genre> builder)
         {
             builder.Property(d => d.Name).IsRequired();
-            builder.HasAlternateKey(d => d.Name);
+            builder.HasAlternateKey(d => d.ExternalId);
         }
     }
 }
