@@ -9,5 +9,6 @@ namespace FilmDomain.Entities
         public string Name { get; set; }
 
         public ICollection<Movie> Movies { get; set; }
+
     }
 }
