@@ -368,7 +368,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task LinkFromManualExternalIdsAsync_WithSameExternalIdForDifferentRips_ShouldLinkToSameMovieEntity()
+        public async Task LinkFromManualExternalIdsAsync_WithSameExternalIdForDifferentRips_ShouldLinkToSameMovieObject()
         {
             // arrange
             int manualExternalId = 101;
