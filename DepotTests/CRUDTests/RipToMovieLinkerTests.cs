@@ -365,7 +365,49 @@ namespace DepotTests.CRUDTests
                         ReleaseDate = secondMovieInfo.ReleaseDate,
                         ExternalId = secondExternalId });
             }
+        }
 
+        [Fact]
+        public async Task LinkFromManualExternalIdsAsync_WithSameExternalIdForDifferentRips_ShouldLinkToSameMovieEntity()
+        {
+            // arrange
+            int manualExternalId = 101;
+            var firstMovieRipToLink = new MovieRip() {
+                FileName = "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous"
+            };
+            var secondMovieRipToLink = new MovieRip() {
+                FileName = "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]"
+            };
+            var manualExternalIds = new Dictionary<string, int>() {
+                { "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous", manualExternalId },
+                { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", manualExternalId }
+            };
+            var movieInfo = new MovieSearchResult() {
+                ExternalId = manualExternalId,
+                Title = "Blue Velvet",
+                OriginalTitle = "Blue Velvet",
+                ReleaseDate = 1986
+                };
+
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
+                .Returns(new MovieRip[] { firstMovieRipToLink, secondMovieRipToLink });
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieInfoAsync(manualExternalId))
+                .ReturnsAsync(movieInfo);
+            this._appSettingsManagerMock
+                .Setup(a => a.GetManualExternalIds())
+                .Returns(manualExternalIds);
+            this._movieRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
+                .Returns(Enumerable.Empty<Movie>());
+
+
+            // act
+            await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
+
+            // assert
+            firstMovieRipToLink.Movie.Should().BeSameAs(secondMovieRipToLink.Movie);
         }
 
         [Fact]
