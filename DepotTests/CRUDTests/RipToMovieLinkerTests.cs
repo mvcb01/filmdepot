@@ -407,7 +407,9 @@ namespace DepotTests.CRUDTests
             await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
 
             // assert
-            firstMovieRipToLink.Movie.Should().BeSameAs(secondMovieRipToLink.Movie);
+            firstMovieRipToLink.Movie
+            .Should()
+            .BeSameAs(secondMovieRipToLink.Movie, because: "only one Movie object should be created for both movie rips");
         }
 
         [Fact]
