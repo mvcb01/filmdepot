@@ -82,12 +82,8 @@ namespace FilmCRUD.Helpers
                 result = searchResultFiltered.First();
             }
 
-            return new Movie() {
-                Title = result.Title,
-                ExternalId = result.ExternalId,
-                OriginalTitle = result.OriginalTitle,
-                ReleaseDate = result.ReleaseDate
-                };
+            // explicit conversion is defined
+            return (Movie)result;
         }
 
     }
