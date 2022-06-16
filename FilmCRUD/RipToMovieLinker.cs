@@ -196,42 +196,6 @@ namespace FilmCRUD
 
         }
 
-        public async Task LinkFromManualExternalIdsAsync_()
-        {
-            Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
-
-            IEnumerable<MovieRip> ripsToLinkManually = _unitOfWork.MovieRips
-                .Find(m => manualExternalIds.Keys.Contains(m.FileName));
-
-            // Movie objects in repo that have one of the manually configured external ids
-            IEnumerable<Movie> existingMoviesWithManualExternalIds = _unitOfWork.Movies
-                .Find(m => manualExternalIds.Values.Contains(m.ExternalId));
-
-            // we only need to manually link those MovieRip objects not yet linked or where the linked Movie.ExternalId does
-            // not match the one given manually
-            IEnumerable<MovieRip> ripsToLinkManuallyFiltered = ripsToLinkManually
-                .Where(m => m.Movie == null || m.Movie.ExternalId != manualExternalIds[m.FileName]);
-
-            List<Task> onlineInfoTasks = new();
-            foreach (var movieRip in ripsToLinkManuallyFiltered)
-            {
-                int externalId = manualExternalIds[movieRip.FileName];
-                Movie existingMovie = existingMoviesWithManualExternalIds.Where(m => m.ExternalId == externalId).FirstOrDefault();
-                if (existingMovie == null)
-                {
-                    Task onlineinfoTask = GetMovieInfoOnlineAndLinkAsync(movieRip, externalId);
-                    onlineInfoTasks.Add(onlineinfoTask);
-                }
-                else
-                {
-                    movieRip.Movie = existingMovie;
-                }
-            }
-
-            await Task.WhenAll(onlineInfoTasks);
-            _unitOfWork.Complete();
-        }
-
         public IEnumerable<string> GetAllUnlinkedMovieRips()
         {
             return this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
@@ -256,12 +220,6 @@ namespace FilmCRUD
                 ["valid"] = manualExternalIds.Where(kvp => validIdKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
                 ["invalid"] = manualExternalIds.Where(kvp => !validIdKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
             };
-        }
-
-        private async Task GetMovieInfoOnlineAndLinkAsync(MovieRip movieRip, int externalId)
-        {
-            MovieSearchResult movieSearchResult = await _movieAPIClient.GetMovieInfoAsync(externalId);
-            movieRip.Movie = (Movie)movieSearchResult;
         }
 
         private async Task LinkRipToOnlineSearchAsync(MovieRip movieRip)
