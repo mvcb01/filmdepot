@@ -220,9 +220,9 @@ namespace FilmCRUD
         private async Task LinkRipToOnlineSearchAsync(MovieRip movieRip)
         {
             movieRip.Movie = await this.MovieFinder.FindMovieOnlineAsync(
-                    movieRip.ParsedTitle,
-                    movieRip.ParsedReleaseDate
-                    );
+                movieRip.ParsedTitle,
+                movieRip.ParsedReleaseDate
+                );
         }
 
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
