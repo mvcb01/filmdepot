@@ -37,8 +37,8 @@ namespace DepotTests.CRUDTests
 
         public RipToMovieLinkerTests()
         {
-            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>();
-            this._movieRepositoryMock = new Mock<IMovieRepository>();
+            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>(MockBehavior.Strict);
+            this._movieRepositoryMock = new Mock<IMovieRepository>(MockBehavior.Strict);
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
             this._unitOfWorkMock
@@ -378,6 +378,7 @@ namespace DepotTests.CRUDTests
             var secondMovieRipToLink = new MovieRip() {
                 FileName = "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]"
             };
+            MovieRip[] allMovieRipsInRepo = { firstMovieRipToLink, secondMovieRipToLink };
             var manualExternalIds = new Dictionary<string, int>() {
                 { "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous", manualExternalId },
                 { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", manualExternalId }
@@ -390,8 +391,11 @@ namespace DepotTests.CRUDTests
                 };
 
             this._movieRipRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
-                .Returns(new MovieRip[] { firstMovieRipToLink, secondMovieRipToLink });
+                .Setup(m => m.GetAll())
+                .Returns(allMovieRipsInRepo);
+            this._movieRipRepositoryMock
+                .Setup(m => m.FindByFileName(It.IsAny<string>()))
+                .Returns((string fileName) => allMovieRipsInRepo.Where(m => m.FileName == fileName).FirstOrDefault());
             this._movieAPIClientMock
                 .Setup(m => m.GetMovieInfoAsync(manualExternalId))
                 .ReturnsAsync(movieInfo);
@@ -399,8 +403,8 @@ namespace DepotTests.CRUDTests
                 .Setup(a => a.GetManualExternalIds())
                 .Returns(manualExternalIds);
             this._movieRepositoryMock
-                .Setup(m => m.Find(It.IsAny<Expression<Func<Movie, bool>>>()))
-                .Returns(Enumerable.Empty<Movie>());
+                .Setup(m => m.FindByExternalId(It.IsAny<int>()))
+                .Returns((Movie)null);
 
 
             // act

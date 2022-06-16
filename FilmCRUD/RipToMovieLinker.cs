@@ -151,6 +151,53 @@ namespace FilmCRUD
 
         public async Task LinkFromManualExternalIdsAsync()
         {
+            Dictionary<string, int> allManualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
+
+            // filtering the manual configuration to consider only movierips whose filename exists in the repo
+            IEnumerable<string> ripFileNamesInRepo = _unitOfWork.MovieRips.GetAll().GetFileNames();
+            Dictionary<string, int> manualExternalIds = allManualExternalIds
+                .Where(kvp => ripFileNamesInRepo.Contains(kvp.Key))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            // we'll only use the api client for those external ids that do not have a matching external id
+            // in the movie repo
+            IEnumerable<int> externalIdsForApiCalls = manualExternalIds
+                .Select(kvp => kvp.Value)
+                .Distinct()
+                .Where(_id => _unitOfWork.Movies.FindByExternalId(_id) == null);
+
+            var onlineInfoTasks = new List<Task<MovieSearchResult>>();
+            foreach (var externalId in externalIdsForApiCalls)
+            {
+                onlineInfoTasks.Add(this._movieAPIClient.GetMovieInfoAsync(externalId));
+            }
+            await Task.WhenAll(onlineInfoTasks);
+
+            // explicit casting is defined in class MovieSearchResult; also, we call ToList to
+            // force an eager operation; this way it is guaranteed that two MovieRips will
+            // map to the same Movie object if they have the same manual external id;
+            IEnumerable<Movie> newMovies = onlineInfoTasks.Select(t => (Movie)t.Result).ToList();
+
+            foreach (var item in manualExternalIds)
+            {
+                MovieRip ripToLink = _unitOfWork.MovieRips.FindByFileName(item.Key);
+
+                if (externalIdsForApiCalls.Contains(item.Value))
+                {
+                    ripToLink.Movie = newMovies.Where(m => m.ExternalId == item.Value).First();
+                }
+                else
+                {
+                    ripToLink.Movie = _unitOfWork.Movies.FindByExternalId(item.Value);
+                }
+            }
+
+            _unitOfWork.Complete();
+
+        }
+
+        public async Task LinkFromManualExternalIdsAsync_()
+        {
             Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
             IEnumerable<MovieRip> ripsToLinkManually = _unitOfWork.MovieRips
