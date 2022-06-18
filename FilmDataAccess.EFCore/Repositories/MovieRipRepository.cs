@@ -11,6 +11,11 @@ namespace FilmDataAccess.EFCore.Repositories
         {
         }
 
+        public MovieRip FindByFileName(string fileName)
+        {
+            return _context.MovieRips.Where(mr => mr.FileName == fileName).FirstOrDefault();
+        }
+
         public IEnumerable<MovieRip> GetAllRipsForMovie(Movie movie)
         {
             return _context.MovieRips.Where(mr => mr.Movie == movie);

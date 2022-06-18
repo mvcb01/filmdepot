@@ -9,5 +9,7 @@ namespace FilmDomain.Interfaces
 
         IEnumerable<MovieRip> GetAllRipsForMovie(Movie movie);
 
+        MovieRip FindByFileName(string fileName);
+
     }
 }
