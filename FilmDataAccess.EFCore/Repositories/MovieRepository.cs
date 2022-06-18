@@ -13,6 +13,11 @@ namespace FilmDataAccess.EFCore.Repositories
         {
         }
 
+        public Movie FindByExternalId(int externalId)
+        {
+            return _context.Movies.Where(m => m.ExternalId == externalId).FirstOrDefault();
+        }
+
         public IEnumerable<Movie> GetMoviesByGenre(params Genre[] genres)
         {
             return _context.Movies.Where(m => m.Genres.Intersect(genres).Count() > 0);

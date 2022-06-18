@@ -9,5 +9,7 @@ namespace FilmDomain.Interfaces
 
         IEnumerable<Movie> SearchMoviesWithTitle(string title);
 
+        Movie FindByExternalId(int externalId);
+
     }
 }
