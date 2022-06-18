@@ -284,6 +284,51 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
+        public async Task SearchAndLinkAsync_WithoutMatchesInRepo_WithSameOnlineMatchForSeveralRips_ShouldLinkToSameMovieObject()
+        {
+            // arrange
+            int manualExternalId = 101;
+            var firstMovieRipToLink = new MovieRip() {
+                FileName = "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous",
+                ParsedTitle = "Blue Velvet",
+                ParsedReleaseDate = "1986"
+            };
+            var secondMovieRipToLink = new MovieRip() {
+                FileName = "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]",
+                ParsedTitle = "Blue Velvet",
+                ParsedReleaseDate = "1986"
+            };
+            MovieRip[] allMovieRipsInRepo = { firstMovieRipToLink, secondMovieRipToLink };
+            var manualExternalIds = new Dictionary<string, int>() {
+                { "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous", manualExternalId },
+                { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", manualExternalId }
+            };
+            var movieInfo = new MovieSearchResult() {
+                ExternalId = manualExternalId,
+                Title = "Blue Velvet",
+                OriginalTitle = "Blue Velvet",
+                ReleaseDate = 1986
+                };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find((It.IsAny<Expression<Func<MovieRip, bool>>>())))
+                .Returns(allMovieRipsInRepo);
+            this._movieAPIClientMock
+                .Setup(cl => cl.SearchMovieAsync(It.Is<string>(s => s.Contains("velvet", StringComparison.InvariantCultureIgnoreCase))))
+                .ReturnsAsync(new MovieSearchResult[] { movieInfo });
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
+                .Returns(Enumerable.Empty<Movie>());
+
+            // act
+            await this._ripToMovieLinker.SearchAndLinkAsync();
+
+            // assert
+            firstMovieRipToLink.Movie
+                .Should()
+                .BeSameAs(secondMovieRipToLink.Movie, because: "only one Movie object should be created for both movie rips");
+        }
+
+        [Fact]
         public async Task LinkFromManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiClient()
         {
             // arrange
