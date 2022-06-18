@@ -118,7 +118,6 @@ namespace FilmCRUD
                     if (movie != null)
                     {
                         movieRip.Movie = movie;
-
                     }
                     else
                     {
@@ -158,6 +157,7 @@ namespace FilmCRUD
             // different searches may have returned the "same" Movie, we choose one Movie entity for each
             // distinct externalid
             var newMovieEntities = newMovieEntitiesTasks.Values
+                .Where(t => t.IsCompletedSuccessfully)
                 .Select(t => t.Result)
                 .GroupBy(m => m.ExternalId)
                 .Select(group => group.First());
