@@ -100,11 +100,16 @@ namespace FilmCRUD
 
         public async Task SearchAndLinkAsync()
         {
-
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
 
-            List<string> errors = new();
-            List<Task> onlineSearches = new();
+            if (!ripsToLink.Any())
+            {
+                return;
+            }
+
+            var ripsForOnlineSearch = new List<MovieRip>();
+            var errors = new List<string>();
+
             foreach (var movieRip in ripsToLink)
             {
                 try
@@ -117,12 +122,10 @@ namespace FilmCRUD
                     }
                     else
                     {
-                        Task onlineSearch = LinkRipToOnlineSearchAsync(movieRip);
-                        onlineSearches.Add(onlineSearch);
+                        ripsForOnlineSearch.Add(movieRip);
                     }
-
                 }
-                // excepções lançadas no método FindRelatedMovieEntityInRepo
+                // exceptions thrown in FindRelatedMovieEntityInRepo
                 catch (MultipleMovieMatchesError ex)
                 {
                     var msg = $"MultipleMovieMatchesError: {movieRip.FileName}: \n{ex.Message}";
@@ -130,18 +133,38 @@ namespace FilmCRUD
                 }
             }
 
+            // online search task associated with each movieRip.FileName
+            var newMovieEntitiesTasks = new Dictionary<string, Task<Movie>>();
+            foreach (var movieRip in ripsForOnlineSearch)
+            {
+                Task<Movie> onlineSearchTask = this.MovieFinder
+                    .FindMovieOnlineAsync(movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+                newMovieEntitiesTasks.Add(movieRip.FileName, onlineSearchTask);
+            }
+
             try
             {
-                await Task.WhenAll(onlineSearches);
+                await Task.WhenAll(newMovieEntitiesTasks.Values);
             }
-            // excepções lançadas no método MovieFinder.FindMovieOnlineAsync
-            catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError)
-            {}
+            // exceptions thrown in MovieFinder.FindMovieOnlineAsync
+            catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError) {}
 
-            foreach (Task task in onlineSearches.Where(t => !t.IsCompletedSuccessfully))
+            foreach (Task task in newMovieEntitiesTasks.Values.Where(t => !t.IsCompletedSuccessfully))
             {
                 Exception innerExc = task.Exception.InnerException;
                 errors.Add($"ex message: {innerExc.GetType().Name}: {innerExc.Message}");
+            }
+
+            // different searches may have returned the "same" Movie, we choose one Movie entity for each
+            // distinct externalid
+            var newMovieEntities = newMovieEntitiesTasks.Values
+                .Select(t => t.Result)
+                .GroupBy(m => m.ExternalId)
+                .Select(group => group.First());
+            foreach (var movieRip in ripsForOnlineSearch)
+            {
+                int linkedMovieExternalId = newMovieEntitiesTasks[movieRip.FileName].Result.ExternalId;
+                movieRip.Movie = newMovieEntities.Where(m => m.ExternalId == linkedMovieExternalId).First();
             }
 
             PersistErrorInfo("linking_errors.txt", errors);
@@ -222,13 +245,13 @@ namespace FilmCRUD
             };
         }
 
-        private async Task LinkRipToOnlineSearchAsync(MovieRip movieRip)
-        {
-            movieRip.Movie = await this.MovieFinder.FindMovieOnlineAsync(
-                movieRip.ParsedTitle,
-                movieRip.ParsedReleaseDate
-                );
-        }
+        // private async Task LinkRipToOnlineSearchAsync(MovieRip movieRip)
+        // {
+        //     movieRip.Movie = await this.MovieFinder.FindMovieOnlineAsync(
+        //         movieRip.ParsedTitle,
+        //         movieRip.ParsedReleaseDate
+        //         );
+        // }
 
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
         {

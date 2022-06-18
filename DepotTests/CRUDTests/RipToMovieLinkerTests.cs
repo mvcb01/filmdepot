@@ -49,7 +49,7 @@ namespace DepotTests.CRUDTests
                 .Returns(this._movieRepositoryMock.Object);
 
             this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>();
-            this._movieAPIClientMock = new Mock<IMovieAPIClient>();
+            this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
             this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
 
             this._ripToMovieLinker = new RipToMovieLinker(
@@ -241,13 +241,21 @@ namespace DepotTests.CRUDTests
                 ParsedTitle = "khrustalyov my car"
             };
             MovieRip[] ripsToLink = { movieRip };
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "khrustalyov my car" }
+            };
             this._movieRipRepositoryMock
                 .Setup(m => m.Find((It.IsAny<Expression<Func<MovieRip, bool>>>())))
                 .Returns(ripsToLink);
             this._movieRepositoryMock
                 .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
                 .Returns(Enumerable.Empty<Movie>());
-            this._appSettingsManagerMock.Setup(a => a.GetWarehouseContentsTextFilesDirectory()).Returns("");
+            this._appSettingsManagerMock
+                .Setup(a => a.GetWarehouseContentsTextFilesDirectory())
+                .Returns("");
+            this._movieAPIClientMock
+                .Setup(cl => cl.SearchMovieAsync(It.IsAny<string>()))
+                .ReturnsAsync(searchResults);
 
             // act
             await this._ripToMovieLinker.SearchAndLinkAsync();
