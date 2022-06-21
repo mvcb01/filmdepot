@@ -35,6 +35,5 @@ namespace FilmDataAccess.EFCore
             modelBuilder.ApplyConfiguration<MovieWarehouseVisit>(new MovieWarehouseVisitEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration<Actor>(new ActorEntityTypeConfiguration());
         }
-
     }
 }
