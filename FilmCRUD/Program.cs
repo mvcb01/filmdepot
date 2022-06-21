@@ -55,7 +55,7 @@ namespace FilmCRUD
 
             services.AddSingleton<IFileSystemIOWrapper, FileSystemIOWrapper>();
 
-            services.AddSingleton<IAppSettingsManager, AppSettingsManager>(_ => new AppSettingsManager());
+            services.AddSingleton<IAppSettingsManager, AppSettingsManager>();
 
             AppSettingsManager _appSettingsManager = new();
             string apiKey = _appSettingsManager.GetApiKey("TheMovieDb");
