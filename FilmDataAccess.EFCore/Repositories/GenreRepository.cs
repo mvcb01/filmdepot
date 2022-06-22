@@ -11,6 +11,11 @@ namespace FilmDataAccess.EFCore.Repositories
         {
         }
 
+        public Genre FindByExternalId(int externalId)
+        {
+            return _context.Genres.Where(m => m.ExternalId == externalId).FirstOrDefault();
+        }
+
         public Genre GetGenreFromName(string name)
         {
             return Find(g => g.Name.Contains(name)).FirstOrDefault();
