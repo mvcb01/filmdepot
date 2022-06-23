@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients;
@@ -15,17 +16,17 @@ namespace FilmCRUD
 
         public override IEnumerable<Genre> GetExistingEntitiesInRepo()
         {
-            throw new System.NotImplementedException();
+            return this._unitOfWork.Genres.GetAll();
         }
 
-        public override Task<IEnumerable<MovieGenreResult>> GetMovieDetailsFromApiAsync(int externalId)
+        public override async Task<IEnumerable<MovieGenreResult>> GetMovieDetailsFromApiAsync(int externalId)
         {
-            throw new System.NotImplementedException();
+            return await this._movieAPIClient.GetMovieGenresAsync(externalId);
         }
 
         public override IEnumerable<Movie> GetMoviesWithoutDetails()
         {
-            throw new System.NotImplementedException();
+            return this._unitOfWork.Movies.Find(m => m.Genres == null || !m.Genres.Any());
         }
     }
 }

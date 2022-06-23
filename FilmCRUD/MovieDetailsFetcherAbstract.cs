@@ -11,9 +11,9 @@ namespace FilmCRUD
         where TEntity : IExternalEntity
         where TAPIResult : IExternalEntity
     {
-        private IUnitOfWork _unitOfWork { get; init; }
+        protected IUnitOfWork _unitOfWork { get; init; }
 
-        private IMovieAPIClient _movieAPIClient { get; init; }
+        protected IMovieAPIClient _movieAPIClient { get; init; }
 
         public MovieDetailsFetcherAbstract(IUnitOfWork unitOfWork, IMovieAPIClient movieAPIClient)
         {
