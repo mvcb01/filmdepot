@@ -1,8 +1,9 @@
 using FilmDomain.Entities;
+using FilmDomain.Interfaces;
 
 namespace MovieAPIClients
 {
-    public class MovieGenreResult
+    public class MovieGenreResult : IExternalEntity
     {
         public int ExternalId { get; set; }
 

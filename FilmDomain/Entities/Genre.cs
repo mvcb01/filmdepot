@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using FilmDomain.Interfaces;
 
 namespace FilmDomain.Entities
 {
-    public class Genre
+    public class Genre : IExternalEntity
     {
         public int Id { get; set; }
 
