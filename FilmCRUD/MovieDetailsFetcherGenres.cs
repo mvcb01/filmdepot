@@ -26,7 +26,7 @@ namespace FilmCRUD
 
         public override IEnumerable<Movie> GetMoviesWithoutDetails()
         {
-            return this._unitOfWork.Movies.Find(m => m.Genres == null || !m.Genres.Any());
+            return this._unitOfWork.Movies.Find(m => !m.Genres.Any());
         }
     }
 }
