@@ -28,8 +28,9 @@ namespace FilmCRUD
         // should be asynchronous and call one the methods of IMovieAPIClient
         public abstract Task<IEnumerable<TAPIResult>> GetMovieDetailsFromApiAsync(int externalId);
 
-        public void MyMethod(int arg)
+        public void PopulateDetails()
         {
+
         }
 
     }
