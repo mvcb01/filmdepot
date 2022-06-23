@@ -19,6 +19,8 @@ namespace DepotTests.CRUDTests
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
+        private readonly MovieDetailsFetcherGenres _movieDetailsFetcherGenres;
+
         public MovieDetailsFetcherGenresTests()
         {
             this._movieRepositoryMock = new Mock<IMovieRepository>(MockBehavior.Strict);
@@ -33,12 +35,17 @@ namespace DepotTests.CRUDTests
                 .Returns(this._genreRepositoryMock.Object);
 
             this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
+
+            this._movieDetailsFetcherGenres = new MovieDetailsFetcherGenres(
+                this._unitOfWorkMock.Object,
+                this._movieAPIClientMock.Object);
         }
 
         [Fact]
         public void TestName()
         {
             // arrange
+
 
             // act
 
