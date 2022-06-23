@@ -11,5 +11,7 @@ namespace FilmDomain.Interfaces
 
         Movie FindByExternalId(int externalId);
 
+        IEnumerable<Movie> GetMoviesWithoutGenres();
+
     }
 }
