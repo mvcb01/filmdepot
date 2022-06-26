@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients;
