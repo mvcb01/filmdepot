@@ -30,11 +30,11 @@ namespace FilmCRUD
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
             IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
             IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
-            IMovieAPIClient movieApiClient = serviceProvider.GetRequiredService<IMovieAPIClient>();
+            IMovieAPIClient movieAPIClient = serviceProvider.GetRequiredService<IMovieAPIClient>();
 
             VisitCRUDManager visitCrudManager = new(unitOfWork, fileSystemIOWrapper, appSettingsManager);
             ScanManager scanManager = new(unitOfWork);
-            RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieApiClient);
+            RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
 
             ParserResult<object> parsed = Parser
                 .Default

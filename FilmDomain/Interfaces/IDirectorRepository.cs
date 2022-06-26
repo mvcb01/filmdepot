@@ -6,5 +6,7 @@ namespace FilmDomain.Interfaces
     public interface IDirectorRepository : IEntityRepository<Director>
     {
         IEnumerable<Director> GetMostRippedDirectors(int topN);
+
+        Director FindByExternalId(int externalId);
     }
 }

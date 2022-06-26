@@ -7,5 +7,7 @@ namespace FilmDomain.Interfaces
     {
         IEnumerable<Actor> GetActorsFromName(string name);
 
+        Actor FindByExternalId(int externalId);
+
     }
 }

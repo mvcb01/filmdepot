@@ -11,6 +11,11 @@ namespace FilmDataAccess.EFCore.Repositories
         {
         }
 
+        public Director FindByExternalId(int externalId)
+        {
+            return _context.Directors.Where(m => m.ExternalId == externalId).FirstOrDefault();
+        }
+
         public IEnumerable<Director> GetMostRippedDirectors(int topN)
         {
             return _context.Directors.OrderByDescending(d => d.Movies.Count()).Take(topN);
