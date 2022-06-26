@@ -28,10 +28,10 @@ namespace FilmCRUD
             return this._unitOfWork.Movies.GetMoviesWithoutGenres();
         }
 
-        public override Genre CastApiResultToDetailEntity(MovieGenreResult apiresult)
+        public override Genre CastApiResultToDetailEntity(MovieGenreResult apiResult)
         {
             // explicit cast is defined in MovieGenreResult
-            return (Genre)apiresult;
+            return (Genre)apiResult;
         }
 
         public override void AddDetailsToMovieEntity(Movie movie, IEnumerable<Genre> details)
