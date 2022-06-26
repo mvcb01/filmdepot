@@ -61,10 +61,12 @@ namespace FilmCRUD
             IEnumerable<TDetailEntity> existingDetailEntities = GetExistingDetailEntitiesInRepo();
             IEnumerable<int> existingDetailEntitiesExtIds = existingDetailEntities.Select(d => d.ExternalId);
 
-            // detail entities that are still not part of its repo
+            // new detail entities: these are still not part of its repo;
+            // the ToList method is called to force such entities to be created exactly once;
             IEnumerable<TDetailEntity> newDetailEntities = distinctDetailResults
                 .Where(res => !existingDetailEntitiesExtIds.Contains(res.ExternalId))
-                .Select(res => CastApiResultToDetailEntity(res));
+                .Select(res => CastApiResultToDetailEntity(res))
+                .ToList();
 
             // gets the new details for each movie
             foreach (Movie movie in moviesWithoutDetails)
