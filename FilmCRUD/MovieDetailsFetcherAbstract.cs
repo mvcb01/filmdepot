@@ -49,7 +49,7 @@ namespace FilmCRUD
                 detailTasks.Add(movie.ExternalId, GetMovieDetailsFromApiAsync(movie.ExternalId));
             }
 
-            await Task.WhenAll();
+            await Task.WhenAll(detailTasks.Values);
 
             // gets the IEnumerable<TAPIResult> of each task, flattens to a single IEnumerable<TAPIResult> and
             // gets the distinct results using the ExternalId property
