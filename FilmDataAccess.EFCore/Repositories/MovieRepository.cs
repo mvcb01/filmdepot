@@ -23,6 +23,11 @@ namespace FilmDataAccess.EFCore.Repositories
             return _context.Movies.Where(m => m.Genres.Intersect(genres).Count() > 0);
         }
 
+        public IEnumerable<Movie> GetMoviesWithoutActors()
+        {
+            return _context.Movies.Where(m => !m.Actors.Any());
+        }
+
         public IEnumerable<Movie> GetMoviesWithoutGenres()
         {
             return _context.Movies.Where(m => !m.Genres.Any());
