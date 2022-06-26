@@ -4,6 +4,7 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 using FilmCRUD;
 using FilmDomain.Entities;
@@ -65,8 +66,11 @@ namespace DepotTests.CRUDTests
             // arrange
             int externalId = 101;
             var movieWithoutGenres = new Movie() {
-                Title = "the fly", ReleaseDate = 1986, ExternalId = externalId , Genres = new Genre[] { }
+                Title = "the fly", ReleaseDate = 1986, ExternalId = externalId , Genres = new List<Genre>()
             };
+            this._genreRepositoryMock
+                .Setup(g => g.GetAll())
+                .Returns(new List<Genre>());
             this._movieRepositoryMock
                 .Setup(m => m.GetMoviesWithoutGenres())
                 .Returns(new Movie[] { movieWithoutGenres });
@@ -91,14 +95,14 @@ namespace DepotTests.CRUDTests
             int firstExternalId = 101;
             int secondExternalId = 102;
             var firstMovieWithoutGenres = new Movie() {
-                Title = "fish tank", ReleaseDate = 2009, ExternalId = firstExternalId , Genres = new Genre[] { }
+                Title = "fish tank", ReleaseDate = 2009, ExternalId = firstExternalId , Genres = new List<Genre>()
             };
             var secondMovieWithoutGenres = new Movie() {
-                Title = "gummo", ReleaseDate = 1997, ExternalId = secondExternalId, Genres = new Genre[] { }
+                Title = "gummo", ReleaseDate = 1997, ExternalId = secondExternalId, Genres = new List<Genre>()
             };
             this._genreRepositoryMock
                 .Setup(m => m.GetAll())
-                .Returns(new Genre[] { dramaGenre });
+                .Returns(new List<Genre>() { dramaGenre });
             this._movieRepositoryMock
                 .Setup(m => m.GetMoviesWithoutGenres())
                 .Returns(new Movie[] { firstMovieWithoutGenres, secondMovieWithoutGenres });
@@ -130,10 +134,10 @@ namespace DepotTests.CRUDTests
             int firstExternalId = 101;
             int secondExternalId = 102;
             var firstMovieWithoutGenres = new Movie() {
-                Title = "the fly", ReleaseDate = 1986, ExternalId = firstExternalId , Genres = new Genre[] { }
+                Title = "the fly", ReleaseDate = 1986, ExternalId = firstExternalId , Genres = new List<Genre>()
             };
             var secondMovieWithoutGenres = new Movie() {
-                Title = "gummo", ReleaseDate = 1997, ExternalId = secondExternalId, Genres = new Genre[] { }
+                Title = "gummo", ReleaseDate = 1997, ExternalId = secondExternalId, Genres = new List<Genre>()
             };
 
             this._genreRepositoryMock
@@ -155,8 +159,8 @@ namespace DepotTests.CRUDTests
             // assert
             using (new AssertionScope())
             {
-                firstMovieWithoutGenres.Genres.Should().BeEquivalentTo(new Genre[] { horrorGenre, dramaGenre });
-                secondMovieWithoutGenres.Genres.Should().BeEquivalentTo(new Genre[] { dramaGenre });
+                firstMovieWithoutGenres.Genres.Should().BeEquivalentTo(new List<Genre>() { horrorGenre, dramaGenre });
+                secondMovieWithoutGenres.Genres.Should().BeEquivalentTo(new List<Genre>() { dramaGenre });
             }
         }
 

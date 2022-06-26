@@ -13,7 +13,7 @@ namespace FilmCRUD
         {
         }
 
-        public override IEnumerable<Genre> GetExistingEntitiesInRepo()
+        public override IEnumerable<Genre> GetExistingDetailEntitiesInRepo()
         {
             return this._unitOfWork.Genres.GetAll();
         }
@@ -27,5 +27,21 @@ namespace FilmCRUD
         {
             return this._unitOfWork.Movies.GetMoviesWithoutGenres();
         }
+
+        public override Genre CastApiResultToDetailEntity(MovieGenreResult apiresult)
+        {
+            // explicit cast is defined in MovieGenreResult
+            return (Genre)apiresult;
+        }
+
+        public override void AddDetailsToMovieEntity(Movie movie, IEnumerable<Genre> details)
+        {
+            // ICollection does not necessarily have the AddRange method
+            foreach (var genre in details)
+            {
+                movie.Genres.Add(genre);
+            }
+        }
+
     }
 }
