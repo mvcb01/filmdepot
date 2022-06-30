@@ -39,7 +39,7 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Directors)
                 .Returns(this._directorRepositoryMock.Object);
 
-            this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
+            this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherDirectors = new MovieDetailsFetcherDirectors(
                 this._unitOfWorkMock.Object,
