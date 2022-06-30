@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients.Interfaces;
 
@@ -19,6 +23,11 @@ namespace FilmCRUD
         {
             this._unitOfWork = unitOfWork;
             this._movieAPIClient = movieAPIClient;
+        }
+
+        public async Task GetKeywordsForMovies()
+        {
+            IEnumerable<Movie> moviesWithoutKeywords = this._unitOfWork.Movies.GetMoviesWithoutKeywords();
         }
     }
 
