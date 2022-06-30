@@ -25,9 +25,10 @@ namespace FilmCRUD
             this._movieAPIClient = movieAPIClient;
         }
 
-        public async Task GetKeywordsForMovies()
+        public async Task PopulateMovieKeywords()
         {
             IEnumerable<Movie> moviesWithoutKeywords = this._unitOfWork.Movies.GetMoviesWithoutKeywords();
+            {}
         }
     }
 

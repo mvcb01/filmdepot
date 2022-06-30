@@ -37,20 +37,39 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void GetKeywordsForMovies_WithMoviesMissingKeywords_ShouldNotCallApiClient()
+        public async void GetKeywordsForMovies_WithoutMoviesMissingKeywords_ShouldNotCallApiClient()
         {
             // arrange
-            // var firstMovie = new Movie() { Title = "total recall", ReleaseDate = 1989 };
-            // var secondMovie = new Movie() { Title = "get carter", ReleaseDate = 1971 };
             this._movieRepositoryMock
                 .Setup(m => m.GetMoviesWithoutKeywords())
                 .Returns(Enumerable.Empty<Movie>());
 
             // act
-            await this._movieDetailsFetcherSimple.GetKeywordsForMovies();
+            await this._movieDetailsFetcherSimple.PopulateMovieKeywords();
 
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieKeywordsAsync(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async void GetKeywordsForMovies_WithMoviesMissingKeywords_ShouldCallApiClient()
+        {
+            // arrange
+            int firstExternalId = 101;
+            int secondExternalId = 102;
+            var firstMovie = new Movie() { Title = "total recall", ReleaseDate = 1989, ExternalId = firstExternalId };
+            var secondMovie = new Movie() { Title = "get carter", ReleaseDate = 1971, ExternalId = secondExternalId };
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutKeywords())
+                .Returns(new Movie[] { firstMovie, secondMovie });
+
+            // act
+            await this._movieDetailsFetcherSimple.PopulateMovieKeywords();
+
+            // assert
+            this._movieAPIClientMock.Verify(
+                m => m.GetMovieKeywordsAsync(It.Is<int>( i => i == firstExternalId | i == secondExternalId)),
+                Times.Exactly(2));
         }
 
 
