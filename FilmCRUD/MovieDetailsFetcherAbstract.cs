@@ -7,7 +7,7 @@ using MovieAPIClients.Interfaces;
 
 namespace FilmCRUD
 {
-    // example of a concrete, non-generic implementation would be with TEntity -> Genre and TAPIResult -> MovieGenreResult
+    // example of a concrete, non-generic implementation would be where TEntity is Genre and TAPIResult is MovieGenreResult
     public abstract class MovieDetailsFetcherAbstract<TDetailEntity, TAPIResult>
         where TDetailEntity : IExternalEntity
         where TAPIResult : IExternalEntity
