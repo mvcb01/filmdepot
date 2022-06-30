@@ -38,6 +38,11 @@ namespace FilmDataAccess.EFCore.Repositories
             return _context.Movies.Where(m => !m.Genres.Any());
         }
 
+        public IEnumerable<Movie> GetMoviesWithoutKeywords()
+        {
+            return _context.Movies.Where(m => !m.Keywords.Any());
+        }
+
         public IEnumerable<Movie> SearchMoviesWithTitle(string title)
         {
             IEnumerable<string> titleTokens = title.GetStringTokensWithoutPunctuation();
