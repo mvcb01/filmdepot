@@ -3,6 +3,7 @@ using Moq;
 using Xunit;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using System.Threading.Tasks;
 
 using FilmCRUD;
 using FilmDomain.Entities;
@@ -38,7 +39,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void GetKeywordsForMovies_WithoutMoviesMissingKeywords_ShouldNotCallApiClient()
+        public async Task PopulateMovieKeywords_WithoutMoviesMissingKeywords_ShouldNotCallApiClient()
         {
             // arrange
             this._movieRepositoryMock
@@ -53,7 +54,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void GetKeywordsForMovies_WithMoviesMissingKeywords_ShouldCallApiClient()
+        public async Task PopulateMovieKeywords_WithMoviesMissingKeywords_ShouldCallApiClient()
         {
             // arrange
             int firstExternalId = 101;
@@ -74,7 +75,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async void GetKeywordsForMovies_WithMoviesMissingKeywords_ShouldPopulateKeywordsCorrectly()
+        public async Task PopulateMovieKeywords_WithMoviesMissingKeywords_ShouldPopulateKeywordsCorrectly()
         {
             // arrange
             int firstExternalId = 101;
@@ -112,6 +113,79 @@ namespace DepotTests.CRUDTests
             }
         }
 
+        [Fact]
+        public async Task PopulateMovieIMDBIds_WithoutMoviesMissingIMDBIds_ShouldNotCallApiClient()
+        {
+            // arrange
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutImdbId())
+                .Returns(Enumerable.Empty<Movie>());
 
+            // act
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieIMDBIdAsync(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task PopulateMovieIMDBIds_WithMoviesMissingIMDBIds_ShouldCallApiClient()
+        {
+            // arrange
+            int firstExternalId = 101;
+            int secondExternalId = 102;
+            var firstMovie = new Movie() { Title = "total recall", ReleaseDate = 1989, ExternalId = firstExternalId };
+            var secondMovie = new Movie() { Title = "get carter", ReleaseDate = 1971, ExternalId = secondExternalId };
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutImdbId())
+                .Returns(new Movie[] { firstMovie, secondMovie });
+
+            // act
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+
+            // assert
+            this._movieAPIClientMock.Verify(
+                m => m.GetMovieIMDBIdAsync(It.Is<int>(i => i == firstExternalId || i == secondExternalId)),
+                Times.Exactly(2));
+        }
+
+        [Fact]
+        public async Task PopulateMovieIMDBIds_WithMoviesMissingIMDBIds_ShouldPopulateIMDBIdsCorrectly()
+        {
+            // arrange
+            // arrange
+            int firstExternalId = 101;
+            int secondExternalId = 102;
+            var firstMovieWithoutIMDBId = new Movie() {
+                Title = "total recall",
+                ReleaseDate = 1989,
+                ExternalId = firstExternalId };
+            var secondMovieWithoutIMDBId = new Movie() {
+                Title = "get carter",
+                ReleaseDate = 1971,
+                ExternalId = secondExternalId };
+
+            var firstMovieImdbId = "tt001";
+            var secondMovieImdbId = "tt002";
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutKeywords())
+                .Returns(new Movie[] { firstMovieWithoutIMDBId, secondMovieWithoutIMDBId });
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieIMDBIdAsync(firstExternalId))
+                .ReturnsAsync(firstMovieImdbId);
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieIMDBIdAsync(secondExternalId))
+                .ReturnsAsync(secondMovieImdbId);
+
+            // act
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+
+            // assert
+            using (new AssertionScope())
+            {
+                firstMovieWithoutIMDBId.IMDBId.Should().Be(firstMovieImdbId);
+                secondMovieWithoutIMDBId.IMDBId.Should().Be(secondMovieImdbId);
+            }
+        }
     }
 }
