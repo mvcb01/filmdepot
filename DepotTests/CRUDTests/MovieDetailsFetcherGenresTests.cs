@@ -40,7 +40,7 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Genres)
                 .Returns(this._genreRepositoryMock.Object);
 
-            this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
+            this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherGenres = new MovieDetailsFetcherGenres(
                 this._unitOfWorkMock.Object,
