@@ -7,7 +7,13 @@ using MovieAPIClients.Interfaces;
 
 namespace FilmCRUD
 {
-    // example of a concrete, non-generic implementation would be with TEntity -> Genre and TAPIResult -> MovieGenreResult
+    /// <summary>
+    /// Class <c>MovieDetailsFetcherAbstract</c> To populate Movie properties that have their specific return type
+    /// in IMovieAPIClient. Example of a concrete, non-generic implementation would be where TEntity is Genre
+    /// and TAPIResult is MovieGenreResult.
+    /// </summary>
+    /// <typeparam name="TDetailEntity">The Movie property type.</typeparam>
+    /// <typeparam name="TAPIResult">The return type of IMovieAPIClient for the relevant method.</typeparam>
     public abstract class MovieDetailsFetcherAbstract<TDetailEntity, TAPIResult>
         where TDetailEntity : IExternalEntity
         where TAPIResult : IExternalEntity
