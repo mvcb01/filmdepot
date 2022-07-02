@@ -40,7 +40,7 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Movie> GetMoviesWithoutKeywords()
         {
-            return _context.Movies.Where(m => !m.Keywords.Any());
+            return _context.Movies.Where(m => m.Keywords == null);
         }
 
         public IEnumerable<Movie> SearchMoviesWithTitle(string title)
