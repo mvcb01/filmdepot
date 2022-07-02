@@ -30,6 +30,8 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Movie> GetMoviesWithoutDirectors()
         {
+            // var test = _context.Movies.ToList().Where(m => m.Keywords != null && m.Keywords.Contains("horror")).ToList();
+            var test = _context.Movies.Where(m => m.Keywords != null).ToList();
             return _context.Movies.Where(m => !m.Directors.Any());
         }
 

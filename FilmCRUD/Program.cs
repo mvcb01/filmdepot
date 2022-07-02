@@ -36,6 +36,8 @@ namespace FilmCRUD
             ScanManager scanManager = new(unitOfWork);
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
 
+            TestKwds(unitOfWork);
+
             ParserResult<object> parsed = Parser
                 .Default
                 .ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
@@ -47,6 +49,15 @@ namespace FilmCRUD
             parsed.WithNotParsed(HandleParseError);
 
             {}
+        }
+
+        public static void TestKwds(IUnitOfWork unitOfWork)
+        {
+            var x = unitOfWork.Movies.GetMoviesWithoutDirectors();
+
+            // var x = unitOfWork.Movies.GetMoviesWithoutDirectors().First();
+            // x.Keywords = new string[] { "horror", "drama"};
+            // unitOfWork.Complete();
         }
 
         private static void ConfigureServices(IServiceCollection services)
