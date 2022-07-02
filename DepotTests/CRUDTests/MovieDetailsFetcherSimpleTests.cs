@@ -153,7 +153,6 @@ namespace DepotTests.CRUDTests
         public async Task PopulateMovieIMDBIds_WithMoviesMissingIMDBIds_ShouldPopulateIMDBIdsCorrectly()
         {
             // arrange
-            // arrange
             int firstExternalId = 101;
             int secondExternalId = 102;
             var firstMovieWithoutIMDBId = new Movie() {
