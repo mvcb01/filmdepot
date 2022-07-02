@@ -17,7 +17,7 @@ namespace FilmDomain.Entities
 
         public string IMDBId { get; set; }
 
-        public ICollection<string> Keywords { get; set; }
+        public IEnumerable<string> Keywords { get; set; }
 
         public ICollection<Genre> Genres { get; set; }
 

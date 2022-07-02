@@ -19,7 +19,7 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
                 .Property(m => m.Keywords)
                 .HasConversion(
                     k => JsonSerializer.Serialize(k, (JsonSerializerOptions)null),
-                    k => JsonSerializer.Deserialize<ICollection<string>>(k, (JsonSerializerOptions)null));
+                    k => JsonSerializer.Deserialize<IEnumerable<string>>(k, (JsonSerializerOptions)null));
 
             builder.Navigation(m => m.Actors).AutoInclude();
             builder.Navigation(m => m.Directors).AutoInclude();
