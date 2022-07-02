@@ -168,7 +168,7 @@ namespace DepotTests.CRUDTests
             var firstMovieImdbId = "tt001";
             var secondMovieImdbId = "tt002";
             this._movieRepositoryMock
-                .Setup(m => m.GetMoviesWithoutKeywords())
+                .Setup(m => m.GetMoviesWithoutImdbId())
                 .Returns(new Movie[] { firstMovieWithoutIMDBId, secondMovieWithoutIMDBId });
             this._movieAPIClientMock
                 .Setup(m => m.GetMovieIMDBIdAsync(firstExternalId))

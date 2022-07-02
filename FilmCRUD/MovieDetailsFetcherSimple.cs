@@ -42,12 +42,29 @@ namespace FilmCRUD
             {
                 movie.Keywords = keywordTasks[movie.ExternalId].Result.ToList();
             }
+
             this._unitOfWork.Complete();
         }
 
         public async Task PopulateMovieIMDBIds()
         {
+            IEnumerable<Movie> moviesWithoutIMDBId = this._unitOfWork.Movies.GetMoviesWithoutImdbId();
 
+            var IMDBIdTasks = new Dictionary<int, Task<string>>();
+
+            foreach (var movie in moviesWithoutIMDBId)
+            {
+                IMDBIdTasks.Add(movie.ExternalId, this._movieAPIClient.GetMovieIMDBIdAsync(movie.ExternalId));
+            }
+
+            await Task.WhenAll(IMDBIdTasks.Values);
+
+            foreach (var movie in moviesWithoutIMDBId)
+            {
+                movie.IMDBId = IMDBIdTasks[movie.ExternalId].Result;
+            }
+
+            this._unitOfWork.Complete();
         }
     }
 
