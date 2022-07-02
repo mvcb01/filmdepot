@@ -31,6 +31,5 @@ namespace FilmDomain.Entities
         {
             return $"{Title} ({ReleaseDate})";
         }
-
     }
 }
