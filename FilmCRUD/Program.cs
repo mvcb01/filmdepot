@@ -39,11 +39,9 @@ namespace FilmCRUD
             ParserResult<object> parsed = Parser
                 .Default
                 .ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
-            parsed
-                .WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
-                .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager));
+            parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager));
+            parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager));
             await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
-
             parsed.WithNotParsed(HandleParseError);
 
             {}
