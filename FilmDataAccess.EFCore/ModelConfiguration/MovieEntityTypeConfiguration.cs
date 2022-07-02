@@ -25,6 +25,7 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
             builder.Navigation(m => m.Directors).AutoInclude();
             builder.Navigation(m => m.Genres).AutoInclude();
             builder.Navigation(m => m.MovieRips).AutoInclude();
+
         }
     }
 }
