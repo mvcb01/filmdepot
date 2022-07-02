@@ -42,6 +42,7 @@ namespace FilmCRUD
             {
                 movie.Keywords = keywordTasks[movie.ExternalId].Result.ToList();
             }
+            this._unitOfWork.Complete();
         }
     }
 
