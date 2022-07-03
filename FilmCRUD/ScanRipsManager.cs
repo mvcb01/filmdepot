@@ -7,11 +7,11 @@ using System;
 
 namespace FilmCRUD
 {
-    public class ScanManager
+    public class ScanRipsManager
     {
         private IUnitOfWork unitOfWork { get; init; }
 
-        public ScanManager(IUnitOfWork unitOfWork)
+        public ScanRipsManager(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
@@ -86,6 +86,5 @@ namespace FilmCRUD
                 ["removed"] = removedFileNames
             };
         }
-
     }
 }
