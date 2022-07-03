@@ -17,4 +17,5 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "PersistingContents", HelpText = "Sufixo do txt a ler, por exemplo 20210923")]
         public string ContentsDate { get; set; }
     }
+
 }
