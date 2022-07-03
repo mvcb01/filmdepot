@@ -38,12 +38,11 @@ namespace FilmCRUD
 
             ParserResult<object> parsed = Parser
                 .Default
-                .ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions>(args);
-            parsed
-                .WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager))
-                .WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager));
+                .ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions, FetchOptions>(args);
+            parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager));
+            parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager));
             await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
-
+            await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, movieAPIClient));
             parsed.WithNotParsed(HandleParseError);
 
             {}
@@ -83,7 +82,7 @@ namespace FilmCRUD
             }
             else
             {
-                System.Console.WriteLine("Nada a fazer...");
+                System.Console.WriteLine("No action requested...");
             }
         }
 
@@ -134,7 +133,7 @@ namespace FilmCRUD
             }
             else
             {
-                System.Console.WriteLine("Nada a fazer...");
+                System.Console.WriteLine("No action requested...");
             }
             System.Console.WriteLine();
         }
@@ -177,10 +176,49 @@ namespace FilmCRUD
             }
             else
             {
-                System.Console.WriteLine("Nada a fazer...");
+                System.Console.WriteLine("No action requested...");
             }
             System.Console.WriteLine();
 
+        }
+
+        public static async Task HandleFetchOptions(FetchOptions opts, IUnitOfWork unitOfWork, IMovieAPIClient movieAPIClient)
+        {
+            if (opts.Genres)
+            {
+                var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching genres for movies...");
+                await genresFetcher.PopulateDetails();
+            }
+            else if (opts.Actors)
+            {
+                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching actors for movies...");
+                await actorsFetcher.PopulateDetails();
+            }
+            else if (opts.Directors)
+            {
+                var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching directors for movies...");
+                await directorsFetcher.PopulateDetails();
+            }
+            else if (opts.Keywords)
+            {
+                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching keywords for movies...");
+                await keywordsFetcher.PopulateMovieKeywords();
+            }
+            else if (opts.IMDBIds)
+            {
+                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching imdb ids for movies...");
+                await IMDBIdFetcher.PopulateMovieIMDBIds();
+            }
+            else
+            {
+                System.Console.WriteLine("No fetch request...");
+            }
+            System.Console.WriteLine();
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)
