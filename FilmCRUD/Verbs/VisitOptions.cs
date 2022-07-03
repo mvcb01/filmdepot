@@ -13,7 +13,7 @@ namespace FilmCRUD.Verbs
 
         [Option(
             SetName = "PersistingContents",
-            HelpText = "reads the warehouse contents textfile with the provided date and persists in repo")]
+            HelpText = "read the warehouse contents textfile with the provided date and persist in repo")]
         public string PersistContents { get; set; }
     }
 

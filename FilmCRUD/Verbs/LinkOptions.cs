@@ -16,7 +16,7 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "GetUnlinkedMovieRips", HelpText = "get all movierips not linked to a movie")]
         public bool GetUnlinkedRips { get; set; }
 
-        [Option(SetName = "ValidateManualExternalIds", HelpText = "validates the manually configured external ids")]
+        [Option(SetName = "ValidateManualExternalIds", HelpText = "validate the manually configured external ids")]
         public bool ValidateManualExtIds { get; set; }
 
     }

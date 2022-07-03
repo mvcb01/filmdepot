@@ -8,7 +8,7 @@ namespace FilmCRUD.Verbs
     [Verb("scanrips", HelpText = "info from existing movie rips")]
     public class ScanRipsOptions
     {
-        [Option(SetName = "CountRipsByReleaseDate", HelpText = "rip count by release date for latest visit")]
+        [Option(SetName = "CountRipsByReleaseDate", HelpText = "rip count by parsed release date for latest visit")]
         public bool CountByReleaseDate { get; set; }
 
         [Option(SetName = "GetRipsByReleaseDate", HelpText = "get all rips from last visit with releasedate YYYYMMDD")]
