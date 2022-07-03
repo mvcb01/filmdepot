@@ -5,7 +5,7 @@ namespace FilmCRUD.Verbs
     // Exemplos:
     //  dotnet run -- scan --countbyreleasedate
     //  dotnet run -- scan --withreleasedate 2011
-    [Verb("scan", HelpText = "Informação dos rips existentes")]
+    [Verb("scanrips", HelpText = "Informação dos rips existentes")]
     public class ScanRipsOptions
     {
         [Option(SetName = "CountRipsByReleaseDate", HelpText = "Contagem por release date")]
