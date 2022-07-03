@@ -18,7 +18,7 @@ namespace DepotTests.CRUDTests
         private readonly  Mock<IMovieWarehouseVisitRepository> _movieWarehouseVisitRepositoryMock;
         private readonly  Mock<IUnitOfWork> _unitOfWorkMock;
 
-        private readonly ScanManager _scanManager;
+        private readonly ScanRipsManager _scanRipsManager;
         public ScanManagerTests()
         {
             this._movieRipRepositoryMock = new Mock<IMovieRipRepository>();
@@ -33,7 +33,7 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.MovieRips)
                 .Returns(this._movieRipRepositoryMock.Object);
 
-            this._scanManager = new ScanManager(this._unitOfWorkMock.Object);
+            this._scanRipsManager = new ScanRipsManager(this._unitOfWorkMock.Object);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace DepotTests.CRUDTests
 
 
             // act
-            var countByReleaseDate = this._scanManager.GetRipCountByReleaseDate();
+            var countByReleaseDate = this._scanRipsManager.GetRipCountByReleaseDate();
 
             // assert
             var expected = new Dictionary<string, int>() {
@@ -89,7 +89,7 @@ namespace DepotTests.CRUDTests
 
 
             // act
-            var ripsWithReleaseDate = this._scanManager.GetAllRipsWithReleaseDate(releaseDate);
+            var ripsWithReleaseDate = this._scanRipsManager.GetAllRipsWithReleaseDate(releaseDate);
 
             // assert
             var expected = new List<string>() {
@@ -123,7 +123,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new MovieWarehouseVisit[] { visit_0, visit_1 });
 
             // act
-            Dictionary<DateTime, int> ripCountByVisit = this._scanManager.GetRipCountByVisit();
+            Dictionary<DateTime, int> ripCountByVisit = this._scanRipsManager.GetRipCountByVisit();
 
             // assert
             var expected = new Dictionary<DateTime, int>() {
@@ -143,7 +143,7 @@ namespace DepotTests.CRUDTests
             // nada a fazer...
 
             // assert
-            this._scanManager.Invoking(s => s.GetLastVisitDiff()).Should().Throw<InvalidOperationException>();
+            this._scanRipsManager.Invoking(s => s.GetLastVisitDiff()).Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -159,7 +159,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new MovieWarehouseVisit[] { onlyVisit });
 
             // act
-            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanRipsManager.GetLastVisitDiff();
 
             // assert
             lastVisitDiff["removed"].Should().BeEmpty();
@@ -192,7 +192,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new MovieWarehouseVisit[] { onlyVisit });
 
             // act
-            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanRipsManager.GetLastVisitDiff();
 
             // assert
             lastVisitDiff["added"].Should().BeEquivalentTo(movieRips.Select(r => r.FileName));
@@ -244,7 +244,7 @@ namespace DepotTests.CRUDTests
                 .Returns(secondVisit);
 
             // act
-            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanManager.GetLastVisitDiff();
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanRipsManager.GetLastVisitDiff();
 
             // assert
             lastVisitDiff["removed"].Should().BeEquivalentTo(new string[] { "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]" });
