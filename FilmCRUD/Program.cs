@@ -184,16 +184,41 @@ namespace FilmCRUD
 
         public static async Task HandleFetchOptions(FetchOptions opts, IUnitOfWork unitOfWork, IMovieAPIClient movieAPIClient)
         {
-            // if (opts.Genres)
-            // {
-            //     var genresGetter = new MovieDetailsFetcherGenres(unitOfWork, movieAPIClient);
-            //     System.Console.WriteLine("Getting genres for movies...");
-            //     await genresGetter.PopulateDetails();
-            // }
-            // else if (opts.Actors)
-            // {
-            //     var actorsGetter = new MovieDetailsFetcherActors()
-            // }
+            if (opts.Genres)
+            {
+                var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching genres for movies...");
+                await genresFetcher.PopulateDetails();
+            }
+            else if (opts.Actors)
+            {
+                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching actors for movies...");
+                await actorsFetcher.PopulateDetails();
+            }
+            else if (opts.Directors)
+            {
+                var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching directors for movies...");
+                await directorsFetcher.PopulateDetails();
+            }
+            else if (opts.Keywords)
+            {
+                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching keywords for movies...");
+                await keywordsFetcher.PopulateMovieKeywords();
+            }
+            else if (opts.IMDBIds)
+            {
+                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, movieAPIClient);
+                System.Console.WriteLine("fetching imdb ids for movies...");
+                await IMDBIdFetcher.PopulateMovieIMDBIds();
+            }
+            else
+            {
+                System.Console.WriteLine("No fetch request...");
+            }
+            System.Console.WriteLine();
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)
