@@ -20,6 +20,5 @@ namespace FilmCRUD.Verbs
         //
         [Option(SetName = "GetIMDBIds", HelpText = "get imdb ids for movies")]
         public bool IMDBIds { get; set; }
-
     }
 }
