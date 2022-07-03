@@ -3,20 +3,20 @@ using CommandLine;
 namespace FilmCRUD.Verbs
 {
 
-    [Verb("link", HelpText = "Para ligar movie rips a filmes e pesquisas online")]
+    [Verb("link", HelpText = "to link each movierip to a movie using online and local searches")]
     public class LinkOptions
     {
 
-        [Option(SetName = "SearchLocallyAndOnline", HelpText = "Procura localmente e online")]
+        [Option(SetName = "SearchLocallyAndOnline", HelpText = "search locally and online")]
         public bool Search { get; set; }
 
-        [Option(SetName = "LinkFromManualExternalIds", HelpText = "Procura online a partir dos external ids manuais")]
+        [Option(SetName = "LinkFromManualExternalIds", HelpText = "link using the manually configured external ids")]
         public bool FromManualExtIds { get; set; }
 
-        [Option(SetName = "GetUnlinkedMovieRips", HelpText = "nomes dos movierips não linkados")]
+        [Option(SetName = "GetUnlinkedMovieRips", HelpText = "get all movierips not linked to a movie")]
         public bool GetUnlinkedRips { get; set; }
 
-        [Option(SetName = "ValidateManualExternalIds", HelpText = "valida os external ids manuais")]
+        [Option(SetName = "ValidateManualExternalIds", HelpText = "validate the manually configured external ids")]
         public bool ValidateManualExtIds { get; set; }
 
     }
