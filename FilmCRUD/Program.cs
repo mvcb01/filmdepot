@@ -75,13 +75,9 @@ namespace FilmCRUD
                 }
                 visitCrudManager.WriteMovieWarehouseContentsToTextFile();
             }
-            else if (visitOpts.PersistContents)
+            else if (!string.IsNullOrEmpty(visitOpts.PersistContents))
             {
-                if (visitOpts.ContentsDate == null)
-                {
-                    throw new ArgumentNullException("Deve ser dado o argumento contentsdate");
-                }
-                visitCrudManager.ReadWarehouseContentsAndRegisterVisit(visitOpts.ContentsDate, failOnParsingErrors: false);
+                visitCrudManager.ReadWarehouseContentsAndRegisterVisit(visitOpts.PersistContents, failOnParsingErrors: false);
             }
             else
             {
