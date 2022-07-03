@@ -33,14 +33,14 @@ namespace FilmCRUD
             IMovieAPIClient movieAPIClient = serviceProvider.GetRequiredService<IMovieAPIClient>();
 
             VisitCRUDManager visitCrudManager = new(unitOfWork, fileSystemIOWrapper, appSettingsManager);
-            ScanManager scanManager = new(unitOfWork);
+            ScanRipsManager scanRipsManager = new(unitOfWork);
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
 
             ParserResult<object> parsed = Parser
                 .Default
                 .ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions, FetchOptions>(args);
             parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager));
-            parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanManager));
+            parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanRipsManager));
             await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
             await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, movieAPIClient));
             parsed.WithNotParsed(HandleParseError);
@@ -86,13 +86,13 @@ namespace FilmCRUD
             }
         }
 
-        private static void HandleScanRipsOptions(ScanRipsOptions scanRipsOpts, ScanManager scanManager)
+        private static void HandleScanRipsOptions(ScanRipsOptions scanRipsOpts, ScanRipsManager scanRipsManager)
         {
             System.Console.WriteLine("----------");
             if (scanRipsOpts.CountByReleaseDate)
             {
                 System.Console.WriteLine("Scan: contagem por ReleaseDate\n");
-                Dictionary<string, int> countByRelaseDate = scanManager.GetRipCountByReleaseDate();
+                Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate();
                 foreach (var kv in countByRelaseDate.OrderBy(kv => kv.Key))
                 {
                     System.Console.WriteLine($"{kv.Key}: {kv.Value}");
@@ -101,7 +101,7 @@ namespace FilmCRUD
             else if (scanRipsOpts.WithReleaseDate != null)
             {
                 System.Console.WriteLine($"Scan: rips com ReleaseDate {scanRipsOpts.WithReleaseDate}\n");
-                List<string> ripFileNames = scanManager.GetAllRipsWithReleaseDate(scanRipsOpts.WithReleaseDate).ToList();
+                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(scanRipsOpts.WithReleaseDate).ToList();
 
                 System.Console.WriteLine($"Contagem: {ripFileNames.Count()}\n");
 
@@ -113,7 +113,7 @@ namespace FilmCRUD
             else if (scanRipsOpts.CountByVisit)
             {
                 System.Console.WriteLine("Scan: contagem por visita\n");
-                Dictionary<DateTime, int> countByVisit = scanManager.GetRipCountByVisit();
+                Dictionary<DateTime, int> countByVisit = scanRipsManager.GetRipCountByVisit();
                 foreach (var item in countByVisit.OrderBy(kvp => kvp.Key))
                 {
                     string visitStr = item.Key.ToString("yyyyMMdd");
@@ -123,7 +123,7 @@ namespace FilmCRUD
             else if (scanRipsOpts.LastVisitDiff)
             {
                 System.Console.WriteLine("Scan: diff da última visita\n");
-                Dictionary<string, IEnumerable<string>> lastVisitDiff = scanManager.GetLastVisitDiff();
+                Dictionary<string, IEnumerable<string>> lastVisitDiff = scanRipsManager.GetLastVisitDiff();
                 foreach (var item in lastVisitDiff.OrderBy(kvp => kvp.Key))
                 {
                     System.Console.WriteLine("\n----------");
