@@ -2,16 +2,18 @@ using CommandLine;
 
 namespace FilmCRUD.Verbs
 {
-    // Exemplos:
+    // Examples:
     //  dotnet run -- visit --listcontents
     //  dotnet run -- visit --persistcontents 20220306
-    [Verb("visit", HelpText = "Para gerar o txt com os conteúdos da warehouse e persistir no repo")]
+    [Verb("visit", HelpText = "to generate the warehouse contents text file and persist in repo")]
     public class VisitOptions
     {
-        [Option(SetName = "ListingContents", HelpText = "Gera o txt com os conteúdos da warehouse")]
+        [Option(SetName = "ListingContents", HelpText = "generate the warehouse contents text file using the configured paths")]
         public bool ListContents { get; set; }
 
-        [Option(SetName = "PersistingContents", HelpText = "Lê conteúdos da warehouse de um txt e persiste no repo")]
+        [Option(
+            SetName = "PersistingContents",
+            HelpText = "reads the warehouse contents textfile with the provided date and persists in repo")]
         public string PersistContents { get; set; }
     }
 
