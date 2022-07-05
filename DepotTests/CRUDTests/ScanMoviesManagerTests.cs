@@ -9,8 +9,6 @@ namespace DepotTests.CRUDTests
 {
     public class ScanMoviesManagerTests
     {
-
-
         private readonly Mock<IActorRepository> _actoRepositoryMock;
 
         private readonly Mock<IGenreRepository> _genreRepositoryMock;
