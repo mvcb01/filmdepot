@@ -51,5 +51,10 @@ namespace FilmDataAccess.EFCore.Repositories
             // obs: no EF Core 6 já podemos usar Regex.IsMatch no Where
             return _context.Movies.Where(m => EF.Functions.Like(m.Title, titleLike));
         }
+
+        public IEnumerable<Movie> GetAllMoviesInVisit(MovieWarehouseVisit visit)
+        {
+            return visit.MovieRips.Select(r => r.Movie);
+        }
     }
 }
