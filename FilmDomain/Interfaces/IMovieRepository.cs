@@ -18,7 +18,5 @@ namespace FilmDomain.Interfaces
         IEnumerable<Movie> GetMoviesWithoutKeywords();
 
         IEnumerable<Movie> GetMoviesWithoutImdbId();
-
-        IEnumerable<Movie> GetAllMoviesInVisit(MovieWarehouseVisit visit);
     }
 }
