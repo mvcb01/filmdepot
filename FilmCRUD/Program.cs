@@ -44,7 +44,6 @@ namespace FilmCRUD
             await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
             await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, movieAPIClient));
             parsed.WithNotParsed(HandleParseError);
-
             {}
         }
 
