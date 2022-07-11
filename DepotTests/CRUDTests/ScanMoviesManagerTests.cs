@@ -109,5 +109,34 @@ namespace DepotTests.CRUDTests
             // assert
             actual.Should().BeEquivalentTo(new Movie[] { firstMovie, secondMovie });
         }
+
+        [Fact]
+        public void GetMoviesWithDirectors_WithProvidedActors_ShouldReturnCorrectMovies()
+        {
+            // arrange
+            var firstDirector = new Director() { Name = "benny safdie" };
+            var secondDirector = new Director() { Name = "josh safdie" };
+            var thirdDirector = new Director() { Name = "paul thomas anderson" };
+
+            var firstMovie = new Movie() {
+                Title = "uncut gems", ReleaseDate = 2019, Directors = new Director[] { firstDirector, secondDirector }
+            };
+            var secondMovie = new Movie() {
+                Title = "there will be blood", ReleaseDate = 2007, Directors = new Director[] { thirdDirector }
+            };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._unitOfWorkMock
+                .Setup(u => u.Movies.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithDirectors(visit, firstDirector, secondDirector);
+
+            // assert
+            actual.Should().BeEquivalentTo(new Movie[] { firstMovie });
+
+        }
     }
 }

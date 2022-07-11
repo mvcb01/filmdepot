@@ -6,8 +6,6 @@ using FilmDomain.Entities;
 
 namespace FilmCRUD
 {
-
-
     public class ScanMoviesManager
     {
         private IUnitOfWork _unitOfWork { get; init; }
@@ -35,6 +33,16 @@ namespace FilmCRUD
         {
             IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => actors.Intersect(m.Actors).Any());
+        }
+
+        /// <summary>
+        /// Method <c>GetMoviesWithDirectors</c> returns all the movies that have at least
+        /// one corresponding MovieRip in <paramref name="visit"/> and at least one Director in <paramref name="directors"/>.
+        /// </summary>
+        public IEnumerable<Movie> GetMoviesWithDirectors(MovieWarehouseVisit visit, params Director[] directors)
+        {
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            return moviesInVisit.Where(m => directors.Intersect(m.Directors).Any());
         }
     }
 }
