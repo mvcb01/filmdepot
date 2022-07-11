@@ -78,5 +78,36 @@ namespace DepotTests.CRUDTests
             // assert
             actual.Should().BeEquivalentTo(new Movie[] { firstMovie, secondMovie });
         }
+
+        [Fact]
+        public void GetMoviesWithActors_WithProvidedActors_ShouldReturnCorrectMovies()
+        {
+            // arrange
+            var firstActor = new Actor() { Name = "jeff goldblum" };
+            var secondActor = new Actor() { Name = "bill pullman" };
+            var thirdActor = new Actor() { Name = "jim carrey" };
+
+            var firstMovie = new Movie() {
+                Title = "the fly", ReleaseDate = 1986, Actors = new Actor[] { firstActor }
+            };
+            var secondMovie = new Movie() {
+                Title = "independence day", ReleaseDate = 1996, Actors = new Actor[] { firstActor, secondActor }
+            };
+            var thirdMovie = new Movie() {
+                Title = "dumb and dumber", ReleaseDate = 1994, Actors = new Actor[] { thirdActor }
+            };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._unitOfWorkMock
+                .Setup(u => u.Movies.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithActors(visit, firstActor, secondActor);
+
+            // assert
+            actual.Should().BeEquivalentTo(new Movie[] { firstMovie, secondMovie });
+        }
     }
 }
