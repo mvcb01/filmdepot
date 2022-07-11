@@ -18,6 +18,11 @@ namespace FilmDataAccess.EFCore.Repositories
             return _context.Movies.Where(m => m.ExternalId == externalId).FirstOrDefault();
         }
 
+        public IEnumerable<Movie> GetAllMoviesInVisit(MovieWarehouseVisit visit)
+        {
+            return visit.MovieRips.Select(r => r.Movie);
+        }
+
         public IEnumerable<Movie> GetMoviesWithoutActors()
         {
             return _context.Movies.Where(m => !m.Actors.Any());
