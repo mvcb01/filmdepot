@@ -2,9 +2,11 @@ using Xunit;
 using FluentAssertions;
 using Moq;
 using System;
+using System.Collections.Generic;
 
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
+using FilmCRUD;
 
 namespace DepotTests.CRUDTests
 {
@@ -18,8 +20,9 @@ namespace DepotTests.CRUDTests
 
         private readonly Mock<IMovieRepository> _movieRepositoryMock;
 
-
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+
+        private readonly ScanMoviesManager _scanMoviesManager;
 
         public ScanMoviesManagerTests()
         {
@@ -41,28 +44,39 @@ namespace DepotTests.CRUDTests
             this._unitOfWorkMock
                 .SetupGet(u => u.Movies)
                 .Returns(this._movieRepositoryMock.Object);
+
+            this._scanMoviesManager = new ScanMoviesManager(this._unitOfWorkMock.Object);
         }
 
         [Fact]
         public void GetMoviesWithGenres_WithProvidedGenres_ShouldReturnCorrectMovies()
         {
+            // arrange
             var dramaGenre = new Genre() { Name = "drama" };
             var horrorGenre = new Genre() { Name = "horror" };
+            var comedyGenre = new Genre() { Name = "comedy" };
 
             var firstMovie = new Movie() {
                 Title = "the fly", ReleaseDate = 1986, Genres = new Genre[] { dramaGenre, horrorGenre }
             };
-            var second = new Movie() {
+            var secondMovie = new Movie() {
                 Title = "gummo", ReleaseDate = 1997, Genres = new Genre[] { dramaGenre }
+            };
+            var thirdMovie = new Movie() {
+                Title = "dumb and dumber", ReleaseDate = 1994, Genres = new Genre[] { comedyGenre }
             };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
-            // this._unitOfWorkMock.Setup(u => u.Movies.G)
+            this._unitOfWorkMock
+                .Setup(u => u.Movies.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
-            // When
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithGenres(visit, dramaGenre, horrorGenre);
 
-            // Then
+            // assert
+            actual.Should().BeEquivalentTo(new Movie[] { firstMovie, secondMovie });
         }
     }
 }

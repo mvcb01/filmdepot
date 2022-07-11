@@ -17,10 +17,14 @@ namespace FilmCRUD
             this._unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Method <c>GetMoviesWithGenres</c> returns all the movies that have at least
+        /// one corresponding MovieRip in <paramref name="visit"/> and at least one Genre in <paramref name="genres"/>.
+        /// </summary>
         public IEnumerable<Movie> GetMoviesWithGenres(MovieWarehouseVisit visit, params Genre[] genres)
         {
-            IEnumerable<Movie> moviesInVisit = visit.MovieRips.Select(r => r.Movie);
-            return null;
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            return moviesInVisit.Where(m => genres.Intersect(m.Genres).Any());
         }
     }
 }
