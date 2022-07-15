@@ -138,5 +138,35 @@ namespace DepotTests.CRUDTests
             actual.Should().BeEquivalentTo(new Movie[] { firstMovie });
 
         }
+
+        [Fact]
+        public void GetCountByGenre_ShouldReturnCorrectCount()
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986 };
+            var secondMovie = new Movie() {Title = "gummo", ReleaseDate = 1997 };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994 };
+
+            var dramaGenre = new Genre() { Name = "drama", Movies = new List<Movie>() { firstMovie, secondMovie }};
+            var horrorGenre = new Genre() { Name = "horror", Movies = new List<Movie>() { firstMovie } };
+            var comedyGenre = new Genre() { Name = "comedy", Movies = new List<Movie>() { thirdMovie } };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._genreRepositoryMock
+                .Setup(g => g.GetAll())
+                .Returns(new Genre[] { dramaGenre, horrorGenre, comedyGenre });
+
+            // act
+            IEnumerable<KeyValuePair<Genre, int>> actual = this._scanMoviesManager.GetCountByGenre(visit);
+
+            // assert
+            var expected = new List<KeyValuePair<Genre, int>>() {
+                new KeyValuePair<Genre, int>(dramaGenre, 2),
+                new KeyValuePair<Genre, int>(horrorGenre, 1),
+                new KeyValuePair<Genre, int>(comedyGenre, 1),
+            };
+            actual.Should().BeEquivalentTo(expected);
+        }
     }
 }

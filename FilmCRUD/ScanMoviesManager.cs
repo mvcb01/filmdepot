@@ -44,5 +44,10 @@ namespace FilmCRUD
             IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => directors.Intersect(m.Directors).Any());
         }
+
+        public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit)
+        {
+            return this._unitOfWork.Genres.GetAll().Select(g => new KeyValuePair<Genre, int>(g, g.Movies.Count()));
+        }
     }
 }
