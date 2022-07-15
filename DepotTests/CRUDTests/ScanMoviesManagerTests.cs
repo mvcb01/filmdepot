@@ -194,7 +194,7 @@ namespace DepotTests.CRUDTests
             var expected = new List<KeyValuePair<Director, int>>() {
                 new KeyValuePair<Director, int>(thirdDirector, 2),
                 new KeyValuePair<Director, int>(secondDirector, 1),
-                new KeyValuePair<Director, int>(firstDirector, 2)
+                new KeyValuePair<Director, int>(firstDirector, 1)
             };
             actual.Should().BeEquivalentTo(expected);
         }
