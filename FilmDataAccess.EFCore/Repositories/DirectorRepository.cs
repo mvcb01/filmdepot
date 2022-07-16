@@ -2,6 +2,8 @@ using System.Linq;
 using System.Collections.Generic;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
+using FilmDomain.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace FilmDataAccess.EFCore.Repositories
 {
@@ -11,14 +13,13 @@ namespace FilmDataAccess.EFCore.Repositories
         {
         }
 
-        public Director FindByExternalId(int externalId)
+        public IEnumerable<Director> GetDirectorsFromName(string name)
         {
-            return _context.Directors.Where(m => m.ExternalId == externalId).FirstOrDefault();
-        }
+            IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation();
+            string nameLike = "%" + string.Join('%', nameTokens) + "%";
 
-        public IEnumerable<Director> GetMostRippedDirectors(int topN)
-        {
-            return _context.Directors.OrderByDescending(d => d.Movies.Count()).Take(topN);
+            // obs: in EF Core 6 we can use Regex.IsMatch in the Where method
+            return _context.Directors.Where(d => EF.Functions.Like(d.Name, nameLike));
         }
     }
 }
