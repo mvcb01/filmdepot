@@ -35,12 +35,14 @@ namespace FilmCRUD
             VisitCRUDManager visitCrudManager = new(unitOfWork, fileSystemIOWrapper, appSettingsManager);
             ScanRipsManager scanRipsManager = new(unitOfWork);
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
+            ScanMoviesManager scanMoviesManager = new(unitOfWork);
 
             ParserResult<object> parsed = Parser
                 .Default
-                .ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions, FetchOptions>(args);
+                .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);
             parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager));
             parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanRipsManager));
+            parsed.WithParsed<ScanMoviesOptions>(opts => HandleScanMoviesOptions(opts, scanMoviesManager));
             await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
             await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, movieAPIClient));
             parsed.WithNotParsed(HandleParseError);
@@ -86,10 +88,10 @@ namespace FilmCRUD
             }
         }
 
-        private static void HandleScanRipsOptions(ScanRipsOptions scanRipsOpts, ScanRipsManager scanRipsManager)
+        private static void HandleScanRipsOptions(ScanRipsOptions opts, ScanRipsManager scanRipsManager)
         {
             System.Console.WriteLine("----------");
-            if (scanRipsOpts.CountByReleaseDate)
+            if (opts.CountByReleaseDate)
             {
                 System.Console.WriteLine("Scan: contagem por ReleaseDate\n");
                 Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate();
@@ -98,10 +100,10 @@ namespace FilmCRUD
                     System.Console.WriteLine($"{kv.Key}: {kv.Value}");
                 }
             }
-            else if (scanRipsOpts.WithReleaseDate != null)
+            else if (opts.WithReleaseDate != null)
             {
-                System.Console.WriteLine($"Scan: rips com ReleaseDate {scanRipsOpts.WithReleaseDate}\n");
-                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(scanRipsOpts.WithReleaseDate).ToList();
+                System.Console.WriteLine($"Scan: rips com ReleaseDate {opts.WithReleaseDate}\n");
+                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(opts.WithReleaseDate).ToList();
 
                 System.Console.WriteLine($"Contagem: {ripFileNames.Count()}\n");
 
@@ -110,7 +112,7 @@ namespace FilmCRUD
                     System.Console.WriteLine(fileName);
                 }
             }
-            else if (scanRipsOpts.CountByVisit)
+            else if (opts.CountByVisit)
             {
                 System.Console.WriteLine("Scan: contagem por visita\n");
                 Dictionary<DateTime, int> countByVisit = scanRipsManager.GetRipCountByVisit();
@@ -120,7 +122,7 @@ namespace FilmCRUD
                     System.Console.WriteLine($"{visitStr} : {item.Value}");
                 }
             }
-            else if (scanRipsOpts.LastVisitDiff)
+            else if (opts.LastVisitDiff)
             {
                 System.Console.WriteLine("Scan: diff da última visita\n");
                 Dictionary<string, IEnumerable<string>> lastVisitDiff = scanRipsManager.GetLastVisitDiff();
@@ -138,6 +140,13 @@ namespace FilmCRUD
             System.Console.WriteLine();
         }
 
+        private static void HandleScanMoviesOptions(ScanMoviesOptions opts,ScanMoviesManager scanMoviesManager)
+        {
+            if (opts.Genres.Any())
+            {
+                System.Console.WriteLine(string.Join(" | ", opts.Genres));
+            }
+        }
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
             System.Console.WriteLine("-------------");
