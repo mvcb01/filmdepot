@@ -6,11 +6,11 @@ namespace FilmCRUD.Verbs
     [Verb("scanmovies", HelpText = "info from existing movies")]
     public class ScanMoviesOptions
     {
-        [Option(SetName = "GenreOptions", HelpText = "")]
-        public IEnumerable<string> Genres { get; set; }
+        [Option(SetName = "GenreOptions", HelpText = "list movies with genres")]
+        public IEnumerable<string> WithGenres { get; set; }
 
         // can be used with any set
-        // [Option()]
-        // public string VisitDate { get; set; }
+        [Option('v', "visit")]
+        public string Visit { get; set; }
     }
 }

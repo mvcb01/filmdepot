@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 using FilmDataAccess.EFCore.UnitOfWork;
+using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDataAccess.EFCore;
 using FilmCRUD.Verbs;
@@ -140,11 +141,33 @@ namespace FilmCRUD
             System.Console.WriteLine();
         }
 
-        private static void HandleScanMoviesOptions(ScanMoviesOptions opts,ScanMoviesManager scanMoviesManager)
+        private static void HandleScanMoviesOptions(ScanMoviesOptions opts, ScanMoviesManager scanMoviesManager)
         {
-            if (opts.Genres.Any())
+            MovieWarehouseVisit visit;
+
+            if (opts.Visit == null)
             {
-                System.Console.WriteLine(string.Join(" | ", opts.Genres));
+                visit = scanMoviesManager.GetClosestVisit();
+            }
+            else
+            {
+                DateTime visitDate = DateTime.ParseExact(opts.Visit, "yyyyMMdd", null);
+                visit = scanMoviesManager.GetClosestVisit(visitDate);
+            }
+
+            System.Console.WriteLine("-------------");
+            var printDateFormat = "MMMM dd yyyy";
+            System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
+            if (opts.WithGenres.Any())
+            {
+                // finds the Genre entities for each string in opts.WithGenres, then flattens
+                IEnumerable<Genre> genres = opts.WithGenres
+                    .Select(name => scanMoviesManager.GenresFromName(name))
+                    .SelectMany(g => g);
+                IEnumerable<Movie> moviesWithGenres = scanMoviesManager.GetMoviesWithGenres(visit, genres.ToArray());
+                string genreNames = string.Join(" | ", genres.Select(g => g.Name));
+                System.Console.WriteLine($"Movies with genres: {genreNames} \n");
+                moviesWithGenres.ToList().ForEach(m => System.Console.WriteLine(m));
             }
         }
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)

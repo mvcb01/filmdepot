@@ -10,6 +10,8 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
         {
             builder.Property(mr => mr.FileName).IsRequired();
             builder.HasAlternateKey(mr => mr.FileName);
+
+            builder.Navigation(r => r.Movie).AutoInclude();
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 using FilmDomain.Interfaces;
 using FilmDomain.Entities;
@@ -58,6 +59,21 @@ namespace FilmCRUD
         public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit)
         {
             return this._unitOfWork.Directors.GetAll().Select(d => new KeyValuePair<Director, int>(d, d.Movies.Count()));
+        }
+
+        public MovieWarehouseVisit GetClosestVisit()
+        {
+            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
+        }
+
+        public MovieWarehouseVisit GetClosestVisit(DateTime dt)
+        {
+            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
+        }
+
+        public IEnumerable<Genre> GenresFromName(string name)
+        {
+            return this._unitOfWork.Genres.GetGenresFromName(name);
         }
     }
 }

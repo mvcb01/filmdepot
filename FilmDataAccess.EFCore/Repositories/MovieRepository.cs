@@ -54,7 +54,7 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Movie> GetAllMoviesInVisit(MovieWarehouseVisit visit)
         {
-            return visit.MovieRips.Select(r => r.Movie);
+            return visit.MovieRips.Select(r => r.Movie).Distinct();
         }
     }
 }
