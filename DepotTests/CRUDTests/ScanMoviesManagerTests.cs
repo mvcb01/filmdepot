@@ -170,6 +170,36 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
+        public void GetCountByActor_ShouldReturnCorrectCount()
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986 };
+            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996 };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994 };
+
+            var firstActor = new Actor() { Name = "jeff goldblum", Movies = new List<Movie>() { firstMovie, secondMovie } };
+            var secondActor = new Actor() { Name = "bill pullman", Movies = new List<Movie>() { firstMovie } };
+            var thirdActor = new Actor() { Name = "jim carrey", Movies =  new List<Movie>() { thirdMovie } };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._actoRepositoryMock
+                .Setup(a => a.GetAll())
+                .Returns(new Actor[] { firstActor, secondActor, thirdActor });
+
+            // act
+            IEnumerable<KeyValuePair<Actor, int>> actual = this._scanMoviesManager.GetCountByActor(visit);
+
+            // assert
+            var expected = new List<KeyValuePair<Actor, int>>() {
+                new KeyValuePair<Actor, int>(firstActor, 2),
+                new KeyValuePair<Actor, int>(secondActor, 1),
+                new KeyValuePair<Actor, int>(thirdActor, 1)
+            };
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
         public void GetCountByDirector_ShouldReturnCorrectCount()
         {
             // arrange

@@ -50,6 +50,11 @@ namespace FilmCRUD
             return this._unitOfWork.Genres.GetAll().Select(g => new KeyValuePair<Genre, int>(g, g.Movies.Count()));
         }
 
+        public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit)
+        {
+            return this._unitOfWork.Actors.GetAll().Select(a => new KeyValuePair<Actor, int>(a, a.Movies.Count()));
+        }
+
         public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit)
         {
             return this._unitOfWork.Directors.GetAll().Select(d => new KeyValuePair<Director, int>(d, d.Movies.Count()));
