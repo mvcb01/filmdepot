@@ -81,5 +81,10 @@ namespace FilmCRUD
         {
             return this._unitOfWork.Genres.GetGenresFromName(name);
         }
+
+        public IEnumerable<Actor> GetActorsFromName(string name)
+        {
+            return this._unitOfWork.Actors.GetActorsFromName(name);
+        }
     }
 }

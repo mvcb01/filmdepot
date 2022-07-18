@@ -166,7 +166,7 @@ namespace FilmCRUD
                 visit = scanMoviesManager.GetClosestVisit(visitDate);
             }
 
-            var printDateFormat = "MMMM dd yyyy";
+            string printDateFormat = "MMMM dd yyyy";
             System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
             if (opts.WithGenres.Any())
             {
@@ -178,6 +178,17 @@ namespace FilmCRUD
                 string genreNames = string.Join(" | ", genres.Select(g => g.Name));
                 System.Console.WriteLine($"Movies with genres: {genreNames} \n");
                 moviesWithGenres.ToList().ForEach(m => System.Console.WriteLine(m));
+            }
+            else if (opts.WithActors.Any())
+            {
+                // finds the Actor entities for each string in opts.WithGenres, then flattens
+                IEnumerable<Actor> actors = opts.WithActors
+                    .Select(name => scanMoviesManager.GetActorsFromName(name))
+                    .SelectMany(a => a);
+                IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithActors(visit, actors.ToArray());
+                string genreNames = string.Join(" | ", actors.Select(g => g.Name));
+                System.Console.WriteLine($"Movies with actors: {genreNames} \n");
+                moviesWithActors.ToList().ForEach(m => System.Console.WriteLine(m));
             }
         }
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
