@@ -12,6 +12,9 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "ActorOptions", HelpText = "list movies with actors")]
         public IEnumerable<string> WithActors { get; set; }
 
+        [Option(SetName = "DirectorOptions", HelpText = "list movies with directors")]
+        public IEnumerable<string> WithDirectors { get; set; }
+
         // can be used with any set
         [Option('v', "visit", HelpText = "warehouse visit to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }

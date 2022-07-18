@@ -181,14 +181,25 @@ namespace FilmCRUD
             }
             else if (opts.WithActors.Any())
             {
-                // finds the Actor entities for each string in opts.WithGenres, then flattens
+                // finds the Actor entities for each string in opts.WithActors, then flattens
                 IEnumerable<Actor> actors = opts.WithActors
                     .Select(name => scanMoviesManager.GetActorsFromName(name))
                     .SelectMany(a => a);
                 IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithActors(visit, actors.ToArray());
-                string genreNames = string.Join(" | ", actors.Select(g => g.Name));
-                System.Console.WriteLine($"Movies with actors: {genreNames} \n");
+                string actorNames = string.Join(" | ", actors.Select(a => a.Name));
+                System.Console.WriteLine($"Movies with actors: {actorNames} \n");
                 moviesWithActors.ToList().ForEach(m => System.Console.WriteLine(m));
+            }
+            else if (opts.WithDirectors.Any())
+            {
+                // finds the Director entities for each string in opts.WithDirectors, then flattens
+                IEnumerable<Director> directors = opts.WithDirectors
+                    .Select(name => scanMoviesManager.GetDirectorsFromName(name))
+                    .SelectMany(a => a);
+                IEnumerable<Movie> moviesWithDirectors = scanMoviesManager.GetMoviesWithDirectors(visit, directors.ToArray());
+                string directorNames = string.Join(" | ", directors.Select(d => d.Name));
+                System.Console.WriteLine($"Movies with directors: {directorNames} \n");
+                moviesWithDirectors.ToList().ForEach(m => System.Console.WriteLine(m));
             }
         }
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
