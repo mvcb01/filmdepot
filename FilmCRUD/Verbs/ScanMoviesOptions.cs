@@ -10,7 +10,7 @@ namespace FilmCRUD.Verbs
         public IEnumerable<string> WithGenres { get; set; }
 
         // can be used with any set
-        [Option('v', "visit")]
+        [Option('v', "visit", HelpText = "warehouse visit to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
     }
 }
