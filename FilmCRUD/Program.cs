@@ -205,7 +205,19 @@ namespace FilmCRUD
             {
                 System.Console.WriteLine();
                 IEnumerable<KeyValuePair<Genre, int>> genreCount = scanMoviesManager.GetCountByGenre(visit);
+                int toTake = opts.Top ?? genreCount.Count();
                 genreCount.OrderByDescending(kvp => kvp.Value)
+                    .Take(toTake)
+                    .ToList()
+                    .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
+            }
+            else if (opts.ByActor)
+            {
+                System.Console.WriteLine();
+                IEnumerable<KeyValuePair<Actor, int>> actorCount = scanMoviesManager.GetCountByActor(visit);
+                int toTake = opts.Top ?? actorCount.Count();
+                actorCount.OrderByDescending(kvp => kvp.Value)
+                    .Take(toTake)
                     .ToList()
                     .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
             }
