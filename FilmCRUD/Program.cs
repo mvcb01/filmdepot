@@ -203,7 +203,7 @@ namespace FilmCRUD
             }
             else if (opts.ByGenre)
             {
-                System.Console.WriteLine();
+                System.Console.WriteLine("Count by genre:\n");
                 IEnumerable<KeyValuePair<Genre, int>> genreCount = scanMoviesManager.GetCountByGenre(visit);
                 int toTake = opts.Top ?? genreCount.Count();
                 genreCount.OrderByDescending(kvp => kvp.Value)
@@ -213,7 +213,7 @@ namespace FilmCRUD
             }
             else if (opts.ByActor)
             {
-                System.Console.WriteLine();
+                System.Console.WriteLine("Count by actor:\n");
                 IEnumerable<KeyValuePair<Actor, int>> actorCount = scanMoviesManager.GetCountByActor(visit);
                 int toTake = opts.Top ?? actorCount.Count();
                 actorCount.OrderByDescending(kvp => kvp.Value)
@@ -221,6 +221,21 @@ namespace FilmCRUD
                     .ToList()
                     .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
             }
+            else if (opts.ByDirector)
+            {
+                System.Console.WriteLine("Count by director:\n");
+                IEnumerable<KeyValuePair<Director, int>> directorCount = scanMoviesManager.GetCountByDirector(visit);
+                int toTake = opts.Top ?? directorCount.Count();
+                directorCount.OrderByDescending(kvp => kvp.Value)
+                    .Take(toTake)
+                    .ToList()
+                    .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
+            }
+            else
+            {
+                System.Console.WriteLine("No action requested...");
+            }
+            System.Console.WriteLine();
         }
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
