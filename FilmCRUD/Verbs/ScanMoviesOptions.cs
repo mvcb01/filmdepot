@@ -15,6 +15,9 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "WithDirectorOptions", HelpText = "list movies with directors")]
         public IEnumerable<string> WithDirectors { get; set; }
 
+        [Option(SetName = "ByGenreOptions", HelpText = "get movie count by genre")]
+        public bool ByGenre { get; set; }
+
         // can be used with any set
         [Option('v', "visit", HelpText = "warehouse visit to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }

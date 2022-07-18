@@ -201,6 +201,14 @@ namespace FilmCRUD
                 System.Console.WriteLine($"Movies with directors: {directorNames} \n");
                 moviesWithDirectors.ToList().ForEach(m => System.Console.WriteLine(m));
             }
+            else if (opts.ByGenre)
+            {
+                System.Console.WriteLine();
+                IEnumerable<KeyValuePair<Genre, int>> genreCount = scanMoviesManager.GetCountByGenre(visit);
+                genreCount.OrderByDescending(kvp => kvp.Value)
+                    .ToList()
+                    .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
+            }
         }
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
