@@ -4,6 +4,7 @@ using System;
 
 using FilmDomain.Interfaces;
 using FilmDomain.Entities;
+using FilmDomain.Extensions;
 
 namespace FilmCRUD
 {
@@ -69,6 +70,11 @@ namespace FilmCRUD
         public MovieWarehouseVisit GetClosestVisit(DateTime dt)
         {
             return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
+        }
+
+        public IEnumerable<DateTime> ListVisitDates()
+        {
+            return this._unitOfWork.MovieWarehouseVisits.GetAll().GetVisitDates();
         }
 
         public IEnumerable<Genre> GenresFromName(string name)

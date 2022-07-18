@@ -12,5 +12,8 @@ namespace FilmCRUD.Verbs
         // can be used with any set
         [Option('v', "visit", HelpText = "warehouse visit to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
+
+        [Option(SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
+        public bool ListVisits { get; set; }
     }
 }

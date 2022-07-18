@@ -143,6 +143,17 @@ namespace FilmCRUD
 
         private static void HandleScanMoviesOptions(ScanMoviesOptions opts, ScanMoviesManager scanMoviesManager)
         {
+            System.Console.WriteLine("-------------");
+
+            if (opts.ListVisits)
+            {
+                System.Console.WriteLine("Dates for all warehouse visits:");
+                scanMoviesManager.ListVisitDates()
+                    .OrderByDescending(dt => dt)
+                    .ToList()
+                    .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+                return;
+            }
             MovieWarehouseVisit visit;
 
             if (opts.Visit == null)
@@ -155,7 +166,6 @@ namespace FilmCRUD
                 visit = scanMoviesManager.GetClosestVisit(visitDate);
             }
 
-            System.Console.WriteLine("-------------");
             var printDateFormat = "MMMM dd yyyy";
             System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
             if (opts.WithGenres.Any())
