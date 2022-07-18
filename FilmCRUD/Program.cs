@@ -154,8 +154,8 @@ namespace FilmCRUD
                     .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
                 return;
             }
-            MovieWarehouseVisit visit;
 
+            MovieWarehouseVisit visit;
             if (opts.Visit == null)
             {
                 visit = scanMoviesManager.GetClosestVisit();
