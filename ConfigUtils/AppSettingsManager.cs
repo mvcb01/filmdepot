@@ -63,7 +63,7 @@ namespace ConfigUtils
             var result = this.ConfigRoot[keyToGet];
             if (result == null)
             {
-                throw new Exception($"Api key desconhecida: {keyName}");
+                throw new Exception($"Unknown Api key: {keyName}");
             }
             return result;
         }
