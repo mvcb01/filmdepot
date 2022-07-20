@@ -12,23 +12,23 @@ namespace ConfigUtils
 
         public AppSettingsManager()
         {
-            var env = Environment.GetEnvironmentVariable("FILMCRUD_ENVIRONMENT");
-            if (env == null)
-            {
-                throw new InvalidOperationException("Please define the environment variable FILMCRUD_ENVIRONMENT");
-            }
-
-            // ordem de acesso às configs:
+            // general access order:
             //    user secrets
             //    appsettings.ENV.json
             //    appsettings.json
-            // NOTA: ver qual a ordem de acesso consoante os diferentes ENVs:
+            // NOTA: access order for different ENVs:
             //      https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-6.0#hi2low
             var configBuilder = new ConfigurationBuilder();
             configBuilder
                 .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{env}.json")
                 .AddUserSecrets<AppSettingsManager>();
+
+            var env = Environment.GetEnvironmentVariable("FILMCRUD_ENVIRONMENT");
+            if (env != null)
+            {
+                configBuilder.AddJsonFile($"appsettings.{env}.json");
+            }
+
             this.ConfigRoot = configBuilder.Build();
         }
 
