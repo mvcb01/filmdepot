@@ -29,7 +29,6 @@ namespace ConfigUtils
                 configBuilder.AddJsonFile($"appsettings.{env}.json");
             }
 
-
             this.ConfigRoot = configBuilder.Build();
         }
 
