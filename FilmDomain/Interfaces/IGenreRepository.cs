@@ -5,7 +5,7 @@ namespace FilmDomain.Interfaces
 {
     public interface IGenreRepository : IEntityRepository<Genre>
     {
-        Genre GetGenreFromName(string name);
+        IEnumerable<Genre> GetGenresFromName(string name);
 
         Genre FindByExternalId(int externalId);
     }

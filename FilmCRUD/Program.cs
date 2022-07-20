@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 using FilmDataAccess.EFCore.UnitOfWork;
+using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDataAccess.EFCore;
 using FilmCRUD.Verbs;
@@ -35,12 +36,14 @@ namespace FilmCRUD
             VisitCRUDManager visitCrudManager = new(unitOfWork, fileSystemIOWrapper, appSettingsManager);
             ScanRipsManager scanRipsManager = new(unitOfWork);
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
+            ScanMoviesManager scanMoviesManager = new(unitOfWork);
 
             ParserResult<object> parsed = Parser
                 .Default
-                .ParseArguments<VisitOptions, ScanRipsOptions, LinkOptions, FetchOptions>(args);
+                .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);
             parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager));
             parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanRipsManager));
+            parsed.WithParsed<ScanMoviesOptions>(opts => HandleScanMoviesOptions(opts, scanMoviesManager));
             await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
             await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, movieAPIClient));
             parsed.WithNotParsed(HandleParseError);
@@ -85,10 +88,10 @@ namespace FilmCRUD
             }
         }
 
-        private static void HandleScanRipsOptions(ScanRipsOptions scanRipsOpts, ScanRipsManager scanRipsManager)
+        private static void HandleScanRipsOptions(ScanRipsOptions opts, ScanRipsManager scanRipsManager)
         {
             System.Console.WriteLine("----------");
-            if (scanRipsOpts.CountByReleaseDate)
+            if (opts.CountByReleaseDate)
             {
                 System.Console.WriteLine("Scan: contagem por ReleaseDate\n");
                 Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate();
@@ -97,10 +100,10 @@ namespace FilmCRUD
                     System.Console.WriteLine($"{kv.Key}: {kv.Value}");
                 }
             }
-            else if (scanRipsOpts.WithReleaseDate != null)
+            else if (opts.WithReleaseDate != null)
             {
-                System.Console.WriteLine($"Scan: rips com ReleaseDate {scanRipsOpts.WithReleaseDate}\n");
-                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(scanRipsOpts.WithReleaseDate).ToList();
+                System.Console.WriteLine($"Scan: rips com ReleaseDate {opts.WithReleaseDate}\n");
+                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(opts.WithReleaseDate).ToList();
 
                 System.Console.WriteLine($"Contagem: {ripFileNames.Count()}\n");
 
@@ -109,7 +112,7 @@ namespace FilmCRUD
                     System.Console.WriteLine(fileName);
                 }
             }
-            else if (scanRipsOpts.CountByVisit)
+            else if (opts.CountByVisit)
             {
                 System.Console.WriteLine("Scan: contagem por visita\n");
                 Dictionary<DateTime, int> countByVisit = scanRipsManager.GetRipCountByVisit();
@@ -119,7 +122,7 @@ namespace FilmCRUD
                     System.Console.WriteLine($"{visitStr} : {item.Value}");
                 }
             }
-            else if (scanRipsOpts.LastVisitDiff)
+            else if (opts.LastVisitDiff)
             {
                 System.Console.WriteLine("Scan: diff da última visita\n");
                 Dictionary<string, IEnumerable<string>> lastVisitDiff = scanRipsManager.GetLastVisitDiff();
@@ -137,6 +140,102 @@ namespace FilmCRUD
             System.Console.WriteLine();
         }
 
+        private static void HandleScanMoviesOptions(ScanMoviesOptions opts, ScanMoviesManager scanMoviesManager)
+        {
+            System.Console.WriteLine("-------------");
+
+            if (opts.ListVisits)
+            {
+                System.Console.WriteLine("Dates for all warehouse visits:");
+                scanMoviesManager.ListVisitDates()
+                    .OrderByDescending(dt => dt)
+                    .ToList()
+                    .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+                return;
+            }
+
+            MovieWarehouseVisit visit;
+            if (opts.Visit == null)
+            {
+                visit = scanMoviesManager.GetClosestVisit();
+            }
+            else
+            {
+                DateTime visitDate = DateTime.ParseExact(opts.Visit, "yyyyMMdd", null);
+                visit = scanMoviesManager.GetClosestVisit(visitDate);
+            }
+
+            string printDateFormat = "MMMM dd yyyy";
+            System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
+            if (opts.WithGenres.Any())
+            {
+                // finds the Genre entities for each string in opts.WithGenres, then flattens
+                IEnumerable<Genre> genres = opts.WithGenres
+                    .Select(name => scanMoviesManager.GenresFromName(name))
+                    .SelectMany(g => g);
+                IEnumerable<Movie> moviesWithGenres = scanMoviesManager.GetMoviesWithGenres(visit, genres.ToArray());
+                string genreNames = string.Join(" | ", genres.Select(g => g.Name));
+                System.Console.WriteLine($"Movies with genres: {genreNames} \n");
+                moviesWithGenres.ToList().ForEach(m => System.Console.WriteLine(m));
+            }
+            else if (opts.WithActors.Any())
+            {
+                // finds the Actor entities for each string in opts.WithActors, then flattens
+                IEnumerable<Actor> actors = opts.WithActors
+                    .Select(name => scanMoviesManager.GetActorsFromName(name))
+                    .SelectMany(a => a);
+                IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithActors(visit, actors.ToArray());
+                string actorNames = string.Join(" | ", actors.Select(a => a.Name));
+                System.Console.WriteLine($"Movies with actors: {actorNames} \n");
+                moviesWithActors.ToList().ForEach(m => System.Console.WriteLine(m));
+            }
+            else if (opts.WithDirectors.Any())
+            {
+                // finds the Director entities for each string in opts.WithDirectors, then flattens
+                IEnumerable<Director> directors = opts.WithDirectors
+                    .Select(name => scanMoviesManager.GetDirectorsFromName(name))
+                    .SelectMany(a => a);
+                IEnumerable<Movie> moviesWithDirectors = scanMoviesManager.GetMoviesWithDirectors(visit, directors.ToArray());
+                string directorNames = string.Join(" | ", directors.Select(d => d.Name));
+                System.Console.WriteLine($"Movies with directors: {directorNames} \n");
+                moviesWithDirectors.ToList().ForEach(m => System.Console.WriteLine(m));
+            }
+            else if (opts.ByGenre)
+            {
+                System.Console.WriteLine("Count by genre:\n");
+                IEnumerable<KeyValuePair<Genre, int>> genreCount = scanMoviesManager.GetCountByGenre(visit);
+                int toTake = opts.Top ?? genreCount.Count();
+                genreCount.OrderByDescending(kvp => kvp.Value)
+                    .Take(toTake)
+                    .ToList()
+                    .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
+            }
+            else if (opts.ByActor)
+            {
+                System.Console.WriteLine("Count by actor:\n");
+                IEnumerable<KeyValuePair<Actor, int>> actorCount = scanMoviesManager.GetCountByActor(visit);
+                int toTake = opts.Top ?? actorCount.Count();
+                actorCount.OrderByDescending(kvp => kvp.Value)
+                    .Take(toTake)
+                    .ToList()
+                    .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
+            }
+            else if (opts.ByDirector)
+            {
+                System.Console.WriteLine("Count by director:\n");
+                IEnumerable<KeyValuePair<Director, int>> directorCount = scanMoviesManager.GetCountByDirector(visit);
+                int toTake = opts.Top ?? directorCount.Count();
+                directorCount.OrderByDescending(kvp => kvp.Value)
+                    .Take(toTake)
+                    .ToList()
+                    .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
+            }
+            else
+            {
+                System.Console.WriteLine("No action requested...");
+            }
+            System.Console.WriteLine();
+        }
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
             System.Console.WriteLine("-------------");
