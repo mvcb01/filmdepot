@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using FilmDomain.Entities;
+using FilmDomain.Extensions;
 using FilmDomain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace FilmDataAccess.EFCore.Repositories
 {
@@ -16,9 +18,13 @@ namespace FilmDataAccess.EFCore.Repositories
             return _context.Genres.Where(m => m.ExternalId == externalId).FirstOrDefault();
         }
 
-        public Genre GetGenreFromName(string name)
+        public IEnumerable<Genre> GetGenresFromName(string name)
         {
-            return Find(g => g.Name.Contains(name)).FirstOrDefault();
+            IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation();
+            string nameLike = "%" + string.Join('%', nameTokens) + "%";
+
+            // obs: in EF Core 6 we can use Regex.IsMatch in the Where method
+            return _context.Genres.Where(g => EF.Functions.Like(g.Name, nameLike));
         }
 
     }

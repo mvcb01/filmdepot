@@ -5,7 +5,7 @@ namespace FilmCRUD.Verbs
     // Examples:
     //  dotnet run -- visit --listcontents
     //  dotnet run -- visit --persistcontents 20220306
-    [Verb("visit", HelpText = "to generate the warehouse contents text file and persist in repo")]
+    [Verb("visit", HelpText = "to generate the warehouse contents text file and persist contents in repo")]
     public class VisitOptions
     {
         [Option(SetName = "ListingContents", HelpText = "generate the warehouse contents text file using the configured paths")]

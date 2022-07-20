@@ -18,11 +18,6 @@ namespace FilmDataAccess.EFCore.Repositories
             return _context.Movies.Where(m => m.ExternalId == externalId).FirstOrDefault();
         }
 
-        public IEnumerable<Movie> GetMoviesByGenre(params Genre[] genres)
-        {
-            return _context.Movies.Where(m => m.Genres.Intersect(genres).Count() > 0);
-        }
-
         public IEnumerable<Movie> GetMoviesWithoutActors()
         {
             return _context.Movies.Where(m => !m.Actors.Any());
@@ -53,8 +48,13 @@ namespace FilmDataAccess.EFCore.Repositories
             IEnumerable<string> titleTokens = title.GetStringTokensWithoutPunctuation();
             string titleLike = "%" + string.Join('%', titleTokens) + "%";
 
-            // obs: no EF Core 6 já podemos usar Regex.IsMatch no Where
+            // obs: in EF Core 6 we can use Regex.IsMatch in the Where method
             return _context.Movies.Where(m => EF.Functions.Like(m.Title, titleLike));
+        }
+
+        public IEnumerable<Movie> GetAllMoviesInVisit(MovieWarehouseVisit visit)
+        {
+            return visit.MovieRips.Select(r => r.Movie).Distinct();
         }
     }
 }
