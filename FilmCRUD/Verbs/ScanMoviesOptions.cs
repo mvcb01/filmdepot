@@ -24,6 +24,9 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "ByDirectorOptions", HelpText = "get descending movie count by director")]
         public bool ByDirector { get; set; }
 
+        [Option(SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
+        public bool ListVisits { get; set; }
+
         // can be used with any set
         [Option('v', "visit", HelpText = "warehouse visit to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
@@ -32,7 +35,6 @@ namespace FilmCRUD.Verbs
         [Option('t', "top", HelpText = "integer to limit output count of bygenre/byactor/bydirector and get only the top N")]
         public int? Top { get; set; }
 
-        [Option(SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
-        public bool ListVisits { get; set; }
+
     }
 }
