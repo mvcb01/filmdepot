@@ -38,6 +38,8 @@ namespace FilmCRUD
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
             ScanMoviesManager scanMoviesManager = new(unitOfWork);
 
+            Test(appSettingsManager);
+
             ParserResult<object> parsed = Parser
                 .Default
                 .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);
@@ -48,6 +50,16 @@ namespace FilmCRUD
             await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, movieAPIClient));
             parsed.WithNotParsed(HandleParseError);
             {}
+        }
+
+        public static void Test(IAppSettingsManager appSettingsManager)
+        {
+            var connstring = appSettingsManager.GetConnectionString("FilmDb");
+            var warehouseDir = appSettingsManager.GetMovieWarehouseDirectory();
+
+            var apikey = appSettingsManager.GetApiKey("TheMovieDb");
+            {}
+
         }
 
         private static void ConfigureServices(IServiceCollection services)
