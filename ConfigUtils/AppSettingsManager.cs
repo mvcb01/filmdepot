@@ -21,7 +21,6 @@ namespace ConfigUtils
             var configBuilder = new ConfigurationBuilder();
             configBuilder.AddJsonFile("appsettings.json");
 
-
             var env = Environment.GetEnvironmentVariable("FILMCRUD_ENVIRONMENT");
             if (env != null)
             {
