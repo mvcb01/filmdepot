@@ -19,15 +19,16 @@ namespace ConfigUtils
             // NOTA: access order for different ENVs:
             //      https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-6.0#hi2low
             var configBuilder = new ConfigurationBuilder();
-            configBuilder
-                .AddJsonFile("appsettings.json")
-                .AddUserSecrets<AppSettingsManager>();
+            configBuilder.AddJsonFile("appsettings.json");
+
 
             var env = Environment.GetEnvironmentVariable("FILMCRUD_ENVIRONMENT");
             if (env != null)
             {
                 configBuilder.AddJsonFile($"appsettings.{env}.json");
             }
+
+            configBuilder.AddUserSecrets<AppSettingsManager>();
 
             this.ConfigRoot = configBuilder.Build();
         }
