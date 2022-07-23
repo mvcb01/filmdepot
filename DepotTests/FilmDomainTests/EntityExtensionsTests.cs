@@ -22,9 +22,10 @@ namespace DepotTests.FilmDomainTests
         [InlineData("Andrés Gertrúdix", new string[] { "andres", "gertrudix" })]
         [InlineData("Göran", new string[] { "goran" })]
         [InlineData("Carlos 'Bochita' Martinetti", new string[] { "carlos", "bochita", "martinetti"})]
-        [InlineData("James O'Connell", new string[] { "james", "o", "connell"})]
+        [InlineData("James O'Connell", new string[] { "james", "o'connell" })]
         [InlineData("Nina Šunevič", new string[] { "nina", "sunevic" })]
-        public void GetStringTokensWithoutPunctuation_ShouldReturnCorrectStrings(string name, IEnumerable<string> expected)
+        [InlineData("Petr Vaněk", new string[] { "petr", "vanek" })]
+        public void GetStringTokensWithoutPunctuation_ShouldReturnCorrectComponents(string name, IEnumerable<string> expected)
         {
             IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation();
             // order matters
