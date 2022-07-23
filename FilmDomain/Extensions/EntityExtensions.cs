@@ -19,7 +19,7 @@ namespace FilmDomain.Extensions
             return visits.Select(v => v.VisitDateTime);
         }
 
-        public static IEnumerable<string> GetStringTokensWithoutPunctuation(this string value)
+        public static IEnumerable<string> GetStringTokensWithoutPunctuationAndDiacritics(this string value)
         {
             if (value == null)
             {

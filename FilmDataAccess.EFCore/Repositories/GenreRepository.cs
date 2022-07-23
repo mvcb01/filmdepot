@@ -20,7 +20,7 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Genre> GetGenresFromName(string name)
         {
-            IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation();
+            IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuationAndDiacritics();
             string nameLike = "%" + string.Join('%', nameTokens) + "%";
 
             // obs: in EF Core 6 we can use Regex.IsMatch in the Where method:
