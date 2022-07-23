@@ -18,7 +18,8 @@ namespace FilmDataAccess.EFCore.Repositories
             IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation();
             string nameLike = "%" + string.Join('%', nameTokens) + "%";
 
-            // obs: in EF Core 6 we can use Regex.IsMatch in the Where method
+            // obs: in EF Core 6 we can use Regex.IsMatch in the Where method:
+            //      https://docs.microsoft.com/en-us/ef/core/providers/sqlite/functions
             return _context.Directors.Where(d => EF.Functions.Like(d.Name, nameLike));
         }
     }
