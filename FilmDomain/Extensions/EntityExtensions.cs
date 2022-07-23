@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using FilmDomain.Entities;
 
 namespace FilmDomain.Extensions
@@ -23,9 +24,9 @@ namespace FilmDomain.Extensions
             {
                 return Enumerable.Empty<string>();
             }
-            var movieTitle = value.Trim().ToLower();
-            char[] punctuation = value.Where(Char.IsPunctuation).Distinct().ToArray();
-            return movieTitle.Split().Select(s => s.Trim(punctuation));
+            string valueNormalized = value.Trim().ToLower().Normalize(NormalizationForm.FormC);
+            IEnumerable<Char> charsToRemove = valueNormalized.Where(c => !Char.IsLetterOrDigit(c)).Distinct();
+            return valueNormalized.Split().Select(s => s.Trim(charsToRemove.ToArray())).Where(s => !string.IsNullOrEmpty(s));
         }
 
     }
