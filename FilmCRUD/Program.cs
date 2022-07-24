@@ -17,7 +17,6 @@ using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using MovieAPIClients.TheMovieDb;
 
-
 namespace FilmCRUD
 {
     class Program
