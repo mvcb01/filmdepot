@@ -27,7 +27,7 @@ namespace DepotTests.FilmDomainTests
         [InlineData("Petr Vaněk", new string[] { "petr", "vanek" })]
         public void GetStringTokensWithoutPunctuationAndDiacritics_ShouldReturnCorrectComponents(string name, IEnumerable<string> expected)
         {
-            IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation();
+            IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation(removeDiacritics: true);
             // order matters
             actual.Should().BeEquivalentTo(expected, opts => opts.WithStrictOrdering());
         }
