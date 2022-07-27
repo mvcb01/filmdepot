@@ -19,15 +19,22 @@ namespace FilmDomain.Extensions
             return visits.Select(v => v.VisitDateTime);
         }
 
-        public static IEnumerable<string> GetStringTokensWithoutPunctuation(this string value)
+        public static IEnumerable<string> GetStringTokensWithoutPunctuation(this string value, bool removeDiacritics = true)
         {
             if (value == null)
             {
                 return Enumerable.Empty<string>();
             }
-            string valueNormalized = RemoveDiacritics(value.Trim().ToLower());
-            IEnumerable<Char> charsToRemove = valueNormalized.Where(c => !Char.IsLetterOrDigit(c)).Distinct();
-            return valueNormalized.Split().Select(s => s.Trim(charsToRemove.ToArray())).Where(s => !string.IsNullOrEmpty(s));
+
+            value = value.Trim().ToLower();
+
+            if (removeDiacritics)
+            {
+                value = RemoveDiacritics(value);
+            }
+
+            IEnumerable<Char> charsToRemove = value.Where(c => !Char.IsLetterOrDigit(c)).Distinct();
+            return value.Split().Select(s => s.Trim(charsToRemove.ToArray())).Where(s => !string.IsNullOrEmpty(s));
         }
 
         // taken from

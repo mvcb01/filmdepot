@@ -32,9 +32,25 @@ namespace DepotTests.FilmDomainTests
             actual.Should().BeEquivalentTo(expected, opts => opts.WithStrictOrdering());
         }
 
+
+        [Theory]
+        [InlineData(null, new string[] {})]
+        [InlineData("name surname", new string[] { "name", "surname" })]
+        [InlineData("Name Surname", new string[] { "name", "surname" })]
+        [InlineData(" namE  suRName  ", new string[] {"name", "surname"})]
+        [InlineData(" Some! Name & with Stuff._>  ", new string[] { "some", "name", "with", "stuff" })]
+        [InlineData("Béla Tarr", new string[] { "béla", "tarr" })]
+        [InlineData("Cação", new string[] { "cação" })]
+        [InlineData("Júli Fàbregas", new string[] { "júli", "fàbregas" })]
+        [InlineData("Andrés Gertrúdix", new string[] { "andrés", "gertrúdix" })]
+        [InlineData("Göran", new string[] { "göran" })]
+        [InlineData("Carlos 'Bochita' Martinetti", new string[] { "carlos", "bochita", "martinetti"})]
+        [InlineData("James O'Connell", new string[] { "james", "o'connell" })]
+        [InlineData("Nina Šunevič", new string[] { "nina", "šunevič" })]
+        [InlineData("Petr Vaněk", new string[] { "petr", "vaněk" })]
         public void GetStringTokensWithoutPunctuation_ShouldReturnCorrectComponents(string name, IEnumerable<string> expected)
         {
-            IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation();
+            IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation(removeDiacritics: false);
             // order matters
             actual.Should().BeEquivalentTo(expected, opts => opts.WithStrictOrdering());
         }
