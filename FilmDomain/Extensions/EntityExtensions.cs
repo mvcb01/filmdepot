@@ -37,6 +37,11 @@ namespace FilmDomain.Extensions
             return value.Split().Select(s => s.Trim(charsToRemove.ToArray())).Where(s => !string.IsNullOrEmpty(s));
         }
 
+        public static string WithoutDiacritics(this string value)
+        {
+            return RemoveDiacritics(value);
+        }
+
         // taken from
         // https://stackoverflow.com/questions/249087/how-do-i-remove-diacritics-accents-from-a-string-in-net/249126#249126
         public static string RemoveDiacritics(string text)
