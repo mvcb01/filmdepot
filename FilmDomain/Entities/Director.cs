@@ -3,7 +3,7 @@ using FilmDomain.Interfaces;
 
 namespace FilmDomain.Entities
 {
-    public class Director : IExternalEntity
+    public class Director : IExternalEntity, INamedEntityWithId
     {
         public int Id { get; set; }
 

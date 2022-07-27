@@ -3,7 +3,7 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# manuais
+# extra stuff
 FilmDataAccess.EFCore/*.db
 FilmDataAccess.EFCore/*.db-shm
 FilmDataAccess.EFCore/*.db-wal
