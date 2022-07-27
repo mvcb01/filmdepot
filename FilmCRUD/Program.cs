@@ -38,6 +38,9 @@ namespace FilmCRUD
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
             ScanMoviesManager scanMoviesManager = new(unitOfWork);
 
+            var test0 = scanMoviesManager.GetActorsFromName("Ana Isabel Velásquez").ToList();
+            var test1 = scanMoviesManager.GetActorsFromName("anA ISABEL velasquez").ToList();
+
             ParserResult<object> parsed = Parser
                 .Default
                 .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);

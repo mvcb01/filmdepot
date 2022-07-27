@@ -4,6 +4,8 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Text.RegularExpressions;
 
 namespace FilmDataAccess.EFCore.Repositories
 {
@@ -20,12 +22,16 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Actor> GetActorsFromName(string name)
         {
-            IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation();
+            IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation(removeDiacritics: false);
             string nameLike = "%" + string.Join('%', nameTokens) + "%";
 
-            // obs: in EF Core 6 we can use Regex.IsMatch in the Where method:
-            //      https://docs.microsoft.com/en-us/ef/core/providers/sqlite/functions
-            return _context.Actors.Where(a => EF.Functions.Like(a.Name, nameLike));
+            IEnumerable<Actor> result =  _context.Actors.Where(a => EF.Functions.Like(a.Name, nameLike));
+
+            if (!result.Any())
+            {
+                result = _context.Actors.GetEntitiesFromName(name, removeDiacritics: true);
+            }
+            return result;
         }
     }
 }

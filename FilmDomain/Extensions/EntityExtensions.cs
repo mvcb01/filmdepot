@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using FilmDomain.Entities;
+using FilmDomain.Interfaces;
 
 namespace FilmDomain.Extensions
 {
@@ -40,6 +42,22 @@ namespace FilmDomain.Extensions
         public static string WithoutDiacritics(this string value)
         {
             return RemoveDiacritics(value);
+        }
+
+        public static IEnumerable<T> GetEntitiesFromName<T>(
+            this IEnumerable<T> allEntities,
+            string name,
+            bool removeDiacritics = false) where T : INamedEntityWithId
+        {
+            IEnumerable<string> nameTokensWithoutDiacritics = name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
+            string nameRegex = @"(\s*)(" + string.Join(@")(\s*)(", nameTokensWithoutDiacritics) + @")(\s*)";
+            IEnumerable<int> externalIds = allEntities
+                    .Where(e => Regex.IsMatch(
+                        string.Join(' ', e.Name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                        nameRegex,
+                        RegexOptions.IgnoreCase))
+                    .Select(t => t.Id);
+            return allEntities.Where(e => externalIds.Contains(e.Id));
         }
 
         // taken from
