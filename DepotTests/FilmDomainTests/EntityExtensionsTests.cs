@@ -25,7 +25,7 @@ namespace DepotTests.FilmDomainTests
         [InlineData("James O'Connell", new string[] { "james", "o'connell" })]
         [InlineData("Nina Šunevič", new string[] { "nina", "sunevic" })]
         [InlineData("Petr Vaněk", new string[] { "petr", "vanek" })]
-        public void GetStringTokensWithoutPunctuation_ShouldReturnCorrectComponents(string name, IEnumerable<string> expected)
+        public void GetStringTokensWithoutPunctuationAndDiacritics_ShouldReturnCorrectComponents(string name, IEnumerable<string> expected)
         {
             IEnumerable<string> actual = name.GetStringTokensWithoutPunctuationAndDiacritics();
             // order matters
