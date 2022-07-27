@@ -1,10 +1,8 @@
 using Xunit;
 using FluentAssertions;
 using System.Collections.Generic;
-using System.Linq;
-
 using FilmDomain.Extensions;
-
+using FilmDomain.Entities;
 
 namespace DepotTests.FilmDomainTests
 {
@@ -53,6 +51,38 @@ namespace DepotTests.FilmDomainTests
             IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation(removeDiacritics: false);
             // order matters
             actual.Should().BeEquivalentTo(expected, opts => opts.WithStrictOrdering());
+        }
+
+        [Fact]
+        public void GetEntitiesFromNameFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches()
+        {
+            // arrange
+            var firstActor = new Actor() { Name = "Benoît Pöelvóorde", Id = 0};
+            var secondActor = new Actor() { Name = " ([]) - benoit -^^ PoeLVOOrdE *+", Id = 1 };
+            var thirdActor = new Actor() { Name = "Zbigniew Zamachowski", Id = 2 };
+            var allActors = new Actor[] { firstActor, secondActor, thirdActor };
+
+            // act
+            IEnumerable<Actor> searchResult = allActors.GetEntitiesFromNameFuzzyMatching("benoit _Poelvoorde-->", removeDiacritics: true);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new Actor[] { firstActor, secondActor });
+        }
+
+        [Fact]
+        public void GetEntitiesFromNameFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches()
+        {
+            // arrange
+            var firstActor = new Actor() { Name = "{/% Benoît Pöelvóorde", Id = 0};
+            var secondActor = new Actor() { Name = ":!!  benoit /& PoeLVOOrdE ", Id = 1 };
+            var thirdActor = new Actor() { Name = "Zbigniew Zamachowski", Id = 2 };
+            var allActors = new Actor[] { firstActor, secondActor, thirdActor };
+
+            // act
+            IEnumerable<Actor> searchResult = allActors.GetEntitiesFromNameFuzzyMatching("benoit _Poelvoorde-->", removeDiacritics: false);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new Actor[] { secondActor });
         }
     }
 }

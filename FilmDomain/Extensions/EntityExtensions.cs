@@ -46,13 +46,10 @@ namespace FilmDomain.Extensions
         {
             IEnumerable<string> nameTokensWithoutDiacritics = name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
             string nameRegex = @"(\s*)(" + string.Join(@")(\s*)(", nameTokensWithoutDiacritics) + @")(\s*)";
-            IEnumerable<int> externalIds = allEntities
-                    .Where(e => Regex.IsMatch(
+            return allEntities.Where(e => Regex.IsMatch(
                         string.Join(' ', e.Name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
                         nameRegex,
-                        RegexOptions.IgnoreCase))
-                    .Select(t => t.Id);
-            return allEntities.Where(e => externalIds.Contains(e.Id));
+                        RegexOptions.IgnoreCase));
         }
 
         // taken from
