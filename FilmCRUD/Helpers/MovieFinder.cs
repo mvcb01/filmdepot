@@ -25,11 +25,11 @@ namespace FilmCRUD.Helpers
             IEnumerable<MovieSearchResult> searchResultAll = await _movieAPIClient.SearchMovieAsync(parsedTitle);
 
             // filtra usando Title e OriginalTitle
-            IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuationAndDiacritics();
+            IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
             List<MovieSearchResult> searchResult = searchResultAll
-                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuationAndDiacritics())
+                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation())
                     ||
-                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuationAndDiacritics()))
+                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation()))
                 .ToList();
 
             int resultCount = searchResult.Count();
