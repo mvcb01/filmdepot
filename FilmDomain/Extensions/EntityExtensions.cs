@@ -39,7 +39,7 @@ namespace FilmDomain.Extensions
             return value.Split().Select(s => s.Trim(charsToRemove.ToArray())).Where(s => !string.IsNullOrEmpty(s));
         }
 
-        public static IEnumerable<T> GetEntitiesFromName<T>(
+        public static IEnumerable<T> GetEntitiesFromNameFuzzyMatching<T>(
             this IEnumerable<T> allEntities,
             string name,
             bool removeDiacritics = false) where T : INamedEntityWithId

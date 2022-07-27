@@ -28,7 +28,7 @@ namespace FilmDataAccess.EFCore.Repositories
             // searches again without diacritics if no results are found
             if (!result.Any())
             {
-                result = _context.Actors.GetEntitiesFromName(name, removeDiacritics: true);
+                result = _context.Actors.GetEntitiesFromNameFuzzyMatching(name, removeDiacritics: true);
             }
             return result;
         }
