@@ -39,11 +39,6 @@ namespace FilmDomain.Extensions
             return value.Split().Select(s => s.Trim(charsToRemove.ToArray())).Where(s => !string.IsNullOrEmpty(s));
         }
 
-        public static string WithoutDiacritics(this string value)
-        {
-            return RemoveDiacritics(value);
-        }
-
         public static IEnumerable<T> GetEntitiesFromName<T>(
             this IEnumerable<T> allEntities,
             string name,
