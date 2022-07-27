@@ -4,8 +4,6 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Text.RegularExpressions;
 
 namespace FilmDataAccess.EFCore.Repositories
 {
@@ -27,6 +25,7 @@ namespace FilmDataAccess.EFCore.Repositories
 
             IEnumerable<Actor> result =  _context.Actors.Where(a => EF.Functions.Like(a.Name, nameLike));
 
+            // searches again without diacritics if no results are found
             if (!result.Any())
             {
                 result = _context.Actors.GetEntitiesFromName(name, removeDiacritics: true);

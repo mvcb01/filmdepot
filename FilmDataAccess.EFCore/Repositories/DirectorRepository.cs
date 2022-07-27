@@ -15,12 +15,17 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Director> GetDirectorsFromName(string name)
         {
-            IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation();
+            IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation(removeDiacritics: false);
             string nameLike = "%" + string.Join('%', nameTokens) + "%";
 
-            // obs: in EF Core 6 we can use Regex.IsMatch in the Where method:
-            //      https://docs.microsoft.com/en-us/ef/core/providers/sqlite/functions
-            return _context.Directors.Where(d => EF.Functions.Like(d.Name, nameLike));
+            IEnumerable<Director> result =  _context.Directors.Where(a => EF.Functions.Like(a.Name, nameLike));
+
+            // searches again without diacritics if no results are found
+            if (!result.Any())
+            {
+                result = _context.Directors.GetEntitiesFromName(name, removeDiacritics: true);
+            }
+            return result;
         }
     }
 }
