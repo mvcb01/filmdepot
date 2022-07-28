@@ -45,7 +45,7 @@ namespace FilmCRUD
             IEnumerable<Movie> moviesWithoutDetails = GetMoviesWithoutDetails();
             if (!moviesWithoutDetails.Any())
             {
-                return;
+                await Task.CompletedTask;
             }
 
             // maps each movie id to the task that returns its details from the movie api
