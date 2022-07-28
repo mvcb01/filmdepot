@@ -143,19 +143,19 @@ namespace DepotTests.CRUDTests
         public void GetCountByGenre_ShouldReturnCorrectCount()
         {
             // arrange
-            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986 };
-            var secondMovie = new Movie() {Title = "gummo", ReleaseDate = 1997 };
-            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994 };
+            var dramaGenre = new Genre() { Name = "drama" };
+            var horrorGenre = new Genre() { Name = "horror" };
+            var comedyGenre = new Genre() { Name = "comedy" };
 
-            var dramaGenre = new Genre() { Name = "drama", Movies = new List<Movie>() { firstMovie, secondMovie }};
-            var horrorGenre = new Genre() { Name = "horror", Movies = new List<Movie>() { firstMovie } };
-            var comedyGenre = new Genre() { Name = "comedy", Movies = new List<Movie>() { thirdMovie } };
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Genres = new Genre[] { dramaGenre, horrorGenre } };
+            var secondMovie = new Movie() {Title = "gummo", ReleaseDate = 1997, Genres = new Genre[] { dramaGenre } };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Genres = new Genre[] { comedyGenre } };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
-            this._genreRepositoryMock
-                .Setup(g => g.GetAll())
-                .Returns(new Genre[] { dramaGenre, horrorGenre, comedyGenre });
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
             IEnumerable<KeyValuePair<Genre, int>> actual = this._scanMoviesManager.GetCountByGenre(visit);
