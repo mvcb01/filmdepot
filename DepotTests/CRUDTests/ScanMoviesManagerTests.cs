@@ -203,19 +203,19 @@ namespace DepotTests.CRUDTests
         public void GetCountByDirector_ShouldReturnCorrectCount()
         {
             // arrange
-            var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019 };
-            var secondMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007 };
-            var thirdMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021 };
+            var firstDirector = new Director() { Name = "benny safdie" };
+            var secondDirector = new Director() { Name = "josh safdie" };
+            var thirdDirector = new Director() { Name = "paul thomas anderson" };
 
-            var firstDirector = new Director() { Name = "benny safdie", Movies = new List<Movie>() { firstMovie } };
-            var secondDirector = new Director() { Name = "josh safdie", Movies = new List<Movie>() { firstMovie } };
-            var thirdDirector = new Director() { Name = "paul thomas anderson", Movies = new List<Movie>() { secondMovie, thirdMovie } };
+            var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019, Directors = new Director[] { firstDirector, secondDirector } };
+            var secondMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007, Directors = new Director[] { thirdDirector } };
+            var thirdMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021, Directors = new Director[] { thirdDirector } };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
-            this._directorRepositoryMock
-                .Setup(d => d.GetAll())
-                .Returns(new Director[] { firstDirector, secondDirector, thirdDirector });
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
             IEnumerable<KeyValuePair<Director, int>> actual = this._scanMoviesManager.GetCountByDirector(visit);

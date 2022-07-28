@@ -67,7 +67,11 @@ namespace FilmCRUD
 
         public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit)
         {
-            return this._unitOfWork.Directors.GetAll().Select(d => new KeyValuePair<Director, int>(d, d.Movies.Count()));
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            // flatten -> group by Director and count
+            IEnumerable<IGrouping<Director, Director>> grouped = moviesInVisit.SelectMany(m => m.Directors).GroupBy(a => a);
+            return grouped.Select(group => new KeyValuePair<Director, int>(group.Key, group.Count()));
         }
 
         public MovieWarehouseVisit GetClosestVisit()
