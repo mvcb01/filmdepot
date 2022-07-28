@@ -54,7 +54,11 @@ namespace FilmCRUD
 
         public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit)
         {
-            return this._unitOfWork.Actors.GetAll().Select(a => new KeyValuePair<Actor, int>(a, a.Movies.Count()));
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            // flatten -> distinct
+            IEnumerable<Actor> actorsInVisit = moviesInVisit.SelectMany(m => m.Actors).Distinct().ToList();
+            return actorsInVisit.Select(a => new KeyValuePair<Actor, int>(a, a.Movies.Count()));
         }
 
         public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit)
