@@ -206,7 +206,7 @@ namespace FilmCRUD
                 System.Console.WriteLine("Count by genre:\n");
                 IEnumerable<KeyValuePair<Genre, int>> genreCount = scanMoviesManager.GetCountByGenre(visit);
                 int toTake = opts.Top ?? genreCount.Count();
-                genreCount.OrderByDescending(kvp => kvp.Value)
+                genreCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
@@ -216,7 +216,7 @@ namespace FilmCRUD
                 System.Console.WriteLine("Count by actor:\n");
                 IEnumerable<KeyValuePair<Actor, int>> actorCount = scanMoviesManager.GetCountByActor(visit);
                 int toTake = opts.Top ?? actorCount.Count();
-                actorCount.OrderByDescending(kvp => kvp.Value)
+                actorCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
@@ -226,7 +226,7 @@ namespace FilmCRUD
                 System.Console.WriteLine("Count by director:\n");
                 IEnumerable<KeyValuePair<Director, int>> directorCount = scanMoviesManager.GetCountByDirector(visit);
                 int toTake = opts.Top ?? directorCount.Count();
-                directorCount.OrderByDescending(kvp => kvp.Value)
+                directorCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
