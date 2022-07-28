@@ -49,17 +49,29 @@ namespace FilmCRUD
 
         public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit)
         {
-            return this._unitOfWork.Genres.GetAll().Select(g => new KeyValuePair<Genre, int>(g, g.Movies.Count()));
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            // flatten -> group by Genre and count
+            IEnumerable<IGrouping<Genre, Genre>> grouped = moviesInVisit.SelectMany(m => m.Genres).GroupBy(g => g);
+            return grouped.Select(group => new KeyValuePair<Genre, int>(group.Key, group.Count()));
         }
 
         public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit)
         {
-            return this._unitOfWork.Actors.GetAll().Select(a => new KeyValuePair<Actor, int>(a, a.Movies.Count()));
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            // flatten -> group by Actor and count
+            IEnumerable<IGrouping<Actor, Actor>> grouped = moviesInVisit.SelectMany(m => m.Actors).GroupBy(a => a);
+            return grouped.Select(group => new KeyValuePair<Actor, int>(group.Key, group.Count()));
         }
 
         public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit)
         {
-            return this._unitOfWork.Directors.GetAll().Select(d => new KeyValuePair<Director, int>(d, d.Movies.Count()));
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            // flatten -> group by Director and count
+            IEnumerable<IGrouping<Director, Director>> grouped = moviesInVisit.SelectMany(m => m.Directors).GroupBy(a => a);
+            return grouped.Select(group => new KeyValuePair<Director, int>(group.Key, group.Count()));
         }
 
         public MovieWarehouseVisit GetClosestVisit()
