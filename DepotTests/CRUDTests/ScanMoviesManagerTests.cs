@@ -173,19 +173,19 @@ namespace DepotTests.CRUDTests
         public void GetCountByActor_ShouldReturnCorrectCount()
         {
             // arrange
-            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986 };
-            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996 };
-            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994 };
+            var firstActor = new Actor() { Name = "jeff goldblum" };
+            var secondActor = new Actor() { Name = "bill pullman" };
+            var thirdActor = new Actor() { Name = "jim carrey" };
 
-            var firstActor = new Actor() { Name = "jeff goldblum", Movies = new List<Movie>() { firstMovie, secondMovie } };
-            var secondActor = new Actor() { Name = "bill pullman", Movies = new List<Movie>() { firstMovie } };
-            var thirdActor = new Actor() { Name = "jim carrey", Movies =  new List<Movie>() { thirdMovie } };
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Actors = new Actor[] { firstActor, secondActor } };
+            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, Actors = new Actor[] { firstActor } };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Actors = new Actor[] { thirdActor } };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
-            this._actoRepositoryMock
-                .Setup(a => a.GetAll())
-                .Returns(new Actor[] { firstActor, secondActor, thirdActor });
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
             IEnumerable<KeyValuePair<Actor, int>> actual = this._scanMoviesManager.GetCountByActor(visit);
