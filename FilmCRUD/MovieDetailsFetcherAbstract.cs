@@ -45,6 +45,7 @@ namespace FilmCRUD
             IEnumerable<Movie> moviesWithoutDetails = GetMoviesWithoutDetails();
             if (!moviesWithoutDetails.Any())
             {
+                System.Console.WriteLine("No movies with missing details");
                 await Task.CompletedTask;
             }
 
