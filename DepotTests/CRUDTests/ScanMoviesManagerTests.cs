@@ -2,6 +2,7 @@ using Xunit;
 using FluentAssertions;
 using Moq;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using FilmDomain.Entities;
@@ -137,6 +138,28 @@ namespace DepotTests.CRUDTests
             // assert
             actual.Should().BeEquivalentTo(new Movie[] { firstMovie });
 
+        }
+
+        [Fact]
+        public void GetMoviesWithReleaseDates_WithProvidedDates_ShouldReturnCorrectMovies()
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986 };
+            var secondMovie = new Movie() {Title = "gummo", ReleaseDate = 1997 };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994 };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithReleaseDates(visit, new int[] { 1994, 1995, 1996, 1997 });
+
+            // assert
+            var expected = new Movie[] { secondMovie, thirdMovie };
+            actual.Should().BeEquivalentTo(expected);
         }
 
         [Fact]
