@@ -202,6 +202,13 @@ namespace FilmCRUD
                 System.Console.WriteLine($"Movies with directors: {directorNames} \n");
                 moviesWithDirectors.ToList().ForEach(m => System.Console.WriteLine(m));
             }
+            else if (opts.WithDates.Any())
+            {
+                IEnumerable<Movie> moviesWithDates = scanMoviesManager.GetMoviesWithReleaseDates(visit, opts.WithDates.ToArray());
+                string releaseDates = string.Join(" or ", opts.WithDates);
+                System.Console.WriteLine($"Movies with release date {releaseDates}: \n");
+                moviesWithDates.ToList().ForEach(m => System.Console.WriteLine(m));
+            }
             else if (opts.ByGenre)
             {
                 System.Console.WriteLine("Count by genre:\n");
