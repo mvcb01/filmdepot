@@ -71,6 +71,8 @@ namespace FilmDomain.Extensions
                 titleRegex,
                 RegexOptions.IgnoreCase));
 
+            // if the last token looks like a date that starts with "1" or "2" then we also search
+            // for movie entities with such release date
             var lastToken = titleTokensWithoutPunctuation.Last();
             if (Regex.IsMatch(lastToken, "(1|2)([0-9]{3})"))
             {
