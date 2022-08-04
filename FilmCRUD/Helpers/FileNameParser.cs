@@ -20,11 +20,11 @@ namespace FilmCRUD.Helpers
 
         // para fazer split pela release date sem parênteses:
         //      "Cop Car 2015" -> "Cop Car", "2015"
-        private const string TitleAndReleaseDateSplitter_WithParenth = @"(1|2)([0-9]{3})";
+        private const string TitleAndReleaseDateSplitter_WithoutParenth = @"(1|2)([0-9]{3})";
 
         // para fazer split pela release date com parênteses:
         //      "The Tragedy Of Macbeth (2021)" -> "The Tragedy Of Macbeth", "2021"
-        private const string TitleAndReleaseDateSplitter_WithoutParenth = @"\((1|2)([0-9]{3})\)";
+        private const string TitleAndReleaseDateSplitter_WithParenth = @"\((1|2)([0-9]{3})\)";
 
         // qualquer palavra com letras a-z, incluindo a palavra vazia
         private const string AnyLetterSequence = @"[a-z]*";
