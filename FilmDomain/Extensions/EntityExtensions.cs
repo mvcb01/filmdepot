@@ -44,12 +44,12 @@ namespace FilmDomain.Extensions
             string name,
             bool removeDiacritics = false) where T : INamedEntityWithId
         {
-            IEnumerable<string> nameTokensWithoutDiacritics = name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
-            string nameRegex = @"(\s*)(" + string.Join(@")(\s*)(", nameTokensWithoutDiacritics) + @")(\s*)";
+            IEnumerable<string> nameTokensWithoutPunctuation = name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
+            string nameRegex = @"(\s*)(" + string.Join(@")(\s*)(", nameTokensWithoutPunctuation) + @")(\s*)";
             return allEntities.Where(e => Regex.IsMatch(
-                        string.Join(' ', e.Name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
-                        nameRegex,
-                        RegexOptions.IgnoreCase));
+                string.Join(' ', e.Name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                nameRegex,
+                RegexOptions.IgnoreCase));
         }
 
         public static IEnumerable<Movie> GetMoviesFromTitleFuzzyMatching(
@@ -57,7 +57,37 @@ namespace FilmDomain.Extensions
             string title,
             bool removeDiacritics = false)
         {
-            return Enumerable.Empty<Movie>();
+            var titleTokensWithoutPunctuation = title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
+
+            if (!titleTokensWithoutPunctuation.Any())
+            {
+                return Enumerable.Empty<Movie>();
+            }
+
+            string titleRegex = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuation) + @")(\s*)";
+
+            IEnumerable<Movie> result = allMovies.Where(m => Regex.IsMatch(
+                string.Join(' ', m.Title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                titleRegex,
+                RegexOptions.IgnoreCase));
+
+            var lastToken = titleTokensWithoutPunctuation.Last();
+            if (Regex.IsMatch(lastToken, "(1|2)([0-9]{3})"))
+            {
+
+                IEnumerable<string> titleTokensWithoutPunctuationNoDate = titleTokensWithoutPunctuation.SkipLast(1);
+                string titleRegexNoDate = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuationNoDate) + @")(\s*)";
+                int parsedReleaseDate = int.Parse(lastToken);
+                IEnumerable<Movie> extraResults = allMovies.Where(
+                    m => m.ReleaseDate == parsedReleaseDate
+                        && Regex.IsMatch(
+                            string.Join(' ', m.Title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                            titleRegexNoDate,
+                            RegexOptions.IgnoreCase));
+                result = result.Concat(extraResults);
+            }
+
+            return result;
         }
 
         // taken from

@@ -96,6 +96,7 @@ namespace DepotTests.FilmDomainTests
         [InlineData("$$#!(!) Sátántangó")]
         [InlineData("  sáTânTãnGó  (1994)")]
         [InlineData("satantango 1994")]
+        [InlineData("satantango")]
         public void GetMoviesFromTitleFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string title)
         {
             // arrange
@@ -116,6 +117,7 @@ namespace DepotTests.FilmDomainTests
         [InlineData("$$#!(!) Satantango")]
         [InlineData("  saTanTanGo  (1994)")]
         [InlineData("satantango 1994")]
+        [InlineData("satantango")]
         public void GetMoviesFromTitleFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches(string title)
         {
             // arrange
@@ -127,7 +129,7 @@ namespace DepotTests.FilmDomainTests
             var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie };
 
             // act
-            IEnumerable<Movie> searchResult = allMovies.GetMoviesFromTitleFuzzyMatching(title, removeDiacritics: true);
+            IEnumerable<Movie> searchResult = allMovies.GetMoviesFromTitleFuzzyMatching(title, removeDiacritics: false);
 
             // assert
             searchResult.Should().BeEquivalentTo(new[] { firstMovie });
