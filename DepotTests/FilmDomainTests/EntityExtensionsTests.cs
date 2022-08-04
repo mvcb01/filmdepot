@@ -122,8 +122,9 @@ namespace DepotTests.FilmDomainTests
             var firstMovie = new Movie() { Title = "Satantango", ReleaseDate = 1994 };
             var secondMovie = new Movie() { Title = "The Turin Horse", ReleaseDate = 2011 };
             var thirdMovie = new Movie() { Title = "Natural Born Killers", ReleaseDate = 1994 };
+            var fourthMovie = new Movie() { Title = "Sátántangó", ReleaseDate = 1994 };
 
-            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie };
+            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie };
 
             // act
             IEnumerable<Movie> searchResult = allMovies.GetMoviesFromTitleFuzzyMatching(title, removeDiacritics: true);
