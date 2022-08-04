@@ -83,6 +83,7 @@ namespace DepotTests.FilmDomainTests
 
             // assert
             searchResult.Should().BeEquivalentTo(new Actor[] { secondActor });
+
         }
     }
 }
