@@ -52,6 +52,14 @@ namespace FilmDomain.Extensions
                         RegexOptions.IgnoreCase));
         }
 
+        public static IEnumerable<Movie> GetMoviesFromTitleFuzzyMatching(
+            this IEnumerable<Movie> allMovies,
+            string title,
+            bool removeDiacritics = false)
+        {
+            return Enumerable.Empty<Movie>();
+        }
+
         // taken from
         // https://stackoverflow.com/questions/249087/how-do-i-remove-diacritics-accents-from-a-string-in-net/249126#249126
         public static string RemoveDiacritics(string text)
