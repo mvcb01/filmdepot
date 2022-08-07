@@ -15,11 +15,17 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "WithDirectorOptions", HelpText = "list movies with directors")]
         public IEnumerable<string> WithDirectors { get; set; }
 
+        [Option(SetName = "WithDatesOptions", HelpText = "list movies with released dates")]
+        public IEnumerable<int> WithDates { get; set; }
+
         [Option(SetName = "ByGenreOptions", HelpText = "get descending movie count by genre")]
         public bool ByGenre { get; set; }
 
         [Option(SetName = "ByActorOptions", HelpText = "get descending movie count by actor")]
         public bool ByActor { get; set; }
+
+        [Option(SetName = "SearchOptions", HelpText = "search movies by title")]
+        public string Search { get; set; }
 
         [Option(SetName = "ByDirectorOptions", HelpText = "get descending movie count by director")]
         public bool ByDirector { get; set; }

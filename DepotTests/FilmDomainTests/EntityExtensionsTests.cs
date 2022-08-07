@@ -53,24 +53,30 @@ namespace DepotTests.FilmDomainTests
             actual.Should().BeEquivalentTo(expected, opts => opts.WithStrictOrdering());
         }
 
-        [Fact]
-        public void GetEntitiesFromNameFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches()
+        [Theory]
+        [InlineData("benoit _Poelvoorde-->")]
+        [InlineData("benoîT     póelvõörDe")]
+        [InlineData("[ -> benoîT     póelvõörDe <-]")]
+        public void GetEntitiesFromNameFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string nameToSearch)
         {
             // arrange
-            var firstActor = new Actor() { Name = "Benoît Pöelvóorde", Id = 0};
+            var firstActor = new Actor() { Name = "!~~Benoît Pöelvóorde", Id = 0};
             var secondActor = new Actor() { Name = " ([]) - benoit -^^ PoeLVOOrdE *+", Id = 1 };
             var thirdActor = new Actor() { Name = "Zbigniew Zamachowski", Id = 2 };
             var allActors = new Actor[] { firstActor, secondActor, thirdActor };
 
             // act
-            IEnumerable<Actor> searchResult = allActors.GetEntitiesFromNameFuzzyMatching("benoit _Poelvoorde-->", removeDiacritics: true);
+            IEnumerable<Actor> searchResult = allActors.GetEntitiesFromNameFuzzyMatching(nameToSearch, removeDiacritics: true);
 
             // assert
             searchResult.Should().BeEquivalentTo(new Actor[] { firstActor, secondActor });
         }
 
-        [Fact]
-        public void GetEntitiesFromNameFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches()
+        [Theory]
+        [InlineData("benoit _Poelvoorde-->")]
+        [InlineData("%-(//) benoiT     poelvoorDe")]
+        [InlineData("[ -> benoiT     poelvoorDe <-]")]
+        public void GetEntitiesFromNameFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches(string nameToSearch)
         {
             // arrange
             var firstActor = new Actor() { Name = "{/% Benoît Pöelvóorde", Id = 0};
@@ -79,10 +85,54 @@ namespace DepotTests.FilmDomainTests
             var allActors = new Actor[] { firstActor, secondActor, thirdActor };
 
             // act
-            IEnumerable<Actor> searchResult = allActors.GetEntitiesFromNameFuzzyMatching("benoit _Poelvoorde-->", removeDiacritics: false);
+            IEnumerable<Actor> searchResult = allActors.GetEntitiesFromNameFuzzyMatching(nameToSearch, removeDiacritics: false);
 
             // assert
             searchResult.Should().BeEquivalentTo(new Actor[] { secondActor });
+
+        }
+
+        [Theory]
+        [InlineData("$$#!(!) Sátántangó")]
+        [InlineData("  sáTânTãnGó  (1994)")]
+        [InlineData("satantango 1994")]
+        [InlineData("satantango")]
+        public void GetMoviesFromTitleFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "Sátántangó", ReleaseDate = 1994 };
+            var secondMovie = new Movie() { Title = "The Turin Horse", ReleaseDate = 2011 };
+            var thirdMovie = new Movie() { Title = "Natural Born Killers", ReleaseDate = 1994 };
+
+            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie };
+
+            // act
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new[] { firstMovie });
+        }
+
+        [Theory]
+        [InlineData("$$#!(!) Satantango")]
+        [InlineData("  saTanTanGo  (1994)")]
+        [InlineData("satantango 1994")]
+        [InlineData("satantango")]
+        public void GetMoviesFromTitleFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "Satantango", ReleaseDate = 1994 };
+            var secondMovie = new Movie() { Title = "The Turin Horse", ReleaseDate = 2011 };
+            var thirdMovie = new Movie() { Title = "Natural Born Killers", ReleaseDate = 1994 };
+            var fourthMovie = new Movie() { Title = "Sátántangó", ReleaseDate = 1994 };
+
+            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie };
+
+            // act
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: false);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new[] { firstMovie });
         }
     }
 }

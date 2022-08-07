@@ -44,12 +44,52 @@ namespace FilmDomain.Extensions
             string name,
             bool removeDiacritics = false) where T : INamedEntityWithId
         {
-            IEnumerable<string> nameTokensWithoutDiacritics = name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
-            string nameRegex = @"(\s*)(" + string.Join(@")(\s*)(", nameTokensWithoutDiacritics) + @")(\s*)";
+            IEnumerable<string> nameTokensWithoutPunctuation = name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
+            string nameRegex = @"(\s*)(" + string.Join(@")(\s*)(", nameTokensWithoutPunctuation) + @")(\s*)";
             return allEntities.Where(e => Regex.IsMatch(
-                        string.Join(' ', e.Name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
-                        nameRegex,
-                        RegexOptions.IgnoreCase));
+                string.Join(' ', e.Name.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                nameRegex,
+                RegexOptions.IgnoreCase));
+        }
+
+        public static IEnumerable<Movie> GetMovieEntitiesFromTitleFuzzyMatching(
+            this IEnumerable<Movie> allMovies,
+            string title,
+            bool removeDiacritics = false)
+        {
+            var titleTokensWithoutPunctuation = title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
+
+            if (!titleTokensWithoutPunctuation.Any())
+            {
+                return Enumerable.Empty<Movie>();
+            }
+
+            string titleRegex = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuation) + @")(\s*)";
+
+            IEnumerable<Movie> result = allMovies.Where(m => Regex.IsMatch(
+                string.Join(' ', m.Title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                titleRegex,
+                RegexOptions.IgnoreCase));
+
+            // if the last token looks like a date that starts with "1" or "2" then we also search
+            // for movie entities with such release date
+            var lastToken = titleTokensWithoutPunctuation.Last();
+            if (Regex.IsMatch(lastToken, "(1|2)([0-9]{3})"))
+            {
+
+                IEnumerable<string> titleTokensWithoutPunctuationNoDate = titleTokensWithoutPunctuation.SkipLast(1);
+                string titleRegexNoDate = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuationNoDate) + @")(\s*)";
+                int parsedReleaseDate = int.Parse(lastToken);
+                IEnumerable<Movie> extraResults = allMovies.Where(
+                    m => m.ReleaseDate == parsedReleaseDate
+                        && Regex.IsMatch(
+                            string.Join(' ', m.Title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                            titleRegexNoDate,
+                            RegexOptions.IgnoreCase));
+                result = result.Concat(extraResults);
+            }
+
+            return result;
         }
 
         // taken from
@@ -69,6 +109,13 @@ namespace FilmDomain.Extensions
             }
 
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+        }
+
+        public static string PrettyFormat(this Movie movie)
+        {
+            string _genres = string.Join(" | ", movie.Genres.Select(g => g.Name));
+            string _directors = string.Join(", ", movie.Directors.Select(d => d.Name));
+            return string.Join('\n', new string[] {movie.ToString(), _genres, $"Directors: {_directors}", $"IMDB id: {movie.IMDBId}"});
         }
     }
 }

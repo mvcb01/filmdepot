@@ -29,7 +29,7 @@ namespace FilmDomain.Entities
 
         public override string ToString()
         {
-            return $"{Title} ({ReleaseDate}); IMDBId: {IMDBId}";
+            return $"{Title} ({ReleaseDate})";
         }
 
     }

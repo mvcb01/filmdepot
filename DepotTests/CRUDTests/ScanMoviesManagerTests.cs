@@ -2,6 +2,7 @@ using Xunit;
 using FluentAssertions;
 using Moq;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using FilmDomain.Entities;
@@ -140,22 +141,44 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void GetCountByGenre_ShouldReturnCorrectCount()
+        public void GetMoviesWithReleaseDates_WithProvidedDates_ShouldReturnCorrectMovies()
         {
             // arrange
             var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986 };
             var secondMovie = new Movie() {Title = "gummo", ReleaseDate = 1997 };
             var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994 };
 
-            var dramaGenre = new Genre() { Name = "drama", Movies = new List<Movie>() { firstMovie, secondMovie }};
-            var horrorGenre = new Genre() { Name = "horror", Movies = new List<Movie>() { firstMovie } };
-            var comedyGenre = new Genre() { Name = "comedy", Movies = new List<Movie>() { thirdMovie } };
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithReleaseDates(visit, new int[] { 1994, 1995, 1996, 1997 });
+
+            // assert
+            var expected = new Movie[] { secondMovie, thirdMovie };
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
+        public void GetCountByGenre_ShouldReturnCorrectCount()
+        {
+            // arrange
+            var dramaGenre = new Genre() { Name = "drama" };
+            var horrorGenre = new Genre() { Name = "horror" };
+            var comedyGenre = new Genre() { Name = "comedy" };
+
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Genres = new Genre[] { dramaGenre, horrorGenre } };
+            var secondMovie = new Movie() {Title = "gummo", ReleaseDate = 1997, Genres = new Genre[] { dramaGenre } };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Genres = new Genre[] { comedyGenre } };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
-            this._genreRepositoryMock
-                .Setup(g => g.GetAll())
-                .Returns(new Genre[] { dramaGenre, horrorGenre, comedyGenre });
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
             IEnumerable<KeyValuePair<Genre, int>> actual = this._scanMoviesManager.GetCountByGenre(visit);
@@ -173,19 +196,19 @@ namespace DepotTests.CRUDTests
         public void GetCountByActor_ShouldReturnCorrectCount()
         {
             // arrange
-            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986 };
-            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996 };
-            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994 };
+            var firstActor = new Actor() { Name = "jeff goldblum" };
+            var secondActor = new Actor() { Name = "bill pullman" };
+            var thirdActor = new Actor() { Name = "jim carrey" };
 
-            var firstActor = new Actor() { Name = "jeff goldblum", Movies = new List<Movie>() { firstMovie, secondMovie } };
-            var secondActor = new Actor() { Name = "bill pullman", Movies = new List<Movie>() { firstMovie } };
-            var thirdActor = new Actor() { Name = "jim carrey", Movies =  new List<Movie>() { thirdMovie } };
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Actors = new Actor[] { firstActor, secondActor } };
+            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, Actors = new Actor[] { firstActor } };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Actors = new Actor[] { thirdActor } };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
-            this._actoRepositoryMock
-                .Setup(a => a.GetAll())
-                .Returns(new Actor[] { firstActor, secondActor, thirdActor });
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
             IEnumerable<KeyValuePair<Actor, int>> actual = this._scanMoviesManager.GetCountByActor(visit);
@@ -203,19 +226,19 @@ namespace DepotTests.CRUDTests
         public void GetCountByDirector_ShouldReturnCorrectCount()
         {
             // arrange
-            var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019 };
-            var secondMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007 };
-            var thirdMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021 };
+            var firstDirector = new Director() { Name = "benny safdie" };
+            var secondDirector = new Director() { Name = "josh safdie" };
+            var thirdDirector = new Director() { Name = "paul thomas anderson" };
 
-            var firstDirector = new Director() { Name = "benny safdie", Movies = new List<Movie>() { firstMovie } };
-            var secondDirector = new Director() { Name = "josh safdie", Movies = new List<Movie>() { firstMovie } };
-            var thirdDirector = new Director() { Name = "paul thomas anderson", Movies = new List<Movie>() { secondMovie, thirdMovie } };
+            var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019, Directors = new Director[] { firstDirector, secondDirector } };
+            var secondMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007, Directors = new Director[] { thirdDirector } };
+            var thirdMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021, Directors = new Director[] { thirdDirector } };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
-            this._directorRepositoryMock
-                .Setup(d => d.GetAll())
-                .Returns(new Director[] { firstDirector, secondDirector, thirdDirector });
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
             IEnumerable<KeyValuePair<Director, int>> actual = this._scanMoviesManager.GetCountByDirector(visit);
@@ -226,6 +249,37 @@ namespace DepotTests.CRUDTests
                 new KeyValuePair<Director, int>(secondDirector, 1),
                 new KeyValuePair<Director, int>(firstDirector, 1)
             };
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Theory]
+        [InlineData("Licorice Pizza")]
+        [InlineData("Licorice Pizza 2021")]
+        [InlineData("Licorice Pizza (2021)")]
+        [InlineData("licorice pizza")]
+        [InlineData("licorice pizza 2021")]
+        [InlineData("licorice pizza (2021)")]
+        [InlineData(" licorice   piZZa")]
+        [InlineData(" licorice ! piZZa 2021 -->")]
+        [InlineData("??? licorice ==> piZZa (2021)%%$$##")]
+        public void SearchMovieEntitiesByTitle_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019 };
+            var secondMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007 };
+            var thirdMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021 };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.SearchMovieEntitiesByTitle(visit, title);
+
+            // assert
+            var expected = new Movie[] { thirdMovie };
             actual.Should().BeEquivalentTo(expected);
         }
     }
