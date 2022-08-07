@@ -84,6 +84,12 @@ namespace FilmCRUD
             return grouped.Select(group => new KeyValuePair<Director, int>(group.Key, group.Count()));
         }
 
+        public IEnumerable<Movie> SearchMovieEntitiesByTitle(MovieWarehouseVisit visit, string title)
+        {
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            return moviesInVisit.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
+        }
+
         public MovieWarehouseVisit GetClosestVisit()
         {
             return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();

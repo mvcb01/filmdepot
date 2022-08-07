@@ -251,5 +251,36 @@ namespace DepotTests.CRUDTests
             };
             actual.Should().BeEquivalentTo(expected);
         }
+
+        [Theory]
+        [InlineData("Licorice Pizza")]
+        [InlineData("Licorice Pizza 2021")]
+        [InlineData("Licorice Pizza (2021)")]
+        [InlineData("licorice pizza")]
+        [InlineData("licorice pizza 2021")]
+        [InlineData("licorice pizza (2021)")]
+        [InlineData(" licorice   piZZa")]
+        [InlineData(" licorice ! piZZa 2021 -->")]
+        [InlineData("??? licorice ==> piZZa (2021)%%$$##")]
+        public void SearchMovieEntitiesByTitle_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019 };
+            var secondMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007 };
+            var thirdMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021 };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.SearchMovieEntitiesByTitle(visit, title);
+
+            // assert
+            var expected = new Movie[] { thirdMovie };
+            actual.Should().BeEquivalentTo(expected);
+        }
     }
 }
