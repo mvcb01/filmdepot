@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using FilmDataAccess.EFCore.UnitOfWork;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
+using FilmDomain.Extensions;
 using FilmDataAccess.EFCore;
 using FilmCRUD.Verbs;
 using FilmCRUD.Interfaces;
@@ -49,6 +50,7 @@ namespace FilmCRUD
             parsed.WithNotParsed(HandleParseError);
 
             {}
+
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -177,7 +179,7 @@ namespace FilmCRUD
                 IEnumerable<Movie> moviesWithGenres = scanMoviesManager.GetMoviesWithGenres(visit, genres.ToArray());
                 string genreNames = string.Join(" | ", genres.Select(g => g.Name));
                 System.Console.WriteLine($"Movies with genres: {genreNames} \n");
-                moviesWithGenres.ToList().ForEach(m => System.Console.WriteLine(m));
+                moviesWithGenres.ToList().ForEach(m => System.Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
             else if (opts.WithActors.Any())
             {
@@ -188,7 +190,7 @@ namespace FilmCRUD
                 IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithActors(visit, actors.ToArray());
                 string actorNames = string.Join(" | ", actors.Select(a => a.Name));
                 System.Console.WriteLine($"Movies with actors: {actorNames} \n");
-                moviesWithActors.ToList().ForEach(m => System.Console.WriteLine(m));
+                moviesWithActors.ToList().ForEach(m => System.Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
             else if (opts.WithDirectors.Any())
             {
@@ -199,7 +201,14 @@ namespace FilmCRUD
                 IEnumerable<Movie> moviesWithDirectors = scanMoviesManager.GetMoviesWithDirectors(visit, directors.ToArray());
                 string directorNames = string.Join(" | ", directors.Select(d => d.Name));
                 System.Console.WriteLine($"Movies with directors: {directorNames} \n");
-                moviesWithDirectors.ToList().ForEach(m => System.Console.WriteLine(m));
+                moviesWithDirectors.ToList().ForEach(m => System.Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
+            }
+            else if (opts.WithDates.Any())
+            {
+                IEnumerable<Movie> moviesWithDates = scanMoviesManager.GetMoviesWithReleaseDates(visit, opts.WithDates.ToArray());
+                string releaseDates = string.Join(" or ", opts.WithDates);
+                System.Console.WriteLine($"Movies with release date {releaseDates}: \n");
+                moviesWithDates.ToList().ForEach(m => System.Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
             else if (opts.ByGenre)
             {
@@ -230,6 +239,20 @@ namespace FilmCRUD
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
+            }
+            else if (opts.Search != null)
+            {
+                string toSearch = opts.Search;
+                System.Console.WriteLine($"Search by title: \"{toSearch}\" \n");
+                IEnumerable<Movie> searchResult = scanMoviesManager.SearchMovieEntitiesByTitle(visit, toSearch);
+                if (!searchResult.Any())
+                {
+                    System.Console.WriteLine("No matches...");
+                }
+                else
+                {
+                    searchResult.ToList().ForEach(m => System.Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
+                }
             }
             else
             {

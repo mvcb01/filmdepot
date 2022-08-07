@@ -91,5 +91,48 @@ namespace DepotTests.FilmDomainTests
             searchResult.Should().BeEquivalentTo(new Actor[] { secondActor });
 
         }
+
+        [Theory]
+        [InlineData("$$#!(!) Sátántangó")]
+        [InlineData("  sáTânTãnGó  (1994)")]
+        [InlineData("satantango 1994")]
+        [InlineData("satantango")]
+        public void GetMoviesFromTitleFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "Sátántangó", ReleaseDate = 1994 };
+            var secondMovie = new Movie() { Title = "The Turin Horse", ReleaseDate = 2011 };
+            var thirdMovie = new Movie() { Title = "Natural Born Killers", ReleaseDate = 1994 };
+
+            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie };
+
+            // act
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new[] { firstMovie });
+        }
+
+        [Theory]
+        [InlineData("$$#!(!) Satantango")]
+        [InlineData("  saTanTanGo  (1994)")]
+        [InlineData("satantango 1994")]
+        [InlineData("satantango")]
+        public void GetMoviesFromTitleFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "Satantango", ReleaseDate = 1994 };
+            var secondMovie = new Movie() { Title = "The Turin Horse", ReleaseDate = 2011 };
+            var thirdMovie = new Movie() { Title = "Natural Born Killers", ReleaseDate = 1994 };
+            var fourthMovie = new Movie() { Title = "Sátántangó", ReleaseDate = 1994 };
+
+            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie };
+
+            // act
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: false);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new[] { firstMovie });
+        }
     }
 }

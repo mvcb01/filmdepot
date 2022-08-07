@@ -2,6 +2,7 @@ using Xunit;
 using FluentAssertions;
 using Moq;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using FilmDomain.Entities;
@@ -140,6 +141,28 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
+        public void GetMoviesWithReleaseDates_WithProvidedDates_ShouldReturnCorrectMovies()
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986 };
+            var secondMovie = new Movie() {Title = "gummo", ReleaseDate = 1997 };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994 };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithReleaseDates(visit, new int[] { 1994, 1995, 1996, 1997 });
+
+            // assert
+            var expected = new Movie[] { secondMovie, thirdMovie };
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
         public void GetCountByGenre_ShouldReturnCorrectCount()
         {
             // arrange
@@ -226,6 +249,37 @@ namespace DepotTests.CRUDTests
                 new KeyValuePair<Director, int>(secondDirector, 1),
                 new KeyValuePair<Director, int>(firstDirector, 1)
             };
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Theory]
+        [InlineData("Licorice Pizza")]
+        [InlineData("Licorice Pizza 2021")]
+        [InlineData("Licorice Pizza (2021)")]
+        [InlineData("licorice pizza")]
+        [InlineData("licorice pizza 2021")]
+        [InlineData("licorice pizza (2021)")]
+        [InlineData(" licorice   piZZa")]
+        [InlineData(" licorice ! piZZa 2021 -->")]
+        [InlineData("??? licorice ==> piZZa (2021)%%$$##")]
+        public void SearchMovieEntitiesByTitle_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019 };
+            var secondMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007 };
+            var thirdMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021 };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.SearchMovieEntitiesByTitle(visit, title);
+
+            // assert
+            var expected = new Movie[] { thirdMovie };
             actual.Should().BeEquivalentTo(expected);
         }
     }
