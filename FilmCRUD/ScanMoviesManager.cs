@@ -47,6 +47,16 @@ namespace FilmCRUD
             return moviesInVisit.Where(m => directors.Intersect(m.Directors).Any());
         }
 
+        /// <summary>
+        /// Method <c>GetMoviesWithReleaseDates</c> returns all the movies that have its ReleaseDate in
+        /// <paramref name="dates"/>.
+        /// </summary>
+        public IEnumerable<Movie> GetMoviesWithReleaseDates(MovieWarehouseVisit visit, params int[] dates)
+        {
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            return moviesInVisit.Where(m => dates.Contains(m.ReleaseDate));
+        }
+
         public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit)
         {
             IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
@@ -72,6 +82,12 @@ namespace FilmCRUD
             // flatten -> group by Director and count
             IEnumerable<IGrouping<Director, Director>> grouped = moviesInVisit.SelectMany(m => m.Directors).GroupBy(a => a);
             return grouped.Select(group => new KeyValuePair<Director, int>(group.Key, group.Count()));
+        }
+
+        public IEnumerable<Movie> SearchMovieEntitiesByTitle(MovieWarehouseVisit visit, string title)
+        {
+            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            return moviesInVisit.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
         }
 
         public MovieWarehouseVisit GetClosestVisit()
