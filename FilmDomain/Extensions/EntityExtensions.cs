@@ -52,7 +52,7 @@ namespace FilmDomain.Extensions
                 RegexOptions.IgnoreCase));
         }
 
-        public static IEnumerable<Movie> GetMoviesFromTitleFuzzyMatching(
+        public static IEnumerable<Movie> GetMovieEntitiesFromTitleFuzzyMatching(
             this IEnumerable<Movie> allMovies,
             string title,
             bool removeDiacritics = false)

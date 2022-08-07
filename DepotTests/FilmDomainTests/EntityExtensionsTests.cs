@@ -107,7 +107,7 @@ namespace DepotTests.FilmDomainTests
             var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie };
 
             // act
-            IEnumerable<Movie> searchResult = allMovies.GetMoviesFromTitleFuzzyMatching(title, removeDiacritics: true);
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
 
             // assert
             searchResult.Should().BeEquivalentTo(new[] { firstMovie });
@@ -129,7 +129,7 @@ namespace DepotTests.FilmDomainTests
             var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie };
 
             // act
-            IEnumerable<Movie> searchResult = allMovies.GetMoviesFromTitleFuzzyMatching(title, removeDiacritics: false);
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: false);
 
             // assert
             searchResult.Should().BeEquivalentTo(new[] { firstMovie });
