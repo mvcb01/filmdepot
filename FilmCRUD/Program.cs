@@ -240,6 +240,20 @@ namespace FilmCRUD
                     .ToList()
                     .ForEach(kvp => System.Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
             }
+            else if (opts.Search != null)
+            {
+                string toSearch = opts.Search;
+                System.Console.WriteLine($"Search by title: \"{toSearch}\" \n");
+                IEnumerable<Movie> searchResult = scanMoviesManager.SearchMovieEntitiesByTitle(visit, toSearch);
+                if (!searchResult.Any())
+                {
+                    System.Console.WriteLine("No matches...");
+                }
+                else
+                {
+                    searchResult.ToList().ForEach(m => System.Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
+                }
+            }
             else
             {
                 System.Console.WriteLine("No action requested...");
