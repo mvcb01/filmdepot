@@ -13,7 +13,8 @@ $dbExists = Test-Path -Path FilmDb.db -PathType Leaf
 
 if ($dbExists)
 {
-    # TODO: find all the migration scripts not executed yet using table __EFMigrationsHistory
+    # TODO: backup the database, find all the migration scripts not executed yet using table __EFMigrationsHistory and
+    # execute one by one; any error and the original db should be restored
     echo "db exists..."
 }
 else
