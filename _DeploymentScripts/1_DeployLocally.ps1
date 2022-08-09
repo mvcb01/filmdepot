@@ -1,8 +1,7 @@
-
 $cwd = (Get-Item .).FullName
 
 $user = $env:USERPROFILE
-$deploymentDir = $user + '\entertainmentdepot_PROD'
+$deploymentDir = Join-Path -Path $user -ChildPath 'entertainmentdepot_PROD'
 
 $solutionRoot = (get-item $PSScriptRoot).parent.FullName
 
