@@ -13,4 +13,3 @@ echo " "
 cd $solutionRoot
 dotnet publish .\entertainmentdepot.sln -o $deploymentDir -c Release
 cd $cwd
-
