@@ -26,7 +26,7 @@ else
     $dirContents = $dirContentsString -split [Environment]::NewLine
     foreach ($file in $dirContents)
     {
-        if ($file -match '^[0-9]{14}_' -And  $file -match '.sql$')
+        if ($file -match '^[0-9]{14}_' -And $file -match '.sql$')
         {
             $scriptPath = Join-Path -Path $deploymentDir -ChildPath 'Migrations' | Join-Path -ChildPath $file
             echo $file
