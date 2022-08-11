@@ -46,22 +46,26 @@ else
     }
 }
 
-if ($migrationsToRun.Count -ne 0)
+if ($migrationsToRun.Count -eq 0)
 {
-    # creates the backup dir if not exists; no need to print anything to the console
-    $backups = Join-Path -Path $deploymentDir -ChildPath 'backups'
-    [System.IO.Directory]::CreateDirectory($backups) | out-null
+    echo "No migrations to run"
+    cd $cwd
+    exit
+}
 
-    $dateStr = '{0:yyyyMMdd}' -f $(Get-Date -f "yyyyMMddTHHmmss")
-    $dbBackup = ".\backups\FilmDb_{0}.db" -f $dateStr
-    echo ("Backing up .\FilmDb --> {0} " -f $dbBackup)
-    Copy-Item .\FilmDb.db -Destination $dbBackup
+# creates the backup dir if not exists; no need to print anything to the console
+$backups = Join-Path -Path $deploymentDir -ChildPath 'backups'
+[System.IO.Directory]::CreateDirectory($backups) | out-null
 
-    foreach ($migrationPath in $migrationsToRun)
-    {
-        echo ("Running migration: " + $migrationPath)
-        Get-Content $migrationPath -Raw | sqlite3 .\FilmDb.db
-    }
+$dateStr = '{0:yyyyMMdd}' -f $(Get-Date -f "yyyyMMddTHHmmss")
+$dbBackup = ".\backups\FilmDb_{0}.db" -f $dateStr
+echo ("Backing up .\FilmDb --> {0} " -f $dbBackup)
+Copy-Item .\FilmDb.db -Destination $dbBackup
+
+foreach ($migrationPath in $migrationsToRun)
+{
+    echo ("Running migration: " + $migrationPath)
+    Get-Content $migrationPath -Raw | sqlite3 .\FilmDb.db
 }
 
 cd $cwd
