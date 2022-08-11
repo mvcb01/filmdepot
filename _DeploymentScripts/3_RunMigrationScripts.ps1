@@ -12,7 +12,7 @@ $migrationsToRun = @()
 $dbExists = Test-Path -Path FilmDb.db -PathType Leaf
 if ($dbExists)
 {
-    $migrationsHistory = sqlite3 .\FilmDb.db "select MigrationId from __EFMigrationsHistory order by MigrationId desc"
+    $migrationsHistory = sqlite3 .\FilmDb.db "select MigrationId from __EFMigrationsHistory"
 
     foreach ($file in $migrationsInDir)
     {
