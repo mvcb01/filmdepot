@@ -96,19 +96,20 @@ namespace FilmCRUD
             System.Console.WriteLine("----------");
             if (opts.CountByReleaseDate)
             {
-                System.Console.WriteLine("Scan: contagem por ReleaseDate\n");
+                System.Console.WriteLine("ScanRips: count by ReleaseDate\n");
                 Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate();
                 foreach (var kv in countByRelaseDate.OrderBy(kv => kv.Key))
                 {
                     System.Console.WriteLine($"{kv.Key}: {kv.Value}");
                 }
             }
-            else if (opts.WithReleaseDate != null)
+            else if (opts.WithDates != null)
             {
-                System.Console.WriteLine($"Scan: rips com ReleaseDate {opts.WithReleaseDate}\n");
-                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(opts.WithReleaseDate).ToList();
+                string releaseDates = string.Join(" or ", opts.WithDates);
+                System.Console.WriteLine($"ScanRips: rips with ReleaseDate {releaseDates}\n");
+                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(opts.WithDates.ToArray()).ToList();
 
-                System.Console.WriteLine($"Contagem: {ripFileNames.Count()}\n");
+                System.Console.WriteLine($"Total count: {ripFileNames.Count()}\n");
 
                 foreach (var fileName in ripFileNames.OrderBy(r => r))
                 {
@@ -117,7 +118,7 @@ namespace FilmCRUD
             }
             else if (opts.CountByVisit)
             {
-                System.Console.WriteLine("Scan: contagem por visita\n");
+                System.Console.WriteLine("ScanRips: count by visit \n");
                 Dictionary<DateTime, int> countByVisit = scanRipsManager.GetRipCountByVisit();
                 foreach (var item in countByVisit.OrderBy(kvp => kvp.Key))
                 {
@@ -127,7 +128,7 @@ namespace FilmCRUD
             }
             else if (opts.LastVisitDiff)
             {
-                System.Console.WriteLine("Scan: diff da última visita\n");
+                System.Console.WriteLine("ScanRips: last visit difference \n");
                 Dictionary<string, IEnumerable<string>> lastVisitDiff = scanRipsManager.GetLastVisitDiff();
                 foreach (var item in lastVisitDiff.OrderBy(kvp => kvp.Key))
                 {
@@ -260,6 +261,7 @@ namespace FilmCRUD
             }
             System.Console.WriteLine();
         }
+
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
             System.Console.WriteLine("-------------");
