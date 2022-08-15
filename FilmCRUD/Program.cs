@@ -109,7 +109,7 @@ namespace FilmCRUD
                 System.Console.WriteLine($"ScanRips: rips with ReleaseDate {releaseDates}\n");
                 List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(opts.WithDates.ToArray()).ToList();
 
-                System.Console.WriteLine($"Contagem: {ripFileNames.Count()}\n");
+                System.Console.WriteLine($"Total count: {ripFileNames.Count()}\n");
 
                 foreach (var fileName in ripFileNames.OrderBy(r => r))
                 {
@@ -118,7 +118,7 @@ namespace FilmCRUD
             }
             else if (opts.CountByVisit)
             {
-                System.Console.WriteLine("Scan: contagem por visita\n");
+                System.Console.WriteLine("ScanRips: count by visit \n");
                 Dictionary<DateTime, int> countByVisit = scanRipsManager.GetRipCountByVisit();
                 foreach (var item in countByVisit.OrderBy(kvp => kvp.Key))
                 {
@@ -128,7 +128,7 @@ namespace FilmCRUD
             }
             else if (opts.LastVisitDiff)
             {
-                System.Console.WriteLine("Scan: diff da última visita\n");
+                System.Console.WriteLine("ScanRips: last visit difference \n");
                 Dictionary<string, IEnumerable<string>> lastVisitDiff = scanRipsManager.GetLastVisitDiff();
                 foreach (var item in lastVisitDiff.OrderBy(kvp => kvp.Key))
                 {
