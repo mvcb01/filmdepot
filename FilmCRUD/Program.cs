@@ -260,6 +260,7 @@ namespace FilmCRUD
             }
             System.Console.WriteLine();
         }
+
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
         {
             System.Console.WriteLine("-------------");
