@@ -67,7 +67,7 @@ namespace DepotTests.CRUDTests
         public void GetAllRipsWithReleaseDate_ReturnsExpectedFileNames()
         {
             // arrange
-            string releaseDate = "1997";
+            var releaseDates = new int[] { 1997, 1998 };
             var movieRips = new List<MovieRip>() {
                     new MovieRip() {
                         FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
@@ -89,7 +89,7 @@ namespace DepotTests.CRUDTests
 
 
             // act
-            var ripsWithReleaseDate = this._scanRipsManager.GetAllRipsWithReleaseDate(releaseDate);
+            var ripsWithReleaseDate = this._scanRipsManager.GetAllRipsWithReleaseDate(releaseDates.ToArray());
 
             // assert
             var expected = new List<string>() {

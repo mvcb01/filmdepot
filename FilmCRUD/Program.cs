@@ -96,17 +96,18 @@ namespace FilmCRUD
             System.Console.WriteLine("----------");
             if (opts.CountByReleaseDate)
             {
-                System.Console.WriteLine("Scan: contagem por ReleaseDate\n");
+                System.Console.WriteLine("ScanRips: count by ReleaseDate\n");
                 Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate();
                 foreach (var kv in countByRelaseDate.OrderBy(kv => kv.Key))
                 {
                     System.Console.WriteLine($"{kv.Key}: {kv.Value}");
                 }
             }
-            else if (opts.WithReleaseDate != null)
+            else if (opts.WithDates != null)
             {
-                System.Console.WriteLine($"Scan: rips com ReleaseDate {opts.WithReleaseDate}\n");
-                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(opts.WithReleaseDate).ToList();
+                string releaseDates = string.Join(" or ", opts.WithDates);
+                System.Console.WriteLine($"ScanRips: rips with ReleaseDate {releaseDates}\n");
+                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(opts.WithDates.ToArray()).ToList();
 
                 System.Console.WriteLine($"Contagem: {ripFileNames.Count()}\n");
 
