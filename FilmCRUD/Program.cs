@@ -158,16 +158,7 @@ namespace FilmCRUD
                 return;
             }
 
-            MovieWarehouseVisit visit;
-            if (opts.Visit == null)
-            {
-                visit = scanMoviesManager.GetClosestVisit();
-            }
-            else
-            {
-                DateTime visitDate = DateTime.ParseExact(opts.Visit, "yyyyMMdd", null);
-                visit = scanMoviesManager.GetClosestVisit(visitDate);
-            }
+            MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanMoviesManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
             System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
@@ -351,6 +342,21 @@ namespace FilmCRUD
             {
                 System.Console.WriteLine(errorObj.Tag);
             }
+        }
+
+        public static MovieWarehouseVisit GetClosestMovieWarehouseVisit(GeneralScanManager scanManager, string dateString)
+        {
+            MovieWarehouseVisit visit;
+            if (dateString == null)
+            {
+                visit = scanManager.GetClosestVisit();
+            }
+            else
+            {
+                DateTime visitDate = DateTime.ParseExact(dateString, "yyyyMMdd", null);
+                visit = scanManager.GetClosestVisit(visitDate);
+            }
+            return visit;
         }
 
     }
