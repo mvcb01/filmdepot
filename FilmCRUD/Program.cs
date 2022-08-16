@@ -107,6 +107,8 @@ namespace FilmCRUD
 
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanRipsManager, opts.Visit);
 
+            string printDateFormat = "MMMM dd yyyy";
+            System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
             if (opts.CountByReleaseDate)
             {
                 System.Console.WriteLine("ScanRips: count by ReleaseDate\n");
