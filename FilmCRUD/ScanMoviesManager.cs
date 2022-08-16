@@ -8,14 +8,10 @@ using FilmDomain.Extensions;
 
 namespace FilmCRUD
 {
-    public class ScanMoviesManager
+    public class ScanMoviesManager : GeneralScanManager
     {
-        private IUnitOfWork _unitOfWork { get; init; }
-
-        public ScanMoviesManager(IUnitOfWork unitOfWork)
-        {
-            this._unitOfWork = unitOfWork;
-        }
+        public ScanMoviesManager(IUnitOfWork unitOfWork) : base(unitOfWork)
+        { }
 
         /// <summary>
         /// Method <c>GetMoviesWithGenres</c> returns all the movies that have at least
@@ -88,21 +84,6 @@ namespace FilmCRUD
         {
             IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
-        }
-
-        public MovieWarehouseVisit GetClosestVisit()
-        {
-            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
-        }
-
-        public MovieWarehouseVisit GetClosestVisit(DateTime dt)
-        {
-            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
-        }
-
-        public IEnumerable<DateTime> ListVisitDates()
-        {
-            return this._unitOfWork.MovieWarehouseVisits.GetAll().GetVisitDates();
         }
 
         public IEnumerable<Genre> GenresFromName(string name)

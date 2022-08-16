@@ -7,14 +7,10 @@ using System;
 
 namespace FilmCRUD
 {
-    public class ScanRipsManager
+    public class ScanRipsManager : GeneralScanManager
     {
-        private IUnitOfWork _unitOfWork { get; init; }
-
-        public ScanRipsManager(IUnitOfWork unitOfWork)
-        {
-            this._unitOfWork = unitOfWork;
-        }
+        public ScanRipsManager(IUnitOfWork unitOfWork) : base(unitOfWork)
+        { }
 
         public Dictionary<string, int> GetRipCountByReleaseDate()
         {
@@ -87,14 +83,5 @@ namespace FilmCRUD
             };
         }
 
-        public MovieWarehouseVisit GetClosestVisit()
-        {
-            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
-        }
-
-        public MovieWarehouseVisit GetClosestVisit(DateTime dt)
-        {
-            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
-        }
     }
 }
