@@ -15,7 +15,7 @@ namespace FilmCRUD
         public Dictionary<string, int> GetRipCountByReleaseDate()
         {
             Dictionary<string, int> result = new();
-            MovieWarehouseVisit latestVisit = _unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
+            MovieWarehouseVisit latestVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
 
             IEnumerable<IGrouping<string, MovieRip>> gbReleaseDate = latestVisit.MovieRips
                 .GroupBy(rip => rip.ParsedReleaseDate ?? "empty");
@@ -38,7 +38,7 @@ namespace FilmCRUD
 
         public Dictionary<DateTime, int> GetRipCountByVisit()
         {
-            IEnumerable<MovieWarehouseVisit> allVisits = _unitOfWork.MovieWarehouseVisits.GetAll();
+            IEnumerable<MovieWarehouseVisit> allVisits = unitOfWork.MovieWarehouseVisits.GetAll();
 
             return allVisits.ToDictionary(
                 visit => visit.VisitDateTime,
@@ -51,7 +51,7 @@ namespace FilmCRUD
             var addedFileNames = new List<string>();
             var removedFileNames = new List<string>();
 
-            List<DateTime> lastTwoVisitDates = _unitOfWork.MovieWarehouseVisits
+            List<DateTime> lastTwoVisitDates = unitOfWork.MovieWarehouseVisits
                 .GetAll()
                 .GetVisitDates()
                 .OrderByDescending(dt => dt)
@@ -65,15 +65,15 @@ namespace FilmCRUD
             }
             else if (nVisits == 1)
             {
-                addedFileNames = _unitOfWork.MovieWarehouseVisits.GetAll().First().MovieRips.GetFileNames().ToList();
+                addedFileNames = unitOfWork.MovieWarehouseVisits.GetAll().First().MovieRips.GetFileNames().ToList();
             }
             else
             {
                 DateTime lastVisitDate = lastTwoVisitDates[0];
                 DateTime firstVisitDate = lastTwoVisitDates[1];
 
-                MovieWarehouseVisit lastVisit = _unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(lastVisitDate);
-                MovieWarehouseVisit firstVisit = _unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(firstVisitDate);
+                MovieWarehouseVisit lastVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(lastVisitDate);
+                MovieWarehouseVisit firstVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(firstVisitDate);
 
                 addedFileNames = lastVisit.MovieRips.GetFileNames().Except(firstVisit.MovieRips.GetFileNames()).ToList();
                 removedFileNames = firstVisit.MovieRips.GetFileNames().Except(lastVisit.MovieRips.GetFileNames()).ToList();
