@@ -12,12 +12,11 @@ namespace FilmCRUD
         public ScanRipsManager(IUnitOfWork unitOfWork) : base(unitOfWork)
         { }
 
-        public Dictionary<string, int> GetRipCountByReleaseDate()
+        public Dictionary<string, int> GetRipCountByReleaseDate(MovieWarehouseVisit visit)
         {
             Dictionary<string, int> result = new();
-            MovieWarehouseVisit latestVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
 
-            IEnumerable<IGrouping<string, MovieRip>> gbReleaseDate = latestVisit.MovieRips
+            IEnumerable<IGrouping<string, MovieRip>> gbReleaseDate = visit.MovieRips
                 .GroupBy(rip => rip.ParsedReleaseDate ?? "empty");
 
             foreach (var dateGroup in gbReleaseDate)

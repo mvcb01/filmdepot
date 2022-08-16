@@ -40,20 +40,16 @@ namespace DepotTests.CRUDTests
         public void GetRipCountByReleaseDate_ReturnsCorrectCount()
         {
             // arrange
-            var latestVisit = new MovieWarehouseVisit() {
+            var visit = new MovieWarehouseVisit() {
                 MovieRips = new List<MovieRip>() {
                     new MovieRip() { ParsedReleaseDate = "1999" },
                     new MovieRip() { ParsedReleaseDate = "1999" },
                     new MovieRip() { ParsedReleaseDate = "2000" }
                 }
             };
-            this._movieWarehouseVisitRepositoryMock
-                .Setup(m => m.GetClosestMovieWarehouseVisit())
-                .Returns(latestVisit);
-
 
             // act
-            var countByReleaseDate = this._scanRipsManager.GetRipCountByReleaseDate();
+            var countByReleaseDate = this._scanRipsManager.GetRipCountByReleaseDate(visit);
 
             // assert
             var expected = new Dictionary<string, int>() {

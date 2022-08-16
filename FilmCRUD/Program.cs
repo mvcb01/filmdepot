@@ -93,17 +93,30 @@ namespace FilmCRUD
 
         private static void HandleScanRipsOptions(ScanRipsOptions opts, ScanRipsManager scanRipsManager)
         {
-            System.Console.WriteLine("----------");
+            System.Console.WriteLine("-------------");
+
+            if (opts.ListVisits)
+            {
+                System.Console.WriteLine("Dates for all warehouse visits:");
+                scanRipsManager.ListVisitDates()
+                    .OrderByDescending(dt => dt)
+                    .ToList()
+                    .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+                return;
+            }
+
+            MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanRipsManager, opts.Visit);
+
             if (opts.CountByReleaseDate)
             {
                 System.Console.WriteLine("ScanRips: count by ReleaseDate\n");
-                Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate();
+                Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate(visit);
                 foreach (var kv in countByRelaseDate.OrderBy(kv => kv.Key))
                 {
                     System.Console.WriteLine($"{kv.Key}: {kv.Value}");
                 }
             }
-            else if (opts.WithDates != null)
+            else if (opts.WithDates.Any())
             {
                 string releaseDates = string.Join(" or ", opts.WithDates);
                 System.Console.WriteLine($"ScanRips: rips with ReleaseDate {releaseDates}\n");
