@@ -86,5 +86,15 @@ namespace FilmCRUD
                 ["removed"] = removedFileNames
             };
         }
+
+        public MovieWarehouseVisit GetClosestVisit()
+        {
+            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
+        }
+
+        public MovieWarehouseVisit GetClosestVisit(DateTime dt)
+        {
+            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
+        }
     }
 }
