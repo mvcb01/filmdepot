@@ -26,11 +26,10 @@ namespace FilmCRUD
             return result;
         }
 
-        public IEnumerable<string> GetAllRipsWithReleaseDate(params int[] dates)
+        public IEnumerable<string> GetAllRipsWithReleaseDate(MovieWarehouseVisit visit, params int[] dates)
         {
             string[] dateStrings = dates.Select(d => d.ToString()).ToArray();
-            MovieWarehouseVisit latestVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
-            return latestVisit.MovieRips
+            return visit.MovieRips
                 .Where(r => dateStrings.Contains(r.ParsedReleaseDate))
                 .Select(r => r.FileName);
         }

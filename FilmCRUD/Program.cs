@@ -120,7 +120,9 @@ namespace FilmCRUD
             {
                 string releaseDates = string.Join(" or ", opts.WithDates);
                 System.Console.WriteLine($"ScanRips: rips with ReleaseDate {releaseDates}\n");
-                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(opts.WithDates.ToArray()).ToList();
+                List<string> ripFileNames = scanRipsManager
+                    .GetAllRipsWithReleaseDate(visit, opts.WithDates.ToArray())
+                    .ToList();
 
                 System.Console.WriteLine($"Total count: {ripFileNames.Count()}\n");
 

@@ -78,14 +78,10 @@ namespace DepotTests.CRUDTests
                         ParsedReleaseDate = "1973"
                         }
                 };
-
-            this._movieWarehouseVisitRepositoryMock
-                .Setup(v => v.GetClosestMovieWarehouseVisit())
-                .Returns(new MovieWarehouseVisit() { MovieRips = movieRips });
-
+            var visit = new MovieWarehouseVisit() { MovieRips = movieRips };
 
             // act
-            var ripsWithReleaseDate = this._scanRipsManager.GetAllRipsWithReleaseDate(releaseDates.ToArray());
+            var ripsWithReleaseDate = this._scanRipsManager.GetAllRipsWithReleaseDate(visit, releaseDates.ToArray());
 
             // assert
             var expected = new List<string>() {
@@ -96,10 +92,8 @@ namespace DepotTests.CRUDTests
             //     The two collections are equivalent when they both contain the same strings in any order.
             ripsWithReleaseDate.Should().BeEquivalentTo(expected);
 
-            // garante que foi executado o método GetClosestMovieWarehouseVisit e não o IMovieRipRepository.Find
-            _movieWarehouseVisitRepositoryMock.Verify(w => w.GetClosestMovieWarehouseVisit(), Times.Once);
+            // garante que não foi executado o método IMovieRipRepository.Find
             _movieRipRepositoryMock.Verify(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()), Times.Never);
-
         }
 
         [Fact]
