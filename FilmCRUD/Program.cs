@@ -353,7 +353,7 @@ namespace FilmCRUD
             }
         }
 
-        public static MovieWarehouseVisit GetClosestMovieWarehouseVisit(GeneralScanManager scanManager, string dateString)
+        private static MovieWarehouseVisit GetClosestMovieWarehouseVisit(GeneralScanManager scanManager, string dateString)
         {
             MovieWarehouseVisit visit;
             if (dateString == null)
@@ -368,7 +368,7 @@ namespace FilmCRUD
             return visit;
         }
 
-        public static void ListVisits(GeneralScanManager scanManager)
+        private static void ListVisits(GeneralScanManager scanManager)
         {
             System.Console.WriteLine("Dates for all warehouse visits:");
             scanManager.ListVisitDates()
