@@ -20,6 +20,9 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "LastVisitRipDifference", HelpText = "movie rip difference from last two visits: added and removed")]
         public bool LastVisitDiff { get; set; }
 
+        [Option(SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
+        public bool ListVisits { get; set; }
+
         // can be used with any set, not relevant for CountRipsByVisit
         [Option('v', "visit", HelpText = "warehouse visit date (YYYY) to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
