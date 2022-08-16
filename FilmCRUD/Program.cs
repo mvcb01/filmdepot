@@ -97,11 +97,7 @@ namespace FilmCRUD
 
             if (opts.ListVisits)
             {
-                System.Console.WriteLine("Dates for all warehouse visits:");
-                scanRipsManager.ListVisitDates()
-                    .OrderByDescending(dt => dt)
-                    .ToList()
-                    .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+                ListVisits(scanRipsManager);
                 return;
             }
 
@@ -167,11 +163,7 @@ namespace FilmCRUD
 
             if (opts.ListVisits)
             {
-                System.Console.WriteLine("Dates for all warehouse visits:");
-                scanMoviesManager.ListVisitDates()
-                    .OrderByDescending(dt => dt)
-                    .ToList()
-                    .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+                ListVisits(scanMoviesManager);
                 return;
             }
 
@@ -374,6 +366,15 @@ namespace FilmCRUD
                 visit = scanManager.GetClosestVisit(visitDate);
             }
             return visit;
+        }
+
+        public static void ListVisits(GeneralScanManager scanManager)
+        {
+            System.Console.WriteLine("Dates for all warehouse visits:");
+            scanManager.ListVisitDates()
+                .OrderByDescending(dt => dt)
+                .ToList()
+                .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
         }
 
     }
