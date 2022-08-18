@@ -82,5 +82,24 @@ namespace FilmCRUD
             };
         }
 
+        public Dictionary<string, IEnumerable<string>> GetVisitDiff(MovieWarehouseVisit visitLeft, MovieWarehouseVisit visitRight)
+        {
+            if (visitLeft.VisitDateTime >= visitRight.VisitDateTime)
+            {
+                string leftString = visitLeft.VisitDateTime.ToString("yyyyMMdd");
+                string rightString = visitRight.VisitDateTime.ToString("yyyyMMdd");
+                string msg = "Expected visitLeft.VisitDateTime >= visitRight.VisitDateTime, ";
+                msg += $"got visitLeft.VisitDateTime = {leftString} and visitRight.VisitDateTime = {rightString}";
+                throw new ArgumentException(msg);
+            }
+
+            List<string> addedFileNames = visitRight.MovieRips.GetFileNames().Except(visitLeft.MovieRips.GetFileNames()).ToList();
+            List<string> removedFileNames = visitLeft.MovieRips.GetFileNames().Except(visitRight.MovieRips.GetFileNames()).ToList();
+            return new Dictionary<string, IEnumerable<string>>() {
+                ["added"] = addedFileNames,
+                ["removed"] = removedFileNames
+            };
+        }
+
     }
 }
