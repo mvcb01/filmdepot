@@ -24,6 +24,11 @@ namespace FilmDataAccess.EFCore.Repositories
             return Find(visit => visit.VisitDateTime == GetClosestDatetime(allDatetimes, dt)).First();
         }
 
+        public MovieWarehouseVisit GetPreviousMovieWarehouseVisit(MovieWarehouseVisit visit)
+        {
+            return GetAll().Where(v => v.VisitDateTime < visit.VisitDateTime).FirstOrDefault();
+        }
+
         private static DateTime GetClosestDatetime(IEnumerable<DateTime> allDateTimes, DateTime dt)
         {
             if (allDateTimes.Count() == 0)
@@ -33,7 +38,6 @@ namespace FilmDataAccess.EFCore.Repositories
 
             return allDateTimes.OrderBy(_dt => Math.Abs((_dt - dt).Ticks)).First();
         }
-
 
     }
 }

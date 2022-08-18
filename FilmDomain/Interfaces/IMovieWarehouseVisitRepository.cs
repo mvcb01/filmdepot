@@ -12,6 +12,8 @@ namespace FilmDomain.Interfaces
 
         MovieWarehouseVisit GetClosestMovieWarehouseVisit(DateTime dt);
 
+        MovieWarehouseVisit GetPreviousMovieWarehouseVisit(MovieWarehouseVisit visit);
+
     }
 
 }
