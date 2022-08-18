@@ -259,7 +259,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void GetVisitDiff_ShouldReturnCorrectDifference()
+        public void GetVisitDiff_WithTwoVisits_ShouldReturnCorrectDifference()
         {
             // arrange
             // arrange

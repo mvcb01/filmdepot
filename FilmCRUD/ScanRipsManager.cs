@@ -46,9 +46,6 @@ namespace FilmCRUD
 
         public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
         {
-            var addedFileNames = new List<string>();
-            var removedFileNames = new List<string>();
-
             List<DateTime> lastTwoVisitDates = unitOfWork.MovieWarehouseVisits
                 .GetAll()
                 .GetVisitDates()
@@ -61,25 +58,21 @@ namespace FilmCRUD
             {
                 throw new InvalidOperationException("No visits yet!");
             }
-            else if (nVisits == 1)
-            {
-                addedFileNames = unitOfWork.MovieWarehouseVisits.GetAll().First().MovieRips.GetFileNames().ToList();
-            }
-            else
-            {
-                DateTime lastVisitDate = lastTwoVisitDates[0];
-                DateTime firstVisitDate = lastTwoVisitDates[1];
 
-                MovieWarehouseVisit lastVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(lastVisitDate);
-                MovieWarehouseVisit firstVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(firstVisitDate);
-
-                addedFileNames = lastVisit.MovieRips.GetFileNames().Except(firstVisit.MovieRips.GetFileNames()).ToList();
-                removedFileNames = firstVisit.MovieRips.GetFileNames().Except(lastVisit.MovieRips.GetFileNames()).ToList();
+            if (nVisits == 1)
+            {
+                return new Dictionary<string, IEnumerable<string>>() {
+                    ["added"] = unitOfWork.MovieWarehouseVisits.GetAll().First().MovieRips.GetFileNames().ToList(),
+                    ["removed"] = Enumerable.Empty<string>()
+                };
             }
-            return new Dictionary<string, IEnumerable<string>>() {
-                ["added"] = addedFileNames,
-                ["removed"] = removedFileNames
-            };
+
+            DateTime visitDateRight = lastTwoVisitDates[0];
+            DateTime visitDateLeft = lastTwoVisitDates[1];
+
+            MovieWarehouseVisit visitRight = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(visitDateRight);
+            MovieWarehouseVisit visitLeft = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(visitDateLeft);
+            return GetVisitDiff(visitLeft, visitRight);
         }
 
         public Dictionary<string, IEnumerable<string>> GetVisitDiff(MovieWarehouseVisit visitLeft, MovieWarehouseVisit visitRight)
