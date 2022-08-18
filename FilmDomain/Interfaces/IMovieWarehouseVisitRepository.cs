@@ -12,5 +12,4 @@ namespace FilmDomain.Interfaces
 
         MovieWarehouseVisit GetPreviousMovieWarehouseVisit(MovieWarehouseVisit visit);
     }
-
 }
