@@ -29,7 +29,7 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
         public bool ListVisits { get; set; }
 
-        // can be used with any set, not relevant for CountRipsByVisit
+        // can be used with any set; relevant for options WithDates and CountByReleaseDate
         [Option('v', "visit", HelpText = "warehouse visit date (YYYYMMDD) to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
 
