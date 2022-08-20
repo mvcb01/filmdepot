@@ -68,9 +68,9 @@ namespace FilmCRUD
 
             if (visitLeft.VisitDateTime >= visitRight.VisitDateTime)
             {
-                string leftString = visitLeft.VisitDateTime.ToString("yyyyMMdd");
-                string rightString = visitRight.VisitDateTime.ToString("yyyyMMdd");
-                string msg = "Expected visitLeft.VisitDateTime >= visitRight.VisitDateTime, ";
+                string leftString = visitLeft.VisitDateTime.ToString("MMMM dd yyyy");
+                string rightString = visitRight.VisitDateTime.ToString("MMMM dd yyyy");
+                string msg = "Expected visitLeft.VisitDateTime < visitRight.VisitDateTime, ";
                 msg += $"got visitLeft.VisitDateTime = {leftString} and visitRight.VisitDateTime = {rightString}";
                 throw new ArgumentException(msg);
             }
