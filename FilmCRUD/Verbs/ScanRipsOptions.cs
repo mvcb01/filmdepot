@@ -26,7 +26,7 @@ namespace FilmCRUD.Verbs
             HelpText = "movie rip difference between two visits with dates YYYY: added and removed movie rips; example: 20100101:20100102")]
         public IEnumerable<string> VisitDiff { get; set; }
 
-        [Option(SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
+        [Option('l', "listvisits", SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
         public bool ListVisits { get; set; }
 
         // can be used with any set; relevant for options WithDates and CountByReleaseDate
