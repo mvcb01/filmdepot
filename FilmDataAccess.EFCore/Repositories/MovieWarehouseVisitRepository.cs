@@ -26,7 +26,10 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public MovieWarehouseVisit GetPreviousMovieWarehouseVisit(MovieWarehouseVisit visit)
         {
-            return GetAll().Where(v => v.VisitDateTime < visit.VisitDateTime).FirstOrDefault();
+            return GetAll()
+                .Where(v => v.VisitDateTime < visit.VisitDateTime)
+                .OrderByDescending(v => v.VisitDateTime)
+                .FirstOrDefault();
         }
 
         private static DateTime GetClosestDatetime(IEnumerable<DateTime> allDateTimes, DateTime dt)
