@@ -5,8 +5,8 @@ using System.Collections.Generic;
 namespace FilmCRUD.Verbs
 {
     // Examples:
-    //  dotnet run -- scan --countbyreleasedate
-    //  dotnet run -- scan --withreleasedate 2011
+    //  dotnet run -- scanrips --countbyreleasedate -v 20211206
+    //  dotnet run -- scanrips --withdates 2011 2012 2013
     [Verb("scanrips", HelpText = "info from existing movie rips")]
     public class ScanRipsOptions
     {
