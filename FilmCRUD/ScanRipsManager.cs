@@ -7,21 +7,16 @@ using System;
 
 namespace FilmCRUD
 {
-    public class ScanRipsManager
+    public class ScanRipsManager : GeneralScanManager
     {
-        private IUnitOfWork unitOfWork { get; init; }
+        public ScanRipsManager(IUnitOfWork unitOfWork) : base(unitOfWork)
+        { }
 
-        public ScanRipsManager(IUnitOfWork unitOfWork)
-        {
-            this.unitOfWork = unitOfWork;
-        }
-
-        public Dictionary<string, int> GetRipCountByReleaseDate()
+        public Dictionary<string, int> GetRipCountByReleaseDate(MovieWarehouseVisit visit)
         {
             Dictionary<string, int> result = new();
-            MovieWarehouseVisit latestVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
 
-            IEnumerable<IGrouping<string, MovieRip>> gbReleaseDate = latestVisit.MovieRips
+            IEnumerable<IGrouping<string, MovieRip>> gbReleaseDate = visit.MovieRips
                 .GroupBy(rip => rip.ParsedReleaseDate ?? "empty");
 
             foreach (var dateGroup in gbReleaseDate)
@@ -31,11 +26,10 @@ namespace FilmCRUD
             return result;
         }
 
-        public IEnumerable<string> GetAllRipsWithReleaseDate(params int[] dates)
+        public IEnumerable<string> GetAllRipsWithReleaseDate(MovieWarehouseVisit visit, params int[] dates)
         {
             string[] dateStrings = dates.Select(d => d.ToString()).ToArray();
-            MovieWarehouseVisit latestVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
-            return latestVisit.MovieRips
+            return visit.MovieRips
                 .Where(r => dateStrings.Contains(r.ParsedReleaseDate))
                 .Select(r => r.FileName);
         }
@@ -52,40 +46,42 @@ namespace FilmCRUD
 
         public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
         {
-            var addedFileNames = new List<string>();
-            var removedFileNames = new List<string>();
+            MovieWarehouseVisit lastVisit = this.unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
+            MovieWarehouseVisit previousVisit = this.unitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(lastVisit);
+            return GetVisitDiff(previousVisit, lastVisit);
+        }
 
-            List<DateTime> lastTwoVisitDates = unitOfWork.MovieWarehouseVisits
-                .GetAll()
-                .GetVisitDates()
-                .OrderByDescending(dt => dt)
-                .Take(2)
-                .ToList();
-
-            int nVisits = lastTwoVisitDates.Count();
-            if (nVisits == 0)
+        public Dictionary<string, IEnumerable<string>> GetVisitDiff(MovieWarehouseVisit visitLeft, MovieWarehouseVisit visitRight)
+        {
+            if (visitRight == null)
             {
-                throw new InvalidOperationException("No visits yet!");
+                throw new ArgumentNullException("visitRight should not be null");
             }
-            else if (nVisits == 1)
-            {
-                addedFileNames = unitOfWork.MovieWarehouseVisits.GetAll().First().MovieRips.GetFileNames().ToList();
-            }
-            else
-            {
-                DateTime lastVisitDate = lastTwoVisitDates[0];
-                DateTime firstVisitDate = lastTwoVisitDates[1];
 
-                MovieWarehouseVisit lastVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(lastVisitDate);
-                MovieWarehouseVisit firstVisit = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(firstVisitDate);
-
-                addedFileNames = lastVisit.MovieRips.GetFileNames().Except(firstVisit.MovieRips.GetFileNames()).ToList();
-                removedFileNames = firstVisit.MovieRips.GetFileNames().Except(lastVisit.MovieRips.GetFileNames()).ToList();
+            if (visitLeft == null)
+            {
+                return new Dictionary<string, IEnumerable<string>>() {
+                    ["added"] = visitRight.MovieRips.GetFileNames(),
+                    ["removed"] = Enumerable.Empty<string>()
+                };
             }
+
+            if (visitLeft.VisitDateTime >= visitRight.VisitDateTime)
+            {
+                string leftString = visitLeft.VisitDateTime.ToString("MMMM dd yyyy");
+                string rightString = visitRight.VisitDateTime.ToString("MMMM dd yyyy");
+                string msg = "Expected visitLeft.VisitDateTime < visitRight.VisitDateTime, ";
+                msg += $"got visitLeft.VisitDateTime = {leftString} and visitRight.VisitDateTime = {rightString}";
+                throw new ArgumentException(msg);
+            }
+
+            List<string> addedFileNames = visitRight.MovieRips.GetFileNames().Except(visitLeft.MovieRips.GetFileNames()).ToList();
+            List<string> removedFileNames = visitLeft.MovieRips.GetFileNames().Except(visitRight.MovieRips.GetFileNames()).ToList();
             return new Dictionary<string, IEnumerable<string>>() {
                 ["added"] = addedFileNames,
                 ["removed"] = removedFileNames
             };
         }
+
     }
 }

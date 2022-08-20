@@ -8,14 +8,10 @@ using FilmDomain.Extensions;
 
 namespace FilmCRUD
 {
-    public class ScanMoviesManager
+    public class ScanMoviesManager : GeneralScanManager
     {
-        private IUnitOfWork _unitOfWork { get; init; }
-
-        public ScanMoviesManager(IUnitOfWork unitOfWork)
-        {
-            this._unitOfWork = unitOfWork;
-        }
+        public ScanMoviesManager(IUnitOfWork unitOfWork) : base(unitOfWork)
+        { }
 
         /// <summary>
         /// Method <c>GetMoviesWithGenres</c> returns all the movies that have at least
@@ -23,7 +19,7 @@ namespace FilmCRUD
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithGenres(MovieWarehouseVisit visit, params Genre[] genres)
         {
-            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => genres.Intersect(m.Genres).Any());
         }
 
@@ -33,7 +29,7 @@ namespace FilmCRUD
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithActors(MovieWarehouseVisit visit, params Actor[] actors)
         {
-            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => actors.Intersect(m.Actors).Any());
         }
 
@@ -43,7 +39,7 @@ namespace FilmCRUD
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithDirectors(MovieWarehouseVisit visit, params Director[] directors)
         {
-            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => directors.Intersect(m.Directors).Any());
         }
 
@@ -53,13 +49,13 @@ namespace FilmCRUD
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithReleaseDates(MovieWarehouseVisit visit, params int[] dates)
         {
-            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => dates.Contains(m.ReleaseDate));
         }
 
         public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit)
         {
-            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
 
             // flatten -> group by Genre and count
             IEnumerable<IGrouping<Genre, Genre>> grouped = moviesInVisit.SelectMany(m => m.Genres).GroupBy(g => g);
@@ -68,7 +64,7 @@ namespace FilmCRUD
 
         public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit)
         {
-            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
 
             // flatten -> group by Actor and count
             IEnumerable<IGrouping<Actor, Actor>> grouped = moviesInVisit.SelectMany(m => m.Actors).GroupBy(a => a);
@@ -77,7 +73,7 @@ namespace FilmCRUD
 
         public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit)
         {
-            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
 
             // flatten -> group by Director and count
             IEnumerable<IGrouping<Director, Director>> grouped = moviesInVisit.SelectMany(m => m.Directors).GroupBy(a => a);
@@ -86,38 +82,23 @@ namespace FilmCRUD
 
         public IEnumerable<Movie> SearchMovieEntitiesByTitle(MovieWarehouseVisit visit, string title)
         {
-            IEnumerable<Movie> moviesInVisit = this._unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
-        }
-
-        public MovieWarehouseVisit GetClosestVisit()
-        {
-            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
-        }
-
-        public MovieWarehouseVisit GetClosestVisit(DateTime dt)
-        {
-            return this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
-        }
-
-        public IEnumerable<DateTime> ListVisitDates()
-        {
-            return this._unitOfWork.MovieWarehouseVisits.GetAll().GetVisitDates();
         }
 
         public IEnumerable<Genre> GenresFromName(string name)
         {
-            return this._unitOfWork.Genres.GetGenresFromName(name);
+            return this.unitOfWork.Genres.GetGenresFromName(name);
         }
 
         public IEnumerable<Actor> GetActorsFromName(string name)
         {
-            return this._unitOfWork.Actors.GetActorsFromName(name);
+            return this.unitOfWork.Actors.GetActorsFromName(name);
         }
 
         public IEnumerable<Director> GetDirectorsFromName(string name)
         {
-            return this._unitOfWork.Directors.GetDirectorsFromName(name);
+            return this.unitOfWork.Directors.GetDirectorsFromName(name);
         }
     }
 }

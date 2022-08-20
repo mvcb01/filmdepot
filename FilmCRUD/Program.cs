@@ -93,21 +93,35 @@ namespace FilmCRUD
 
         private static void HandleScanRipsOptions(ScanRipsOptions opts, ScanRipsManager scanRipsManager)
         {
-            System.Console.WriteLine("----------");
+            System.Console.WriteLine("-------------");
+
+            if (opts.ListVisits)
+            {
+                ListVisits(scanRipsManager);
+                return;
+            }
+
+            MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanRipsManager, opts.Visit);
+
+            string printDateFormat = "MMMM dd yyyy";
             if (opts.CountByReleaseDate)
             {
+                System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
                 System.Console.WriteLine("ScanRips: count by ReleaseDate\n");
-                Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate();
+                Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate(visit);
                 foreach (var kv in countByRelaseDate.OrderBy(kv => kv.Key))
                 {
                     System.Console.WriteLine($"{kv.Key}: {kv.Value}");
                 }
             }
-            else if (opts.WithDates != null)
+            else if (opts.WithDates.Any())
             {
+                System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
                 string releaseDates = string.Join(" or ", opts.WithDates);
                 System.Console.WriteLine($"ScanRips: rips with ReleaseDate {releaseDates}\n");
-                List<string> ripFileNames = scanRipsManager.GetAllRipsWithReleaseDate(opts.WithDates.ToArray()).ToList();
+                List<string> ripFileNames = scanRipsManager
+                    .GetAllRipsWithReleaseDate(visit, opts.WithDates.ToArray())
+                    .ToList();
 
                 System.Console.WriteLine($"Total count: {ripFileNames.Count()}\n");
 
@@ -126,16 +140,32 @@ namespace FilmCRUD
                     System.Console.WriteLine($"{visitStr} : {item.Value}");
                 }
             }
+            else if (opts.VisitDiff.Any())
+            {
+                IEnumerable<int> dateInts = opts.VisitDiff.Select(i => int.Parse(i)).OrderByDescending(i => i);
+
+                int dateIntRight = dateInts.First();
+                MovieWarehouseVisit visitRight = GetClosestMovieWarehouseVisit(scanRipsManager, dateIntRight.ToString());
+
+                int dateIntLeft = dateInts.Skip(1).FirstOrDefault();
+                MovieWarehouseVisit visitLeft;
+                if (dateIntLeft > 0)
+                {
+                    visitLeft = GetClosestMovieWarehouseVisit(scanRipsManager, dateIntLeft.ToString());
+                }
+                else
+                {
+                    visitLeft = scanRipsManager.GetPreviousVisit(visitRight);
+                }
+                string _left = visitLeft.VisitDateTime.ToString(printDateFormat);
+                string _right = visitRight.VisitDateTime.ToString(printDateFormat);
+                System.Console.WriteLine($"Visit Difference: {_left} -> {_right}");
+                PrintVisitDiff(scanRipsManager.GetVisitDiff(visitLeft, visitRight));
+            }
             else if (opts.LastVisitDiff)
             {
                 System.Console.WriteLine("ScanRips: last visit difference \n");
-                Dictionary<string, IEnumerable<string>> lastVisitDiff = scanRipsManager.GetLastVisitDiff();
-                foreach (var item in lastVisitDiff.OrderBy(kvp => kvp.Key))
-                {
-                    System.Console.WriteLine("\n----------");
-                    System.Console.WriteLine(item.Key + "\n");
-                    System.Console.WriteLine(String.Join('\n', item.Value.OrderBy(s => s)));
-                }
+                PrintVisitDiff(scanRipsManager.GetLastVisitDiff());
             }
             else
             {
@@ -150,24 +180,11 @@ namespace FilmCRUD
 
             if (opts.ListVisits)
             {
-                System.Console.WriteLine("Dates for all warehouse visits:");
-                scanMoviesManager.ListVisitDates()
-                    .OrderByDescending(dt => dt)
-                    .ToList()
-                    .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+                ListVisits(scanMoviesManager);
                 return;
             }
 
-            MovieWarehouseVisit visit;
-            if (opts.Visit == null)
-            {
-                visit = scanMoviesManager.GetClosestVisit();
-            }
-            else
-            {
-                DateTime visitDate = DateTime.ParseExact(opts.Visit, "yyyyMMdd", null);
-                visit = scanMoviesManager.GetClosestVisit(visitDate);
-            }
+            MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanMoviesManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
             System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
@@ -350,6 +367,40 @@ namespace FilmCRUD
             foreach (var errorObj in errors)
             {
                 System.Console.WriteLine(errorObj.Tag);
+            }
+        }
+
+        private static MovieWarehouseVisit GetClosestMovieWarehouseVisit(GeneralScanManager scanManager, string dateString)
+        {
+            MovieWarehouseVisit visit;
+            if (dateString == null)
+            {
+                visit = scanManager.GetClosestVisit();
+            }
+            else
+            {
+                DateTime visitDate = DateTime.ParseExact(dateString, "yyyyMMdd", null);
+                visit = scanManager.GetClosestVisit(visitDate);
+            }
+            return visit;
+        }
+
+        private static void ListVisits(GeneralScanManager scanManager)
+        {
+            System.Console.WriteLine("Dates for all warehouse visits:");
+            scanManager.ListVisitDates()
+                .OrderByDescending(dt => dt)
+                .ToList()
+                .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+        }
+
+        private static void PrintVisitDiff(Dictionary<string, IEnumerable<string>> visitDiff)
+        {
+            foreach (var item in visitDiff.OrderBy(kvp => kvp.Key))
+            {
+                System.Console.WriteLine("\n----------");
+                System.Console.WriteLine(item.Key + "\n");
+                System.Console.WriteLine(String.Join('\n', item.Value.OrderBy(s => s)));
             }
         }
 
