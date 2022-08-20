@@ -368,6 +368,11 @@ namespace FilmCRUD
             return visit;
         }
 
+        private static MovieWarehouseVisit GetPreviousMovieWarehouseVisit(GeneralScanManager scanManager, MovieWarehouseVisit visit)
+        {
+            return scanManager.GetPreviousVisit(visit);
+        }
+
         private static void ListVisits(GeneralScanManager scanManager)
         {
             System.Console.WriteLine("Dates for all warehouse visits:");
