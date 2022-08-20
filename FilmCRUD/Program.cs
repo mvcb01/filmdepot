@@ -399,7 +399,7 @@ namespace FilmCRUD
             foreach (var item in visitDiff.OrderBy(kvp => kvp.Key))
             {
                 System.Console.WriteLine("\n----------");
-                System.Console.WriteLine(item.Key + "\n");
+                System.Console.WriteLine($"{item.Key} | Count: {item.Value.Count()}");
                 System.Console.WriteLine(String.Join('\n', item.Value.OrderBy(s => s)));
             }
         }
