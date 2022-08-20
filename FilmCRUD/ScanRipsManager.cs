@@ -77,6 +77,19 @@ namespace FilmCRUD
 
         public Dictionary<string, IEnumerable<string>> GetVisitDiff(MovieWarehouseVisit visitLeft, MovieWarehouseVisit visitRight)
         {
+            if (visitRight == null)
+            {
+                throw new ArgumentNullException("visitRight should not be null");
+            }
+
+            if (visitLeft == null)
+            {
+                return new Dictionary<string, IEnumerable<string>>() {
+                    ["added"] = visitRight.MovieRips.GetFileNames(),
+                    ["removed"] = Enumerable.Empty<string>()
+                };
+            }
+
             if (visitLeft.VisitDateTime >= visitRight.VisitDateTime)
             {
                 string leftString = visitLeft.VisitDateTime.ToString("yyyyMMdd");
