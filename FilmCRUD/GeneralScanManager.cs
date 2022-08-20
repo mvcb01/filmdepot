@@ -26,6 +26,11 @@ namespace FilmCRUD
             return this.unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
         }
 
+        public MovieWarehouseVisit GetPreviousVisit(MovieWarehouseVisit visit)
+        {
+            return this.unitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(visit);
+        }
+
         public IEnumerable<DateTime> ListVisitDates()
         {
             return this.unitOfWork.MovieWarehouseVisits.GetAll().GetVisitDates();
