@@ -139,16 +139,30 @@ namespace FilmCRUD
                     System.Console.WriteLine($"{visitStr} : {item.Value}");
                 }
             }
+            else if (opts.VisitDiff.Any())
+            {
+                IEnumerable<int> dateInts = opts.VisitDiff.Select(i => int.Parse(i)).OrderByDescending(i => i);
+
+                int dateIntRight = dateInts.First();
+                MovieWarehouseVisit visitRight = GetClosestMovieWarehouseVisit(scanRipsManager, dateIntRight.ToString());
+
+                int dateIntLeft = dateInts.Skip(1).FirstOrDefault();
+                MovieWarehouseVisit visitLeft;
+                if (dateIntLeft > 0)
+                {
+                    visitLeft = GetClosestMovieWarehouseVisit(scanRipsManager, dateIntLeft.ToString());
+                }
+                else
+                {
+                    visitLeft = scanRipsManager.GetPreviousVisit(visitRight);
+                }
+
+                PrintVisitDiff(scanRipsManager.GetVisitDiff(visitLeft, visitRight));
+            }
             else if (opts.LastVisitDiff)
             {
                 System.Console.WriteLine("ScanRips: last visit difference \n");
-                Dictionary<string, IEnumerable<string>> lastVisitDiff = scanRipsManager.GetLastVisitDiff();
-                foreach (var item in lastVisitDiff.OrderBy(kvp => kvp.Key))
-                {
-                    System.Console.WriteLine("\n----------");
-                    System.Console.WriteLine(item.Key + "\n");
-                    System.Console.WriteLine(String.Join('\n', item.Value.OrderBy(s => s)));
-                }
+                PrintVisitDiff(scanRipsManager.GetLastVisitDiff());
             }
             else
             {
@@ -368,11 +382,6 @@ namespace FilmCRUD
             return visit;
         }
 
-        private static MovieWarehouseVisit GetPreviousMovieWarehouseVisit(GeneralScanManager scanManager, MovieWarehouseVisit visit)
-        {
-            return scanManager.GetPreviousVisit(visit);
-        }
-
         private static void ListVisits(GeneralScanManager scanManager)
         {
             System.Console.WriteLine("Dates for all warehouse visits:");
@@ -380,6 +389,16 @@ namespace FilmCRUD
                 .OrderByDescending(dt => dt)
                 .ToList()
                 .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+        }
+
+        private static void PrintVisitDiff(Dictionary<string, IEnumerable<string>> visitDiff)
+        {
+            foreach (var item in visitDiff.OrderBy(kvp => kvp.Key))
+            {
+                System.Console.WriteLine("\n----------");
+                System.Console.WriteLine(item.Key + "\n");
+                System.Console.WriteLine(String.Join('\n', item.Value.OrderBy(s => s)));
+            }
         }
 
     }

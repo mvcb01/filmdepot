@@ -1,4 +1,5 @@
 using CommandLine;
+using System;
 using System.Collections.Generic;
 
 namespace FilmCRUD.Verbs
@@ -18,14 +19,18 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "CountRipsByVisit", HelpText = "rip count by visit")]
         public bool CountByVisit { get; set; }
 
-        [Option(SetName = "LastVisitRipDifference", HelpText = "movie rip difference from last two visits: added and removed")]
+        [Option(SetName = "LastVisitRipDifference", HelpText = "movie rip difference from last two visits: added and removed movie rips")]
         public bool LastVisitDiff { get; set; }
+
+        [Option(SetName = "VisitRipDifference", Separator = ':',
+            HelpText = "movie rip difference between two visits with dates YYYY: added and removed movie rips; example: 20100101:20100102")]
+        public IEnumerable<string> VisitDiff { get; set; }
 
         [Option(SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
         public bool ListVisits { get; set; }
 
         // can be used with any set, not relevant for CountRipsByVisit
-        [Option('v', "visit", HelpText = "warehouse visit date (YYYY) to use as the scan target; defaults to the most recent visit")]
+        [Option('v', "visit", HelpText = "warehouse visit date (YYYYMMDD) to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
 
     }
