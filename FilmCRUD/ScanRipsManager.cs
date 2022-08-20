@@ -46,33 +46,9 @@ namespace FilmCRUD
 
         public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
         {
-            List<DateTime> lastTwoVisitDates = unitOfWork.MovieWarehouseVisits
-                .GetAll()
-                .GetVisitDates()
-                .OrderByDescending(dt => dt)
-                .Take(2)
-                .ToList();
-
-            int nVisits = lastTwoVisitDates.Count();
-            if (nVisits == 0)
-            {
-                throw new InvalidOperationException("No visits yet!");
-            }
-
-            if (nVisits == 1)
-            {
-                return new Dictionary<string, IEnumerable<string>>() {
-                    ["added"] = unitOfWork.MovieWarehouseVisits.GetAll().First().MovieRips.GetFileNames().ToList(),
-                    ["removed"] = Enumerable.Empty<string>()
-                };
-            }
-
-            DateTime visitDateRight = lastTwoVisitDates[0];
-            DateTime visitDateLeft = lastTwoVisitDates[1];
-
-            MovieWarehouseVisit visitRight = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(visitDateRight);
-            MovieWarehouseVisit visitLeft = unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(visitDateLeft);
-            return GetVisitDiff(visitLeft, visitRight);
+            MovieWarehouseVisit lastVisit = this.unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
+            MovieWarehouseVisit previousVisit = this.unitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(lastVisit);
+            return GetVisitDiff(previousVisit, lastVisit);
         }
 
         public Dictionary<string, IEnumerable<string>> GetVisitDiff(MovieWarehouseVisit visitLeft, MovieWarehouseVisit visitRight)

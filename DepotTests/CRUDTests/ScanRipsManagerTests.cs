@@ -22,8 +22,8 @@ namespace DepotTests.CRUDTests
         private readonly ScanRipsManager _scanRipsManager;
         public ScanRipsManagerTests()
         {
-            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>();
-            this._movieWarehouseVisitRepositoryMock = new Mock<IMovieWarehouseVisitRepository>();
+            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>(MockBehavior.Strict);
+            this._movieWarehouseVisitRepositoryMock = new Mock<IMovieWarehouseVisitRepository>(MockBehavior.Strict);
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
             this._unitOfWorkMock
@@ -174,15 +174,12 @@ namespace DepotTests.CRUDTests
             var movieRips = new List<MovieRip>() {
                 new MovieRip() {
                     FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
-                    ParsedReleaseDate = "1997"
                     },
                 new MovieRip() {
                     FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
-                    ParsedReleaseDate = "1997"
                     },
                 new MovieRip() {
                     FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
-                    ParsedReleaseDate = "1973"
                     }
             };
             var visitRight = new MovieWarehouseVisit() {
@@ -209,21 +206,17 @@ namespace DepotTests.CRUDTests
             var movieRipsFirstVisit = new List<MovieRip>() {
                 new MovieRip() {
                     FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
-                    ParsedReleaseDate = "1997"
                     },
                 new MovieRip() {
                     FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
-                    ParsedReleaseDate = "1997"
                     }
             };
             var movieRipsSecondVisit = new List<MovieRip>() {
                 new MovieRip() {
                     FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
-                    ParsedReleaseDate = "1997"
                     },
                 new MovieRip() {
                     FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
-                    ParsedReleaseDate = "1973"
                     }
             };
             DateTime firstVisitDate = DateTime.ParseExact("20220101", "yyyyMMdd", null);
@@ -242,8 +235,60 @@ namespace DepotTests.CRUDTests
             Dictionary<string, IEnumerable<string>> visitDiff = this._scanRipsManager.GetVisitDiff(visitLeft, visitRight);
 
             // assert
-            visitDiff["removed"].Should().BeEquivalentTo(new string[] { "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]" });
-            visitDiff["added"].Should().BeEquivalentTo(new string[] { "Papillon.1973.1080p.BluRay.X264-AMIABLE" });
+            using (new AssertionScope())
+            {
+                visitDiff["removed"].Should().BeEquivalentTo(new string[] { "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]" });
+                visitDiff["added"].Should().BeEquivalentTo(new string[] { "Papillon.1973.1080p.BluRay.X264-AMIABLE" });
+            }
+        }
+
+        [Fact]
+        public void GetLastVisitDiff_ShouldReturnCorrectDifference()
+        {
+            // arrange
+            var movieRip0 = new MovieRip() {
+                FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+            };
+            var movieRip1 = new MovieRip() {
+                FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+            };
+            var movieRip2 = new MovieRip() {
+                FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
+            };
+            var movieRip3 = new MovieRip() {
+                FileName = "Badlands.1973.1080p.BluRay.X264-AMIABLE",
+            };
+
+            var firstVisit = new MovieWarehouseVisit() {
+                MovieRips = new List<MovieRip>() { movieRip0, movieRip1 },
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+            };
+            var secondVisit = new MovieWarehouseVisit() {
+                MovieRips = new List<MovieRip>() { movieRip1, movieRip2 },
+                VisitDateTime = DateTime.ParseExact("20220102", "yyyyMMdd", null)
+            };
+            var thirdVisit = new MovieWarehouseVisit() {
+                MovieRips = new List<MovieRip>() { movieRip2, movieRip3 },
+                VisitDateTime = DateTime.ParseExact("20220103", "yyyyMMdd", null)
+            };
+
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetClosestMovieWarehouseVisit())
+                .Returns(thirdVisit);
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetPreviousMovieWarehouseVisit(
+                    It.Is<MovieWarehouseVisit>(m => m.VisitDateTime == thirdVisit.VisitDateTime)))
+                .Returns(secondVisit);
+
+            // act
+            var lastVisitDiff = this._scanRipsManager.GetLastVisitDiff();
+
+            // assert
+            using (new AssertionScope())
+            {
+                lastVisitDiff["removed"].Should().BeEquivalentTo(new string[] { movieRip1.FileName });
+                lastVisitDiff["added"].Should().BeEquivalentTo(new string[] { movieRip3.FileName });
+            }
         }
     }
 }
