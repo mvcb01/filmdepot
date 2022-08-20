@@ -104,9 +104,9 @@ namespace FilmCRUD
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanRipsManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
-            System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
             if (opts.CountByReleaseDate)
             {
+                System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
                 System.Console.WriteLine("ScanRips: count by ReleaseDate\n");
                 Dictionary<string, int> countByRelaseDate = scanRipsManager.GetRipCountByReleaseDate(visit);
                 foreach (var kv in countByRelaseDate.OrderBy(kv => kv.Key))
@@ -116,6 +116,7 @@ namespace FilmCRUD
             }
             else if (opts.WithDates.Any())
             {
+                System.Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
                 string releaseDates = string.Join(" or ", opts.WithDates);
                 System.Console.WriteLine($"ScanRips: rips with ReleaseDate {releaseDates}\n");
                 List<string> ripFileNames = scanRipsManager
@@ -156,7 +157,9 @@ namespace FilmCRUD
                 {
                     visitLeft = scanRipsManager.GetPreviousVisit(visitRight);
                 }
-
+                string _left = visitLeft.VisitDateTime.ToString(printDateFormat);
+                string _right = visitRight.VisitDateTime.ToString(printDateFormat);
+                System.Console.WriteLine($"Visit Difference: {_left} -> {_right}");
                 PrintVisitDiff(scanRipsManager.GetVisitDiff(visitLeft, visitRight));
             }
             else if (opts.LastVisitDiff)
