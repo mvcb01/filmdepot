@@ -202,7 +202,6 @@ namespace DepotTests.CRUDTests
         public void GetVisitDiff_WithTwoVisits_ShouldReturnCorrectDifference()
         {
             // arrange
-            // arrange
             var movieRipsFirstVisit = new List<MovieRip>() {
                 new MovieRip() {
                     FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",

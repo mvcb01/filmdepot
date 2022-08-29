@@ -100,5 +100,42 @@ namespace FilmCRUD
         {
             return this.unitOfWork.Directors.GetDirectorsFromName(name);
         }
+
+        /// <summary>
+        /// Method <c>GetVisitDiff</c> considers all the distinct Movie entities linked to some
+        /// MovieRip in <paramref name="visitLeft"/> or in <paramref name="visitLeft"/> and outputs the difference in
+        /// a dictionary with keys "added" and "removed".
+        /// </summary>
+        public Dictionary<string, IEnumerable<string>> GetVisitDiff(MovieWarehouseVisit visitLeft, MovieWarehouseVisit visitRight)
+        {
+            if (visitRight == null)
+            {
+                throw new ArgumentNullException("visitRight should not be null");
+            }
+
+            if (visitLeft == null)
+            {
+                return new Dictionary<string, IEnumerable<string>>() {
+                    ["added"] = this.unitOfWork.Movies.GetAllMoviesInVisit(visitRight).Select(m => m.ToString()),
+                    ["removed"] = Enumerable.Empty<string>()
+                };
+            }
+
+            if (visitLeft.VisitDateTime >= visitRight.VisitDateTime)
+            {
+                string leftString = visitLeft.VisitDateTime.ToString("MMMM dd yyyy");
+                string rightString = visitRight.VisitDateTime.ToString("MMMM dd yyyy");
+                string msg = "Expected visitLeft.VisitDateTime < visitRight.VisitDateTime, ";
+                msg += $"got visitLeft.VisitDateTime = {leftString} and visitRight.VisitDateTime = {rightString}";
+                throw new ArgumentException(msg);
+            }
+
+            IEnumerable<Movie> visitLeftMovies = this.unitOfWork.Movies.GetAllMoviesInVisit(visitLeft);
+            IEnumerable<Movie> visitRightMovies = this.unitOfWork.Movies.GetAllMoviesInVisit(visitRight);
+            return new Dictionary<string, IEnumerable<string>>() {
+                ["removed"] = visitLeftMovies.Except(visitRightMovies).Select(m => m.ToString()),
+                ["added"] = visitRightMovies.Except(visitLeftMovies).Select(m => m.ToString())
+            };
+        }
     }
 }
