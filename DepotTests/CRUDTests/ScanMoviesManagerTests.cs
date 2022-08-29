@@ -14,12 +14,6 @@ namespace DepotTests.CRUDTests
 {
     public class ScanMoviesManagerTests
     {
-        private readonly Mock<IActorRepository> _actorRepositoryMock;
-
-        private readonly Mock<IGenreRepository> _genreRepositoryMock;
-
-        private readonly Mock<IDirectorRepository> _directorRepositoryMock;
-
         private readonly Mock<IMovieRepository> _movieRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
@@ -28,21 +22,9 @@ namespace DepotTests.CRUDTests
 
         public ScanMoviesManagerTests()
         {
-            this._actorRepositoryMock = new Mock<IActorRepository>(MockBehavior.Strict);
-            this._genreRepositoryMock = new Mock<IGenreRepository>(MockBehavior.Strict);
-            this._directorRepositoryMock = new Mock<IDirectorRepository>(MockBehavior.Strict);
             this._movieRepositoryMock = new Mock<IMovieRepository>(MockBehavior.Strict);
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
-            this._unitOfWorkMock
-                .SetupGet(u => u.Actors)
-                .Returns(this._actorRepositoryMock.Object);
-            this._unitOfWorkMock
-                .SetupGet(u => u.Genres)
-                .Returns(this._genreRepositoryMock.Object);
-            this._unitOfWorkMock
-                .SetupGet(u => u.Directors)
-                .Returns(this._directorRepositoryMock.Object);
             this._unitOfWorkMock
                 .SetupGet(u => u.Movies)
                 .Returns(this._movieRepositoryMock.Object);
