@@ -272,6 +272,11 @@ namespace FilmCRUD
                     searchResult.ToList().ForEach(m => System.Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
                 }
             }
+            else if (opts.VisitDiff.Any())
+            {
+                // TODO: move the code in HandleScanRipsOptions to a separate method and use in both places!!
+                throw new NotImplementedException("");
+            }
             else
             {
                 System.Console.WriteLine("No action requested...");
