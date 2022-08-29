@@ -34,7 +34,7 @@ namespace FilmCRUD.Verbs
         public bool ListVisits { get; set; }
 
         // can be used with any set, not relevant for ListVisitsOption
-        [Option('v', "visit", HelpText = "warehouse visit date (YYYY) to use as the scan target; defaults to the most recent visit")]
+        [Option('v', "visit", HelpText = "warehouse visit date (YYYYMMDD) to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
 
         // can be used with any set, only relevant for GetCountByGenre/Actor/Director
