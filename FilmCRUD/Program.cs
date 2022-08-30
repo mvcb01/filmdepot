@@ -260,8 +260,11 @@ namespace FilmCRUD
             }
             else if (opts.VisitDiff.Any())
             {
-                // TODO: move the code in HandleScanRipsOptions to a separate method and use in both places!!
-                throw new NotImplementedException("");
+                GetVisitDiffAndPrint(
+                    scanMoviesManager,
+                    opts.VisitDiff,
+                    visitDiffStrategy: scanMoviesManager.GetVisitDiff,
+                    printDateFormat: printDateFormat);
             }
             else
             {
