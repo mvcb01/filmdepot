@@ -142,25 +142,11 @@ namespace FilmCRUD
             }
             else if (opts.VisitDiff.Any())
             {
-                IEnumerable<int> dateInts = opts.VisitDiff.Select(i => int.Parse(i)).OrderByDescending(i => i);
-
-                int dateIntRight = dateInts.First();
-                MovieWarehouseVisit visitRight = GetClosestMovieWarehouseVisit(scanRipsManager, dateIntRight.ToString());
-
-                int dateIntLeft = dateInts.Skip(1).FirstOrDefault();
-                MovieWarehouseVisit visitLeft;
-                if (dateIntLeft > 0)
-                {
-                    visitLeft = GetClosestMovieWarehouseVisit(scanRipsManager, dateIntLeft.ToString());
-                }
-                else
-                {
-                    visitLeft = scanRipsManager.GetPreviousVisit(visitRight);
-                }
-                string _left = visitLeft.VisitDateTime.ToString(printDateFormat);
-                string _right = visitRight.VisitDateTime.ToString(printDateFormat);
-                System.Console.WriteLine($"Visit Difference: {_left} -> {_right}");
-                PrintVisitDiff(scanRipsManager.GetVisitDiff(visitLeft, visitRight));
+                GetVisitDiffAndPrint(
+                    scanRipsManager,
+                    opts.VisitDiff,
+                    visitDiffStrategy: scanRipsManager.GetVisitDiff,
+                    printDateFormat: printDateFormat);
             }
             else if (opts.LastVisitDiff)
             {
@@ -388,6 +374,39 @@ namespace FilmCRUD
                 visit = scanManager.GetClosestVisit(visitDate);
             }
             return visit;
+        }
+
+        /// <summary>
+        /// Works for both ScanMoviesManager.GetVisitDiff and ScanRipsManager.GetVisitDiff.
+        /// Parameter <paramref name="diffDates"/> should be as is provided in ScanMoviesOptions.VisitDiff
+        /// and ScanRipsOptions.VisitDiff respectively.
+        /// </summary>
+        private static void GetVisitDiffAndPrint(
+            GeneralScanManager scanManager,
+            IEnumerable<string> diffDates,
+            Func<MovieWarehouseVisit, MovieWarehouseVisit, Dictionary<string, IEnumerable<string>>> visitDiffStrategy,
+            string printDateFormat)
+        {
+            IEnumerable<int> dateInts = diffDates.Select(i => int.Parse(i)).OrderByDescending(i => i);
+
+            int dateIntRight = dateInts.First();
+            MovieWarehouseVisit visitRight = GetClosestMovieWarehouseVisit(scanManager, dateIntRight.ToString());
+
+            int dateIntLeft = dateInts.Skip(1).FirstOrDefault();
+            MovieWarehouseVisit visitLeft;
+            if (dateIntLeft > 0)
+            {
+                visitLeft = GetClosestMovieWarehouseVisit(scanManager, dateIntLeft.ToString());
+            }
+            else
+            {
+                visitLeft = scanManager.GetPreviousVisit(visitRight);
+            }
+
+            string _left = visitLeft.VisitDateTime.ToString(printDateFormat);
+            string _right = visitRight.VisitDateTime.ToString(printDateFormat);
+            System.Console.WriteLine($"Visit Difference: {_left} -> {_right}");
+            PrintVisitDiff(visitDiffStrategy(visitLeft, visitRight));
         }
 
         private static void ListVisits(GeneralScanManager scanManager)
