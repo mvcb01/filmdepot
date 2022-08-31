@@ -258,6 +258,10 @@ namespace FilmCRUD
                     searchResult.ToList().ForEach(m => System.Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
                 }
             }
+            else if (opts.LastVisitDiff)
+            {
+                PrintVisitDiff(scanMoviesManager.GetLastVisitDiff());
+            }
             else if (opts.VisitDiff.Any())
             {
                 GetVisitDiffAndPrint(
