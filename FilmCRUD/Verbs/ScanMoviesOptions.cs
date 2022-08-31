@@ -30,6 +30,9 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "ByDirectorOptions", HelpText = "get descending movie count by director")]
         public bool ByDirector { get; set; }
 
+        [Option(SetName = "LastVisitMovieDifference", HelpText = "movie difference from last two visits")]
+        public bool LastVisitDiff { get; set; }
+
         [Option(SetName = "VisitMovieDifference", Separator = ':',
             HelpText = "movie difference between two visits with dates YYYYMMDD: added and removed movie; example: 20100101:20100102")]
         public IEnumerable<string> VisitDiff { get; set; }
