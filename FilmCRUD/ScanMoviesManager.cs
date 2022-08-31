@@ -101,6 +101,13 @@ namespace FilmCRUD
             return this.unitOfWork.Directors.GetDirectorsFromName(name);
         }
 
+        public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
+        {
+            MovieWarehouseVisit lastVisit = this.unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
+            MovieWarehouseVisit previousVisit = this.unitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(lastVisit);
+            return GetVisitDiff(previousVisit, lastVisit);
+        }
+
         /// <summary>
         /// Method <c>GetVisitDiff</c> considers all the distinct Movie entities linked to some
         /// MovieRip in <paramref name="visitLeft"/> or in <paramref name="visitLeft"/> and outputs the difference in
