@@ -8,17 +8,13 @@ using System.Collections.Generic;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmCRUD;
+using FluentAssertions.Execution;
 
 namespace DepotTests.CRUDTests
 {
     public class ScanMoviesManagerTests
     {
-        private readonly Mock<IActorRepository> _actoRepositoryMock;
-
-        private readonly Mock<IGenreRepository> _genreRepositoryMock;
-
-        private readonly Mock<IDirectorRepository> _directorRepositoryMock;
-
+        private readonly Mock<IMovieWarehouseVisitRepository> _movieWarehouseVisitRepositoryMock;
         private readonly Mock<IMovieRepository> _movieRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
@@ -27,21 +23,13 @@ namespace DepotTests.CRUDTests
 
         public ScanMoviesManagerTests()
         {
-            this._actoRepositoryMock = new Mock<IActorRepository>(MockBehavior.Strict);
-            this._genreRepositoryMock = new Mock<IGenreRepository>(MockBehavior.Strict);
-            this._directorRepositoryMock = new Mock<IDirectorRepository>(MockBehavior.Strict);
             this._movieRepositoryMock = new Mock<IMovieRepository>(MockBehavior.Strict);
+            this._movieWarehouseVisitRepositoryMock = new Mock<IMovieWarehouseVisitRepository>(MockBehavior.Strict);
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
             this._unitOfWorkMock
-                .SetupGet(u => u.Actors)
-                .Returns(this._actoRepositoryMock.Object);
-            this._unitOfWorkMock
-                .SetupGet(u => u.Genres)
-                .Returns(this._genreRepositoryMock.Object);
-            this._unitOfWorkMock
-                .SetupGet(u => u.Directors)
-                .Returns(this._directorRepositoryMock.Object);
+                .SetupGet(u => u.MovieWarehouseVisits)
+                .Returns(this._movieWarehouseVisitRepositoryMock.Object);
             this._unitOfWorkMock
                 .SetupGet(u => u.Movies)
                 .Returns(this._movieRepositoryMock.Object);
@@ -282,5 +270,207 @@ namespace DepotTests.CRUDTests
             var expected = new Movie[] { thirdMovie };
             actual.Should().BeEquivalentTo(expected);
         }
+
+        [Fact]
+        public void GetVisitDiff_WithTwoNullVisits_ShouldThrowArgumentNullException()
+        {
+            // arrange
+            // nothing to do...
+
+            // act
+            // nothing to do...
+
+            // assert
+            this._scanMoviesManager.Invoking(s => s.GetVisitDiff(null, null)).Should().Throw<ArgumentNullException>();
+
+        }
+
+        [Fact]
+        public void GetVisitDiff_WithNullVisitRight_ShouldThrowArgumentNullException()
+        {
+            // arrange
+            var visitLeft = new MovieWarehouseVisit();
+
+            // act
+            // nothing to do...
+
+            // assert
+            this._scanMoviesManager.Invoking(s => s.GetVisitDiff(visitLeft, null)).Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void GetVisitDiff_WithVisitLeftMoreRecentThanVisitRigh_ShouldThrowArgumentException()
+        {
+            // arrange
+            var visitLeft = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220102", "yyyyMMdd", null) };
+            var visitRight = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            // act
+            // nothing to to...
+
+            //assert
+            this._scanMoviesManager
+                .Invoking(r => r.GetVisitDiff(visitLeft, visitRight))
+                .Should()
+                .Throw<ArgumentException>();
+        }
+
+        [Fact]
+        public void GetVisitDiff_WithOnlyVisitRight_ShouldReturnEmptyEnumerableInRemovedKeyAndAllRipsInAddedKey()
+        {
+            // arrange
+            var firstRip = new MovieRip() {
+                FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
+                Movie = new Movie() { Title = "Face Off", ReleaseDate = 1997 }
+            };
+            var secondRip = new MovieRip() {
+                FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                Movie = new Movie() { Title = "Gummo", ReleaseDate = 1997 }
+            };
+            var thirdRip = new MovieRip() {
+                FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+                Movie = new Movie() { Title = "Papillon", ReleaseDate = 1973 }
+            };
+            var visitRight = new MovieWarehouseVisit() {
+                MovieRips = new List<MovieRip>() { firstRip, secondRip, thirdRip },
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+                };
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visitRight))
+                .Returns(visitRight.MovieRips.Select(mr => mr.Movie));
+
+            // act
+            Dictionary<string, IEnumerable<string>> visitDiff = this._scanMoviesManager.GetVisitDiff(null, visitRight);
+
+            // assert
+            using (new AssertionScope())
+            {
+                visitDiff["removed"].Should().BeEmpty();
+                visitDiff["added"].Should().BeEquivalentTo(new string[] {
+                    firstRip.Movie.ToString(),
+                    secondRip.Movie.ToString(),
+                    thirdRip.Movie.ToString() });
+            }
+        }
+
+        [Fact]
+        public void GetVisitDiff_WithTwoVisits_ShouldReturnCorrectDifference()
+        {
+            // arrange
+            var movieWithTwoRips = new Movie() { Title = "Wake In Fright", ReleaseDate = 1971 };
+
+            var firstRip = new MovieRip() {
+                FileName = "Face.Off.1997.iNTERNAL.1080p.BluRay.x264-MARS[rarbg]",
+                Movie = new Movie() { Title = "Face Off", ReleaseDate = 1997 }
+            };
+            var secondRip = new MovieRip() {
+                FileName = "Wake.In.Fright.1971.1080p.BluRay.H264.AAC-RARBG",
+                Movie = movieWithTwoRips
+            };
+            var thirdRip = new MovieRip() {
+                FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                Movie = new Movie() { Title = "Gummo", ReleaseDate = 1997 }
+            };
+            var fourthRip = new MovieRip() {
+                FileName = "Wake.In.Fright.1971.1080p.BluRay.x264.DD2.0-FGT",
+                Movie = movieWithTwoRips
+            };
+
+            var visitLeft = new MovieWarehouseVisit() {
+                MovieRips = new List<MovieRip>() { firstRip, secondRip },
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+            };
+            var visitRight = new MovieWarehouseVisit() {
+                MovieRips = new List<MovieRip>() { thirdRip, fourthRip },
+                VisitDateTime = DateTime.ParseExact("20220102", "yyyyMMdd", null)
+            };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visitLeft))
+                .Returns(visitLeft.MovieRips.Select(mr => mr.Movie));
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(visitRight))
+                .Returns(visitRight.MovieRips.Select(mr => mr.Movie));
+
+            // act
+            Dictionary<string, IEnumerable<string>> visitDiff = this._scanMoviesManager.GetVisitDiff(visitLeft, visitRight);
+
+            // assert
+            IEnumerable<string> removedExpected = new string[] { firstRip.Movie.ToString() };
+            IEnumerable<string> addedExpected = new string[] { thirdRip.Movie.ToString() };
+            using (new AssertionScope())
+            {
+                visitDiff["removed"].Should().BeEquivalentTo(removedExpected);
+                visitDiff["added"].Should().BeEquivalentTo(addedExpected);
+            }
+        }
+
+        [Fact]
+        public void GetLastVisitDiff_ShouldReturnCorrectDifference()
+        {
+            // arrange
+            var movieWithTwoRips = new Movie() { Title = "Wake In Fright", ReleaseDate = 1971 };
+            var movieRip0 = new MovieRip() {
+                FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE",
+                Movie = new Movie() { Title = "Gummo", ReleaseDate = 1997 }
+            };
+            var movieRip1 = new MovieRip() {
+                FileName = "Papillon.1973.1080p.BluRay.X264-AMIABLE",
+                Movie = new Movie() { Title = "Papillon", ReleaseDate = 1973 }
+            };
+            var movieRip2 = new MovieRip() {
+                FileName = "Wake.In.Fright.1971.1080p.BluRay.H264.AAC-RARBG",
+                Movie = movieWithTwoRips
+            };
+            var movieRip3 = new MovieRip() {
+                FileName = "Wake.In.Fright.1971.1080p.BluRay.x264.DD2.0-FGT",
+                Movie = movieWithTwoRips
+            };
+            var movieRip4 = new MovieRip() {
+                FileName = "Badlands.1973.1080p.BluRay.X264-AMIABLE",
+                Movie = new Movie() { Title = "Badlands", ReleaseDate = 1973 }
+            };
+
+            var firstVisit = new MovieWarehouseVisit() {
+                MovieRips = new List<MovieRip>() { movieRip0, movieRip1 },
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+            };
+            var secondVisit = new MovieWarehouseVisit() {
+                MovieRips = new List<MovieRip>() { movieRip1, movieRip2 },
+                VisitDateTime = DateTime.ParseExact("20220102", "yyyyMMdd", null)
+            };
+            var thirdVisit = new MovieWarehouseVisit() {
+                MovieRips = new List<MovieRip>() { movieRip3, movieRip4 },
+                VisitDateTime = DateTime.ParseExact("20220103", "yyyyMMdd", null)
+            };
+
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetClosestMovieWarehouseVisit())
+                .Returns(thirdVisit);
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetPreviousMovieWarehouseVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == thirdVisit.VisitDateTime)))
+                .Returns(secondVisit);
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(firstVisit))
+                .Returns(firstVisit.MovieRips.Select(mr => mr.Movie));
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(secondVisit))
+                .Returns(secondVisit.MovieRips.Select(mr => mr.Movie));
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(thirdVisit))
+                .Returns(thirdVisit.MovieRips.Select(mr => mr.Movie));
+
+            // act
+            Dictionary<string, IEnumerable<string>> lastVisitDiff = this._scanMoviesManager.GetLastVisitDiff();
+
+            // assert
+            using (new AssertionScope())
+            {
+                lastVisitDiff["removed"].Should().BeEquivalentTo(new string[] { movieRip1.Movie.ToString() });
+                lastVisitDiff["added"].Should().BeEquivalentTo(new string[] { movieRip4.Movie.ToString() });
+            }
+        }
+
     }
 }
