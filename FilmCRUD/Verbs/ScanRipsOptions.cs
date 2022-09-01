@@ -23,7 +23,7 @@ namespace FilmCRUD.Verbs
         public bool LastVisitDiff { get; set; }
 
         [Option(SetName = "VisitRipDifference", Separator = ':',
-            HelpText = "movie rip difference between two visits with dates YYYY: added and removed movie rips; example: 20100101:20100102")]
+            HelpText = "movie rip difference between two visits with dates YYYYMMDD: added and removed movie rips; example: 20100101:20100102")]
         public IEnumerable<string> VisitDiff { get; set; }
 
         [Option('l', "listvisits", SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
