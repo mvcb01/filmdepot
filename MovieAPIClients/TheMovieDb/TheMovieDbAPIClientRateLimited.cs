@@ -8,6 +8,7 @@ using System.Net;
 using Polly;
 using Polly.Retry;
 using Polly.RateLimit;
+using System.Threading;
 
 namespace MovieAPIClients.TheMovieDb
 {
@@ -44,23 +45,37 @@ namespace MovieAPIClients.TheMovieDb
             return result.ToTuple<string, string>();
         }
 
-        public async Task<string> DummyExecutionsAsync(int i)
+        public async Task<string> DummyExecutionsAsync()
         {
             AsyncRateLimitPolicy<string> limitPolicy = GetRateLimitPolicy<string>(1, TimeSpan.FromSeconds(1));
-            var errors = new List<string>();
-            string result;
-            try
+
+            // AsyncRateLimitPolicy limitPolicy = Policy.RateLimitAsync(1, TimeSpan.FromSeconds(1));
+
+            Func<int, Task<string>> f = async i => {
+                await Task.Delay(100);
+                return $"iter {i}";
+            };
+
+            List<string> resultList = new();
+            Dictionary<string, TimeSpan> retryInfo = new();
+            for (int i = 0; i < 10; i++)
             {
-                result = await limitPolicy.ExecuteAsync(async () => {
-                    await Task.Delay(2);
-                    return i.ToString();
-                });
+                try
+                {
+                    string output = await limitPolicy.ExecuteAsync(() => f(i));
+                    resultList.Add(output);
+                }
+                catch (RateLimitRejectedException ex)
+                {
+                    var msg = ex.Message;
+                    TimeSpan retryAfter = ex.RetryAfter;
+                    retryInfo.Add(i.ToString(), retryAfter);
+                }
+
             }
-            catch (RateLimitRejectedException ex)
-            {
-                throw;
-            }
-            return result;
+
+
+            return string.Join(" | ", resultList);
         }
 
         public async Task<IEnumerable<MovieGenreResult>> GetMovieGenresWithRetryAsync(int externalId)
@@ -85,9 +100,15 @@ namespace MovieAPIClients.TheMovieDb
             return retryPolicy;
         }
 
-        private static AsyncRateLimitPolicy<TResult> GetRateLimitPolicy<TResult>(int numberOfExecutions, TimeSpan perTimeSpan)
+        private static AsyncRateLimitPolicy<TResult> GetRateLimitPolicy<TResult>(
+            int numberOfExecutions,
+            TimeSpan perTimeSpan)
         {
-            return Policy.RateLimitAsync<TResult>(numberOfExecutions, perTimeSpan);
+            return Policy.RateLimitAsync<TResult>(
+                numberOfExecutions,
+                perTimeSpan
+
+                );
         }
     }
 }
