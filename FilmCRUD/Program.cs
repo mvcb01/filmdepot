@@ -276,6 +276,7 @@ namespace FilmCRUD
                 System.Console.WriteLine("No action requested...");
             }
             System.Console.WriteLine();
+
         }
 
         private static async Task HandleLinkOptions(LinkOptions opts, RipToMovieLinker ripToMovieLinker)
