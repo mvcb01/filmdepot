@@ -158,6 +158,7 @@ namespace FilmCRUD
                 System.Console.WriteLine("No action requested...");
             }
             System.Console.WriteLine();
+
         }
 
         private static void HandleScanMoviesOptions(ScanMoviesOptions opts, ScanMoviesManager scanMoviesManager)
