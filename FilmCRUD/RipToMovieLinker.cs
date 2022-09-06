@@ -253,7 +253,6 @@ namespace FilmCRUD
             System.Console.WriteLine($"Erros no linking, consultar o seguinte ficheiro: {errorsFpath}");
             this._fileSystemIOWrapper.WriteAllText(errorsFpath, string.Join("\n\n", errors));
         }
-
     }
 
 }
