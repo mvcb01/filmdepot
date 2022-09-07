@@ -1,27 +1,29 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmDomain", "FilmDomain\FilmDomain.csproj", "{656906A4-0B94-45A3-9EFF-E37342E4F171}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilmDomain", "FilmDomain\FilmDomain.csproj", "{656906A4-0B94-45A3-9EFF-E37342E4F171}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmDataAccess.EFCore", "FilmDataAccess.EFCore\FilmDataAccess.EFCore.csproj", "{4BFE2D1F-DA01-4450-9323-8D59652C1BD2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilmDataAccess.EFCore", "FilmDataAccess.EFCore\FilmDataAccess.EFCore.csproj", "{4BFE2D1F-DA01-4450-9323-8D59652C1BD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigUtils", "ConfigUtils\ConfigUtils.csproj", "{8213DFE4-D54B-4ECF-AA89-DDD23DF77233}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigUtils", "ConfigUtils\ConfigUtils.csproj", "{8213DFE4-D54B-4ECF-AA89-DDD23DF77233}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmCRUD", "FilmCRUD\FilmCRUD.csproj", "{0E7E8989-1C6D-44A0-A2A5-6DC7CF79B5C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilmCRUD", "FilmCRUD\FilmCRUD.csproj", "{0E7E8989-1C6D-44A0-A2A5-6DC7CF79B5C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepotTests", "DepotTests\DepotTests.csproj", "{B231DF13-09A0-442A-846C-896134285ECD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepotTests", "DepotTests\DepotTests.csproj", "{B231DF13-09A0-442A-846C-896134285ECD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieAPIClients", "MovieAPIClients\MovieAPIClients.csproj", "{EF5083A9-1CC4-4297-B884-82D3915AAFC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieAPIClients", "MovieAPIClients\MovieAPIClients.csproj", "{EF5083A9-1CC4-4297-B884-82D3915AAFC0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CDAC7364-41CD-4A0C-A0D5-E3300E7BFFBF}"
+	ProjectSection(SolutionItems) = preProject
+		_NOTES.txt = _NOTES.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{656906A4-0B94-45A3-9EFF-E37342E4F171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -48,5 +50,11 @@ Global
 		{EF5083A9-1CC4-4297-B884-82D3915AAFC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF5083A9-1CC4-4297-B884-82D3915AAFC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF5083A9-1CC4-4297-B884-82D3915AAFC0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6EBC0863-8EAA-415B-99D0-078A5F829B63}
 	EndGlobalSection
 EndGlobal
