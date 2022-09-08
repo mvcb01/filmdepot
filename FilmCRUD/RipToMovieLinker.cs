@@ -60,9 +60,8 @@ namespace FilmCRUD
 
             Movie relatedMovie = null;
 
-            // vai ser ripReleaseDate == 0 e parsed == false sempre que movieRip.ParsedReleaseDate == null
-            int ripReleaseDate;
-            bool releaseDateParsed = int.TryParse(movieRip.ParsedReleaseDate, out ripReleaseDate);
+            // we'll have ripReleaseDate == 0 and parsed == false whenever movieRip.ParsedReleaseDate == null
+            bool releaseDateParsed = int.TryParse(movieRip.ParsedReleaseDate, out int ripReleaseDate);
 
             IEnumerable<Movie> existingMatches = this._unitOfWork.Movies.SearchMoviesWithTitle(movieRip.ParsedTitle);
             int matchCount = existingMatches.Count();
