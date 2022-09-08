@@ -246,7 +246,7 @@ namespace FilmCRUD
 
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
         {
-            if (errors.Count() == 0) { return; }
+            if (!errors.Any()) { return; }
 
             string errorsFpath = Path.Combine(this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(), filename);
             System.Console.WriteLine($"Erros no linking, consultar o seguinte ficheiro: {errorsFpath}");
