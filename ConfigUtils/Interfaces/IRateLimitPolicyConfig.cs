@@ -8,6 +8,6 @@ namespace ConfigUtils.Interfaces
 
         TimeSpan PerTimeSpan { get; set; }
 
-        int MaxBurst { get; set; }
+        int? MaxBurst { get; set; }
     }
 }
