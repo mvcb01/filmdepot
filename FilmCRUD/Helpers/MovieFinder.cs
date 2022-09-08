@@ -48,8 +48,7 @@ namespace FilmCRUD.Helpers
             }
             else
             {
-                int releaseDate;
-                bool parseSuccess = int.TryParse(parsedReleaseDate, out releaseDate);
+                bool parseSuccess = int.TryParse(parsedReleaseDate, out int releaseDate);
                 string[] admissibleDates;
                 if (parseSuccess)
                 {
