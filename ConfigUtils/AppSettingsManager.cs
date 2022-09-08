@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
 using ConfigUtils.Interfaces;
+using System.Net.WebSockets;
 
 namespace ConfigUtils
 {
@@ -76,6 +77,26 @@ namespace ConfigUtils
         public Dictionary<string, int> GetManualExternalIds()
         {
             return ConfigRoot.GetSection("ManualRipToMovieLinks").GetSection("ManualExternalIds").Get<Dictionary<string, int>>();
+        }
+
+
+        class RateLimitPolicyConfig : IRateLimitPolicyConfig
+        {
+            public int NumberOfExecutions { get; set; }
+            public TimeSpan PerTimeSpan { get; set; }
+            public int? MaxBurst { get; set; }
+        }
+
+        public IRateLimitPolicyConfig GetRateLimitPolicyConfig()
+        {
+            var cfgDict = ConfigRoot.GetSection("Policies").GetSection("RateLimit").Get<Dictionary<string, int>>();
+            int cfgMaxBurst = cfgDict.GetValueOrDefault("MaxBurst", -1);
+            return new RateLimitPolicyConfig()
+            {
+                NumberOfExecutions = cfgDict["NumberOfExecutions"],
+                PerTimeSpan = TimeSpan.FromMilliseconds(cfgDict["PerTimeSpanMilliseconds"]),
+                MaxBurst = cfgMaxBurst == -1 ? null : cfgMaxBurst
+            };
         }
     }
 }
