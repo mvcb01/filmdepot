@@ -22,7 +22,7 @@ namespace ConfigUtils.Interfaces
 
         IRateLimitPolicyConfig GetRateLimitPolicyConfig();
 
-        //IRetryPolicyConfig GetRetryPolicyConfig();
+        IRetryPolicyConfig GetRetryPolicyConfig();
 
     }
 }

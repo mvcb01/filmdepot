@@ -79,12 +79,20 @@ namespace ConfigUtils
             return ConfigRoot.GetSection("ManualRipToMovieLinks").GetSection("ManualExternalIds").Get<Dictionary<string, int>>();
         }
 
+        // ------------------------
+        // Policy methods
 
         class RateLimitPolicyConfig : IRateLimitPolicyConfig
         {
             public int NumberOfExecutions { get; set; }
             public TimeSpan PerTimeSpan { get; set; }
             public int? MaxBurst { get; set; }
+        }
+
+        class RetryPolicyConfig : IRetryPolicyConfig
+        {
+            public int RetryCount { get; set; }
+            public TimeSpan SleepDuration { get; set; }
         }
 
         public IRateLimitPolicyConfig GetRateLimitPolicyConfig()
@@ -96,6 +104,16 @@ namespace ConfigUtils
                 NumberOfExecutions = cfgDict["NumberOfExecutions"],
                 PerTimeSpan = TimeSpan.FromMilliseconds(cfgDict["PerTimeSpanMilliseconds"]),
                 MaxBurst = cfgMaxBurst == -1 ? null : cfgMaxBurst
+            };
+        }
+
+        public IRetryPolicyConfig GetRetryPolicyConfig()
+        {
+            var cfgDict = ConfigRoot.GetSection("Policies").GetSection("Retry").Get<Dictionary<string, int>>();
+            return new RetryPolicyConfig() 
+            {
+                RetryCount = cfgDict["RetryCount"],
+                SleepDuration = TimeSpan.FromMilliseconds(cfgDict["SleepDurationMilliseconds"])
             };
         }
     }
