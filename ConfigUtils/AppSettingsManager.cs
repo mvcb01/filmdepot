@@ -82,11 +82,48 @@ namespace ConfigUtils
         // ------------------------
         // Policy methods
 
+        // no need to publicly expose these classes
         class RateLimitPolicyConfig : IRateLimitPolicyConfig
         {
-            public int NumberOfExecutions { get; set; }
-            public TimeSpan PerTimeSpan { get; set; }
-            public int? MaxBurst { get; set; }
+            private int numberOfExecutions;
+
+            public int NumberOfExecutions
+            {
+                get { return numberOfExecutions; }
+                set
+                {
+                    if (value < 1) throw new ArgumentOutOfRangeException(nameof(value), "should be > 0");
+                    numberOfExecutions = value;
+                }
+            }
+
+            private TimeSpan perTimeSpan;
+
+            public TimeSpan PerTimeSpan
+            {
+                get { return perTimeSpan; }
+                set 
+                {
+                    if (value.Milliseconds <= 0) throw new ArgumentOutOfRangeException(nameof(value), "should be a positive timespan");
+                    perTimeSpan = value; 
+                }
+            }
+
+            private int? maxBurst;
+
+            public int? MaxBurst
+            {
+                get { return maxBurst; }
+                set
+                {
+                    if (value != null && value < 1)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(value), "should be null or > 0");
+                    }
+                    maxBurst = value; 
+                }
+            }
+
         }
 
         class RetryPolicyConfig : IRetryPolicyConfig
