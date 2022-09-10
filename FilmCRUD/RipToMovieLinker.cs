@@ -27,8 +27,6 @@ namespace FilmCRUD
 
         private IMovieAPIClient _movieAPIClient { get; init; }
 
-        public MovieFinder MovieFinder { get; init; }
-
         public RipToMovieLinker(
             IUnitOfWork unitOfWork,
             IFileSystemIOWrapper fileSystemIOWrapper,
@@ -39,7 +37,6 @@ namespace FilmCRUD
             this._fileSystemIOWrapper = fileSystemIOWrapper;
             this._appSettingsManager = appSettingsManager;
             this._movieAPIClient = movieAPIClient;
-            this.MovieFinder = new MovieFinder(this._movieAPIClient);
         }
 
         /// <summary>
@@ -136,8 +133,12 @@ namespace FilmCRUD
             var newMovieEntitiesTasks = new Dictionary<string, Task<Movie>>();
             foreach (var movieRip in ripsForOnlineSearch)
             {
-                Task<Movie> onlineSearchTask = this.MovieFinder
-                    .FindMovieOnlineAsync(movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+                Task<Movie> onlineSearchTask = Task.Run<Movie>(async () =>
+                {
+                    IEnumerable<MovieSearchResult> searchResultAll = await _movieAPIClient.SearchMovieAsync(movieRip.ParsedTitle);
+                    return PickMovieFromSearchResults(searchResultAll, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+                });
+
                 newMovieEntitiesTasks.Add(movieRip.FileName, onlineSearchTask);
             }
 
