@@ -50,6 +50,7 @@ namespace FilmCRUD
             IEnumerable<string> toIgnore = _appSettingsManager.GetRipFilenamesToIgnoreOnLinking();
             Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
             IEnumerable<string> ripNamesToExclude = Enumerable.Concat<string>(toIgnore, manualExternalIds.Keys);
+            // using Find before Where so we limit the number of objects loaded into memory
             return _unitOfWork.MovieRips
                 .Find(r => r.Movie == null)
                 .Where(r => r.ParsedTitle != null && !ripNamesToExclude.Contains(r.FileName));
