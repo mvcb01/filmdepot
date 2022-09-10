@@ -1,10 +1,11 @@
 ﻿using Xunit;
 using FluentAssertions;
+using System;
+using System.Linq;
+
 using FilmCRUD.CustomExceptions;
 using MovieAPIClients;
 using FilmCRUD;
-using System;
-using System.Linq;
 using FilmDomain.Entities;
 
 namespace DepotTests.CRUDTests
