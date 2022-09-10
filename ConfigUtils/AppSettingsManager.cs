@@ -92,7 +92,7 @@ namespace ConfigUtils
                 get => _numberOfExecutions;
                 set
                 {
-                    _numberOfExecutions = value > 0 ? value : throw new ArgumentOutOfRangeException(nameof(value), value, "should be > 0");
+                    _numberOfExecutions = value > 0 ? value : throw new ArgumentOutOfRangeException(nameof(value), value, "number of executions should be > 0");
                 }
             }
 
@@ -114,7 +114,7 @@ namespace ConfigUtils
                 get => _maxBurst;
                 set
                 {
-                    _maxBurst = (value == null || value > 0) ? value : throw new ArgumentOutOfRangeException(nameof(value), value, "should be null or > 0");
+                    _maxBurst = (value == null || value > 0) ? value : throw new ArgumentOutOfRangeException(nameof(value), value, "max burst should be null or > 0");
                 }
             }
 
@@ -122,8 +122,27 @@ namespace ConfigUtils
 
         class RetryPolicyConfig : IRetryPolicyConfig
         {
-            public int RetryCount { get; set; }
-            public TimeSpan SleepDuration { get; set; }
+            private int _retryCount;
+
+            public int RetryCount
+            {
+                get => _retryCount;
+                set
+                {
+                    _retryCount = value > 0 ? value : throw new ArgumentOutOfRangeException(nameof(value), value, "retry count should be > 0");
+                }
+            }
+
+            private TimeSpan _sleepDuration;
+
+            public TimeSpan SleepDuration
+            {
+                get => _sleepDuration;
+                set
+                {
+                    _sleepDuration = value.TotalMilliseconds > 0 ? value : throw new ArgumentOutOfRangeException(nameof(value), value, "should be a positive timespan");
+                }
+            }
         }
 
         public IRateLimitPolicyConfig GetRateLimitPolicyConfig()

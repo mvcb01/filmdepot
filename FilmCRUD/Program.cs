@@ -39,6 +39,10 @@ namespace FilmCRUD
             RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
             ScanMoviesManager scanMoviesManager = new(unitOfWork);
 
+
+            var pol = appSettingsManager.GetRetryPolicyConfig();
+            { }
+
             ParserResult<object> parsed = Parser
                 .Default
                 .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);
