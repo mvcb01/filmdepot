@@ -247,7 +247,7 @@ namespace FilmCRUD
 
         public static Movie PickMovieFromSearchResults(IEnumerable<MovieSearchResult> searchResultAll, string parsedTitle, string parsedReleaseDate = null)
         {
-            // filtra usando Title e OriginalTitle
+            // filters results using both Title and OriginalTitle
             IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
             List<MovieSearchResult> searchResult = searchResultAll
                 .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation())
