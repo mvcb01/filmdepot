@@ -85,42 +85,42 @@ namespace ConfigUtils
         // no need to publicly expose these classes
         class RateLimitPolicyConfig : IRateLimitPolicyConfig
         {
-            private int numberOfExecutions;
+            private int _numberOfExecutions;
 
             public int NumberOfExecutions
             {
-                get { return numberOfExecutions; }
+                get { return _numberOfExecutions; }
                 set
                 {
                     if (value < 1) throw new ArgumentOutOfRangeException(nameof(value), "should be > 0");
-                    numberOfExecutions = value;
+                    _numberOfExecutions = value;
                 }
             }
 
-            private TimeSpan perTimeSpan;
+            private TimeSpan _perTimeSpan;
 
             public TimeSpan PerTimeSpan
             {
-                get { return perTimeSpan; }
+                get { return _perTimeSpan; }
                 set 
                 {
                     if (value.Milliseconds <= 0) throw new ArgumentOutOfRangeException(nameof(value), "should be a positive timespan");
-                    perTimeSpan = value; 
+                    _perTimeSpan = value; 
                 }
             }
 
-            private int? maxBurst;
+            private int? _maxBurst;
 
             public int? MaxBurst
             {
-                get { return maxBurst; }
+                get { return _maxBurst; }
                 set
                 {
                     if (value != null && value < 1)
                     {
                         throw new ArgumentOutOfRangeException(nameof(value), "should be null or > 0");
                     }
-                    maxBurst = value; 
+                    _maxBurst = value; 
                 }
             }
 
