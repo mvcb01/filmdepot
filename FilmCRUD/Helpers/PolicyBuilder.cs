@@ -18,7 +18,8 @@ namespace FilmCRUD.Helpers
             }
             return Policy.RateLimitAsync(
                 rateLimitConfig.NumberOfExecutions,
-                rateLimitConfig.PerTimeSpan
+                rateLimitConfig.PerTimeSpan,
+                (int)rateLimitConfig.MaxBurst
             );
         }
 
