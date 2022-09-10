@@ -1,13 +1,10 @@
 ﻿using Xunit;
-using Moq;
 using FluentAssertions;
 using FilmCRUD.CustomExceptions;
 using MovieAPIClients;
 using FilmCRUD;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using FilmDomain.Entities;
 
 namespace DepotTests.CRUDTests
