@@ -245,6 +245,69 @@ namespace FilmCRUD
             };
         }
 
+        public static Movie PickMovieFromSearchResults(IEnumerable<MovieSearchResult> searchResultAll, string parsedTitle, string parsedReleaseDate = null)
+        {
+            // filtra usando Title e OriginalTitle
+            IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
+            List<MovieSearchResult> searchResult = searchResultAll
+                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation())
+                    ||
+                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation()))
+                .ToList();
+
+            int resultCount = searchResult.Count();
+            MovieSearchResult result;
+            if (resultCount == 0)
+            {
+                throw new NoSearchResultsError($"No search results for \"{parsedTitle}\" ");
+            }
+            else if (resultCount == 1)
+            {
+                result = searchResult.First();
+            }
+            else if (parsedReleaseDate == null)
+            {
+                throw new MultipleSearchResultsError($"Multiple search results for \"{parsedTitle}\"; count = {resultCount}");
+            }
+            else
+            {
+                bool parseSuccess = int.TryParse(parsedReleaseDate, out int releaseDate);
+                string[] admissibleDates;
+                if (parseSuccess)
+                {
+                    admissibleDates = new string[] {
+                        releaseDate.ToString(),
+                        (releaseDate + 1).ToString(),
+                        (releaseDate - 1).ToString()
+                    };
+                }
+                else
+                {
+                    admissibleDates = new string[] { parsedReleaseDate };
+                }
+
+                List<MovieSearchResult> searchResultFiltered = searchResult
+                    .Where(r => admissibleDates.Contains(r.ReleaseDate.ToString()))
+                    .ToList();
+                int resultCountFiltered = searchResultFiltered.Count();
+
+                if (resultCountFiltered == 0)
+                {
+                    throw new NoSearchResultsError(
+                        $"No search results for \"{parsedTitle}\" with release date in {string.Join(", ", admissibleDates)}");
+                }
+                else if (resultCountFiltered > 1)
+                {
+                    throw new MultipleSearchResultsError(
+                        $"Multiple search results for \"{parsedTitle}\"  with release date in {string.Join(", ", admissibleDates)}; count = {resultCount}");
+                }
+                result = searchResultFiltered.First();
+            }
+
+            // explicit conversion is defined
+            return (Movie)result;
+        }
+
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
         {
             if (!errors.Any()) { return; }
