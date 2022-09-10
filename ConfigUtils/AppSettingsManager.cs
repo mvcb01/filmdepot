@@ -89,11 +89,10 @@ namespace ConfigUtils
 
             public int NumberOfExecutions
             {
-                get { return _numberOfExecutions; }
+                get => _numberOfExecutions;
                 set
                 {
-                    if (value < 1) throw new ArgumentOutOfRangeException(nameof(value), "should be > 0");
-                    _numberOfExecutions = value;
+                    _numberOfExecutions = value > 0 ? value : throw new ArgumentOutOfRangeException(nameof(value), value, "should be > 0");
                 }
             }
 
@@ -101,11 +100,10 @@ namespace ConfigUtils
 
             public TimeSpan PerTimeSpan
             {
-                get { return _perTimeSpan; }
+                get => _perTimeSpan;
                 set 
                 {
-                    if (value.Milliseconds <= 0) throw new ArgumentOutOfRangeException(nameof(value), "should be a positive timespan");
-                    _perTimeSpan = value; 
+                    _perTimeSpan = value.TotalMilliseconds > 0 ? value : throw new ArgumentOutOfRangeException(nameof(value), value, "should be a positive timespan");
                 }
             }
 
@@ -113,14 +111,10 @@ namespace ConfigUtils
 
             public int? MaxBurst
             {
-                get { return _maxBurst; }
+                get => _maxBurst;
                 set
                 {
-                    if (value != null && value < 1)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(value), "should be null or > 0");
-                    }
-                    _maxBurst = value; 
+                    _maxBurst = (value == null || value > 0) ? value : throw new ArgumentOutOfRangeException(nameof(value), value, "should be null or > 0");
                 }
             }
 
