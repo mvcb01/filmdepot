@@ -2,7 +2,7 @@
 namespace FilmDomain.Enums
 {
     /// <summary>
-    /// Basically a clone of Entity Framework Core's EntityState.
+    /// A clone of Entity Framework Core's EntityState.
     /// </summary>
     public enum FilmDomainEntityState
     {
