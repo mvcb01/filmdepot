@@ -19,6 +19,5 @@ namespace FilmDomain.Interfaces
         void Remove(TEntity entity);
 
         void RemoveRange(IEnumerable<TEntity> entities);
-
     }
 }
