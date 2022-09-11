@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Linq;
 
 using FilmDomain.Interfaces;
+using FilmDomain.Enums;
 
 namespace FilmDataAccess.EFCore.Repositories
 {
@@ -45,6 +46,11 @@ namespace FilmDataAccess.EFCore.Repositories
         public TEntity GetById(int id)
         {
             return _context.Set<TEntity>().Find(id);
+        }
+
+        public FilmDomainEntityState GetEntityState(TEntity entity)
+        {
+            return (FilmDomainEntityState)_context.Entry(entity).State;
         }
 
         public void Remove(TEntity entity)

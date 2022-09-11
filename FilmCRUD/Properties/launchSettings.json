@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FilmCRUD": {
+      "commandName": "Project",
+      "commandLineArgs": "visit --persistcontents 20100102"
+    }
+  }
+}
