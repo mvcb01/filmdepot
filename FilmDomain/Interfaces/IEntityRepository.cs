@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using FilmDomain.Enums;
 
 namespace FilmDomain.Interfaces
 {
@@ -19,5 +20,7 @@ namespace FilmDomain.Interfaces
         void Remove(TEntity entity);
 
         void RemoveRange(IEnumerable<TEntity> entities);
+
+        FilmDomainEntityState GetEntityState(TEntity entity);
     }
 }
