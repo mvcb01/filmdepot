@@ -145,7 +145,7 @@ namespace FilmCRUD
             {
                 await Task.WhenAll(newMovieEntitiesTasks.Values);
             }
-            // exceptions thrown in MovieFinder.FindMovieOnlineAsync
+            // exceptions thrown in method PickMovieFromSearchResults
             catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError) {}
 
             foreach (Task task in newMovieEntitiesTasks.Values.Where(t => !t.IsCompletedSuccessfully))
