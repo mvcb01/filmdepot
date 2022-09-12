@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
+using Polly;
 
 using ConfigUtils.Interfaces;
 using FilmDomain.Entities;
@@ -12,7 +13,7 @@ using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-
+using Polly.Wrap;
 
 namespace FilmCRUD
 {
@@ -95,6 +96,58 @@ namespace FilmCRUD
         }
 
         public async Task SearchAndLinkAsync()
+        {
+            IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
+
+            if (!ripsToLink.Any())
+            {
+                return;
+            }
+
+            var ripsForOnlineSearch = new List<MovieRip>();
+            var errors = new List<string>();
+
+            // some movie rips may already have a match in some existing Movie entity
+            foreach (var movieRip in ripsToLink)
+            {
+                try
+                {
+                    Movie movie = FindRelatedMovieEntityInRepo(movieRip);
+                    if (movie != null)
+                    {
+                        movieRip.Movie = movie;
+                    }
+                    else
+                    {
+                        ripsForOnlineSearch.Add(movieRip);
+                    }
+                }
+                // exceptions thrown in FindRelatedMovieEntityInRepo
+                catch (MultipleMovieMatchesError ex)
+                {
+                    var msg = $"MultipleMovieMatchesError: {movieRip.FileName}: \n{ex.Message}";
+                    errors.Add(msg);
+                }
+            }
+
+            // to save the new Movie entities linked to some MovieRip
+            var newMovieEntities = new List<Movie>();
+
+            // maps MovieRip.Id -> Movie.Id
+            var ripToMovieMapping = new Dictionary<int, int>();
+
+            // policies; notice the order of the async policies when calling Policy.WrapAsync
+            IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
+            IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
+            AsyncPolicyWrap policyWrap = Policy.WrapAsync(
+                //PolicyBuilder.
+            );
+
+
+
+        }
+
+        public async Task SearchAndLinkAsync_OLD()
         {
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
 
@@ -316,6 +369,7 @@ namespace FilmCRUD
             System.Console.WriteLine($"Erros no linking, consultar o seguinte ficheiro: {errorsFpath}");
             this._fileSystemIOWrapper.WriteAllText(errorsFpath, string.Join("\n\n", errors));
         }
+
     }
 
 }

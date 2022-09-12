@@ -7,7 +7,7 @@ using ConfigUtils.Interfaces;
 
 namespace FilmCRUD.Helpers
 {
-    public static class PolicyBuilder
+    public static class APIClientPolicyBuilder
     {
 
         public static AsyncRateLimitPolicy GetAsyncRateLimitPolicy(IRateLimitPolicyConfig rateLimitConfig)
