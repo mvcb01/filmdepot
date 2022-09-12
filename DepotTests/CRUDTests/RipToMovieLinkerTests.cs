@@ -31,6 +31,10 @@ namespace DepotTests.CRUDTests
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
+        private readonly Mock<IRateLimitPolicyConfig> _rateLimitConfigMock;
+
+        private readonly Mock<IRetryPolicyConfig> _retryConfigMock;
+
         private readonly Mock<IAppSettingsManager> _appSettingsManagerMock;
 
         private readonly RipToMovieLinker _ripToMovieLinker;
@@ -51,6 +55,19 @@ namespace DepotTests.CRUDTests
             this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>();
             this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
             this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
+
+            this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
+            this._retryConfigMock = new Mock<IRetryPolicyConfig>();
+
+            // default policy configs
+            this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(5);
+            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(2000));
+
+            this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(2);
+            this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(50));
+
+            this._appSettingsManagerMock.Setup(a => a.GetRateLimitPolicyConfig()).Returns(this._rateLimitConfigMock.Object);
+            this._appSettingsManagerMock.Setup(a => a.GetRetryPolicyConfig()).Returns(this._retryConfigMock.Object);
 
             this._ripToMovieLinker = new RipToMovieLinker(
                 this._unitOfWorkMock.Object,
@@ -169,7 +186,7 @@ namespace DepotTests.CRUDTests
                 };
             this._movieRepositoryMock
                 .Setup(m => m.SearchMoviesWithTitle(It.Is<string>(s => s.Contains("khrustalyov"))))
-                .Returns(new Movie[] {});
+                .Returns(Enumerable.Empty<Movie>());
 
             // act
             Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);

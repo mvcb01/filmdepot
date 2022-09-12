@@ -4,6 +4,8 @@ using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using Polly;
+using Polly.Wrap;
+using Polly.RateLimit;
 
 using ConfigUtils.Interfaces;
 using FilmDomain.Entities;
@@ -11,9 +13,9 @@ using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
+using FilmCRUD.Helpers;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-using Polly.Wrap;
 
 namespace FilmCRUD
 {
@@ -130,99 +132,66 @@ namespace FilmCRUD
                 }
             }
 
-            // to save the new Movie entities linked to some MovieRip
-            var newMovieEntities = new List<Movie>();
-
-            // maps MovieRip.Id -> Movie.Id
-            var ripToMovieMapping = new Dictionary<int, int>();
-
-            // policies; notice the order of the async policies when calling Policy.WrapAsync
+            // policies;
+            // notice the order of the async policies when calling Policy.WrapAsync:
+            //      outermost (at left) to innermost (at right)
             IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
             IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
             AsyncPolicyWrap policyWrap = Policy.WrapAsync(
-                //PolicyBuilder.
+                APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(retryConfig),
+                APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig)
             );
 
+            // letting the token bucket fill for the current timespan...
+            await Task.Delay(rateLimitConfig.PerTimeSpan);
 
+            // to save the new Movie entities linked to some MovieRip
+            var newMovieEntities = new List<Movie>();
 
-        }
-
-        public async Task SearchAndLinkAsync_OLD()
-        {
-            IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
-
-            if (!ripsToLink.Any())
-            {
-                return;
-            }
-
-            var ripsForOnlineSearch = new List<MovieRip>();
-            var errors = new List<string>();
-
-            foreach (var movieRip in ripsToLink)
+            // TODO: investigate how to properly use the limit+retry policy with Task.WhenAll...
+            foreach (var movieRip in ripsForOnlineSearch)
             {
                 try
                 {
-                    Movie movie = FindRelatedMovieEntityInRepo(movieRip);
-                    if (movie != null)
+                    IEnumerable<MovieSearchResult> searchResults = await policyWrap.ExecuteAsync(
+                        () => _movieAPIClient.SearchMovieAsync(movieRip.ParsedTitle)
+                    );
+                    Movie movieToLink = PickMovieFromSearchResults(searchResults, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+
+                    // we may already have the "same" Movie from a previous searched
+                    Movie existingMovie = newMovieEntities.Where(m => m.ExternalId == movieToLink.ExternalId).FirstOrDefault();
+                    
+                    if (existingMovie != null)
                     {
-                        movieRip.Movie = movie;
+                        movieRip.Movie = existingMovie;
                     }
                     else
                     {
-                        ripsForOnlineSearch.Add(movieRip);
+                        movieRip.Movie = movieToLink;
+                        newMovieEntities.Add(movieToLink);
                     }
                 }
-                // exceptions thrown in FindRelatedMovieEntityInRepo
-                catch (MultipleMovieMatchesError ex)
+                // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
+                catch (RateLimitRejectedException ex)
                 {
-                    var msg = $"MultipleMovieMatchesError: {movieRip.FileName}: \n{ex.Message}";
-                    errors.Add(msg);
+                    errors.Add($"Rate Limit error for {movieRip.FileName}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
                 }
-            }
-
-            // online search task associated with each movieRip.FileName
-            var newMovieEntitiesTasks = new Dictionary<string, Task<Movie>>();
-            foreach (var movieRip in ripsForOnlineSearch)
-            {
-                Task<Movie> onlineSearchTask = Task.Run<Movie>(async () =>
+                // exceptions thrown in FindRelatedMovieEntityInRepo; used for control flow, probably shouldn't...
+                catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError)
                 {
-                    IEnumerable<MovieSearchResult> searchResultAll = await _movieAPIClient.SearchMovieAsync(movieRip.ParsedTitle);
-                    return PickMovieFromSearchResults(searchResultAll, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
-                });
-
-                newMovieEntitiesTasks.Add(movieRip.FileName, onlineSearchTask);
-            }
-
-            try
-            {
-                await Task.WhenAll(newMovieEntitiesTasks.Values);
-            }
-            // exceptions thrown in method PickMovieFromSearchResults
-            catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError) {}
-
-            foreach (Task task in newMovieEntitiesTasks.Values.Where(t => !t.IsCompletedSuccessfully))
-            {
-                Exception innerExc = task.Exception.InnerException;
-                errors.Add($"ex message: {innerExc.GetType().Name}: {innerExc.Message}");
-            }
-
-            // different searches may have returned the "same" Movie, we choose one Movie entity for each
-            // distinct externalid
-            var newMovieEntities = newMovieEntitiesTasks.Values
-                .Where(t => t.IsCompletedSuccessfully)
-                .Select(t => t.Result)
-                .GroupBy(m => m.ExternalId)
-                .Select(group => group.First());
-            foreach (var movieRip in ripsForOnlineSearch)
-            {
-                int linkedMovieExternalId = newMovieEntitiesTasks[movieRip.FileName].Result.ExternalId;
-                movieRip.Movie = newMovieEntities.Where(m => m.ExternalId == linkedMovieExternalId).First();
+                    errors.Add($"Linking error for {movieRip.FileName}: {ex.Message}");
+                }
+                // abort for other exceptions, entity changes are not persisted
+                catch (Exception)
+                {
+                    this._unitOfWork.Dispose();
+                    throw;
+                }
             }
 
             PersistErrorInfo("linking_errors.txt", errors);
 
-            _unitOfWork.Complete();
+            this._unitOfWork.Complete();
         }
 
         public async Task LinkFromManualExternalIdsAsync()
