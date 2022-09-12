@@ -282,25 +282,25 @@ namespace FilmCRUD
             System.Console.WriteLine("-------------");
             if (opts.Search)
             {
-                System.Console.WriteLine($"A linkar...");
+                System.Console.WriteLine($"Linking rips to movies...");
                 await ripToMovieLinker.SearchAndLinkAsync();
             }
             else if (opts.FromManualExtIds)
             {
-                System.Console.WriteLine($"A linkar a partir de external ids manuais...");
+                System.Console.WriteLine($"Linking rips to movies - manually configured external ids...");
                 await ripToMovieLinker.LinkFromManualExternalIdsAsync();
             }
             else if (opts.GetUnlinkedRips)
             {
                 IEnumerable<string> unlinked = ripToMovieLinker.GetAllUnlinkedMovieRips();
-                System.Console.WriteLine($"MovieRips não linkados:");
+                System.Console.WriteLine($"Unlinked MovieRips:");
                 System.Console.WriteLine();
                 unlinked.ToList().ForEach(s => System.Console.WriteLine(s));
 
             }
             else if (opts.ValidateManualExtIds)
             {
-                System.Console.WriteLine($"A validar external ids manuais:");
+                System.Console.WriteLine($"Validating manually configured external ids...");
                 System.Console.WriteLine();
                 Dictionary<string, Dictionary<string, int>> validStatus = await ripToMovieLinker.ValidateManualExternalIdsAsync();
                 foreach (var item in validStatus)
