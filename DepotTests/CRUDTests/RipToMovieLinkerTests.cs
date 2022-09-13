@@ -16,6 +16,8 @@ using System;
 using System.Linq;
 using FluentAssertions.Execution;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net;
 
 namespace DepotTests.CRUDTests
 {
@@ -704,6 +706,71 @@ namespace DepotTests.CRUDTests
 
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieInfoAsync(It.IsAny<int>()), Times.Once);
+        }
+
+
+        [Fact]
+        public async void LinkFromManualExternalIdsAsync_WithInvalidIdsAndValidIds_ShouldHandleInvalidIdsAndProcessTheValidIds()
+        {
+            // arrange
+            int validExternalId = 101;
+            int invalidExternalId = 999;
+            var firstMovieRipToLinkManually = new MovieRip()
+            {
+                FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN"
+            };
+            var secondMovieRipToLinkManually = new MovieRip()
+            {
+                FileName = "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]"
+            };
+            var movieRipsToLinkManually = new MovieRip[] { firstMovieRipToLinkManually, secondMovieRipToLinkManually };
+            var manualExternalIds = new Dictionary<string, int>() {
+                { "The.Fly.1986.1080p.BluRay.x264-TFiN", validExternalId },
+                { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", invalidExternalId }
+            };
+            var movieInfo = new MovieSearchResult()
+            {
+                ExternalId = validExternalId,
+                Title = "The Fly",
+                OriginalTitle = "The Fly",
+                ReleaseDate = 1986
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.GetAll())
+                .Returns(movieRipsToLinkManually);
+            this._movieRipRepositoryMock
+                .Setup(m => m.FindByFileName(It.Is<string>(s => movieRipsToLinkManually.Select(r => r.FileName).Contains(s))))
+                .Returns((string fileName) => movieRipsToLinkManually.Where(r => r.FileName == fileName).First());
+            this._appSettingsManagerMock
+                .Setup(a => a.GetManualExternalIds())
+                .Returns(manualExternalIds);
+            this._movieRepositoryMock
+                .Setup(m => m.FindByExternalId(It.IsAny<int>()))
+                .Returns((Movie)null);
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieInfoAsync(validExternalId))
+                .ReturnsAsync(movieInfo);
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieInfoAsync(It.Is<int>(i => i == invalidExternalId)))
+                .ThrowsAsync(new HttpRequestException(message: "invalid id", inner: new HttpRequestException(), statusCode: HttpStatusCode.NotFound));
+
+            // act
+            await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
+
+            // assert
+            // makes sure that the exception caused by invalidExternalId is handled
+            using (new AssertionScope())
+            {
+                firstMovieRipToLinkManually.Movie
+                    .Should()
+                    .BeEquivalentTo(new {
+                        ExternalId = movieInfo.ExternalId,
+                        Title = movieInfo.Title,
+                        OriginalTitle = movieInfo.OriginalTitle,
+                        ReleaseDate = movieInfo.ReleaseDate});
+                
+                secondMovieRipToLinkManually.Movie.Should().BeNull();
+            }
         }
 
         [Fact]
