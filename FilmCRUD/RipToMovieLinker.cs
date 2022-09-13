@@ -362,7 +362,7 @@ namespace FilmCRUD
             if (!errors.Any()) { return; }
 
             string errorsFpath = Path.Combine(this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(), filename);
-            System.Console.WriteLine($"Erros no linking, consultar o seguinte ficheiro: {errorsFpath}");
+            System.Console.WriteLine($"Linking errors, details in: {errorsFpath}");
             this._fileSystemIOWrapper.WriteAllText(errorsFpath, string.Join("\n\n", errors));
         }
 
