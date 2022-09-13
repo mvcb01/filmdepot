@@ -196,7 +196,7 @@ namespace FilmCRUD
             }
 
             // filtering the manual configuration to consider only movierips whose filename exists in the repo
-            IEnumerable<string> ripFileNamesInRepo = _unitOfWork.MovieRips.GetAll().GetFileNames();
+            IEnumerable<string> ripFileNamesInRepo = this._unitOfWork.MovieRips.GetAll().GetFileNames();
             Dictionary<string, int> manualExternalIds = allManualExternalIds
                 .Where(kvp => ripFileNamesInRepo.Contains(kvp.Key))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
@@ -206,23 +206,40 @@ namespace FilmCRUD
             IEnumerable<int> externalIdsForApiCalls = manualExternalIds
                 .Select(kvp => kvp.Value)
                 .Distinct()
-                .Where(_id => _unitOfWork.Movies.FindByExternalId(_id) == null);
+                .Where(_id => this._unitOfWork.Movies.FindByExternalId(_id) == null);
 
-            var onlineInfoTasks = new List<Task<MovieSearchResult>>();
-            foreach (var externalId in externalIdsForApiCalls)
+            AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
+
+            // letting the token bucket fill for the current timespan...
+            await Task.Delay(initialDelay);
+
+            var newMovies = new List<Movie>();
+            var rateLimitErrors = new List<string>();
+            foreach (int externalId in externalIdsForApiCalls)
             {
-                onlineInfoTasks.Add(this._movieAPIClient.GetMovieInfoAsync(externalId));
+                try
+                {
+                    MovieSearchResult movieInfo = await this._movieAPIClient.GetMovieInfoAsync(externalId);
+                    // explicit casting is defined
+                    newMovies.Add((Movie)movieInfo);
+                }
+                // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
+                catch (RateLimitRejectedException ex)
+                {
+                    rateLimitErrors.Add($"Rate Limit error for external id {externalId}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                }
+                // abort for other exceptions, entity changes are not persisted
+                catch (Exception)
+                {
+                    this._unitOfWork.Dispose();
+                    throw;
+                }
             }
-            await Task.WhenAll(onlineInfoTasks);
 
-            // explicit casting is defined in class MovieSearchResult; also, we call ToList to
-            // force an eager operation; this way it is guaranteed that two MovieRips will
-            // map to the same Movie object if they have the same manual external id;
-            IEnumerable<Movie> newMovies = onlineInfoTasks.Select(t => (Movie)t.Result).ToList();
-
+            // links each manually configured movierip to a new Movie entity or to an existing one
             foreach (var item in manualExternalIds)
             {
-                MovieRip ripToLink = _unitOfWork.MovieRips.FindByFileName(item.Key);
+                MovieRip ripToLink = this._unitOfWork.MovieRips.FindByFileName(item.Key);
 
                 if (externalIdsForApiCalls.Contains(item.Value))
                 {
@@ -230,12 +247,11 @@ namespace FilmCRUD
                 }
                 else
                 {
-                    ripToLink.Movie = _unitOfWork.Movies.FindByExternalId(item.Value);
+                    ripToLink.Movie = this._unitOfWork.Movies.FindByExternalId(item.Value);
                 }
             }
 
-            _unitOfWork.Complete();
-
+            this._unitOfWork.Complete();
         }
 
         public IEnumerable<string> GetAllUnlinkedMovieRips()
