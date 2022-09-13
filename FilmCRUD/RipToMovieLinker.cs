@@ -102,10 +102,7 @@ namespace FilmCRUD
         {
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
 
-            if (!ripsToLink.Any())
-            {
-                return;
-            }
+            if (!ripsToLink.Any()) return;
 
             var ripsForOnlineSearch = new List<MovieRip>();
             var errors = new List<string>();
@@ -191,10 +188,7 @@ namespace FilmCRUD
         {
             Dictionary<string, int> allManualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
-            if (!allManualExternalIds.Any())
-            {
-                return;
-            }
+            if (!allManualExternalIds.Any()) return;
 
             // filtering the manual configuration to consider only movierips whose filename exists in the repo
             IEnumerable<string> ripFileNamesInRepo = this._unitOfWork.MovieRips.GetAll().GetFileNames();
@@ -373,7 +367,7 @@ namespace FilmCRUD
 
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
         {
-            if (!errors.Any()) { return; }
+            if (!errors.Any()) return;
 
             string errorsFpath = Path.Combine(this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(), filename);
             System.Console.WriteLine($"Linking errors, details in: {errorsFpath}");
