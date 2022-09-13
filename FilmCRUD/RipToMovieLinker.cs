@@ -17,6 +17,8 @@ using FilmCRUD.Helpers;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
 using CommandLine;
+using System.Net.Http;
+using System.Net;
 
 namespace FilmCRUD
 {
@@ -209,7 +211,7 @@ namespace FilmCRUD
             await Task.Delay(initialDelay);
 
             var newMovies = new List<Movie>();
-            var errors = new List<string>();
+            var errors = new Dictionary<int, string>();
             foreach (int externalId in externalIdsForApiCalls)
             {
                 try
@@ -221,7 +223,14 @@ namespace FilmCRUD
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
                 catch (RateLimitRejectedException ex)
                 {
-                    errors.Add($"Rate Limit error for external id {externalId}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                    errors.Add(
+                        externalId,
+                        $"Rate Limit error for external id {externalId}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                }
+                // invalid external ids should not stop execution
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    errors.Add(externalId, $"Invalid external id: {externalId}");
                 }
                 // abort for other exceptions, entity changes are not persisted
                 catch (Exception)
@@ -234,6 +243,8 @@ namespace FilmCRUD
             // links each manually configured movierip to a new Movie entity or to an existing one
             foreach (var item in manualExternalIds)
             {
+                if (errors.ContainsKey(item.Value)) continue;
+
                 MovieRip ripToLink = this._unitOfWork.MovieRips.FindByFileName(item.Key);
 
                 if (externalIdsForApiCalls.Contains(item.Value))
@@ -246,7 +257,7 @@ namespace FilmCRUD
                 }
             }
             
-            PersistErrorInfo("manual_linking_errors.txt", errors);
+            PersistErrorInfo("manual_linking_errors.txt", errors.Values);
 
             this._unitOfWork.Complete();
         }

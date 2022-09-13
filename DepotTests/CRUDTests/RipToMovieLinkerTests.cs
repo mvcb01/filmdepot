@@ -753,6 +753,9 @@ namespace DepotTests.CRUDTests
             this._movieAPIClientMock
                 .Setup(m => m.GetMovieInfoAsync(It.Is<int>(i => i == invalidExternalId)))
                 .ThrowsAsync(new HttpRequestException(message: "invalid id", inner: new HttpRequestException(), statusCode: HttpStatusCode.NotFound));
+            this._appSettingsManagerMock
+                .Setup(a => a.GetWarehouseContentsTextFilesDirectory())
+                .Returns("some\\dummy\\path");
 
             // act
             await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
