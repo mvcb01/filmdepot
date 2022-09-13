@@ -16,6 +16,7 @@ using FilmCRUD.Interfaces;
 using FilmCRUD.Helpers;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
+using CommandLine;
 
 namespace FilmCRUD
 {
@@ -250,6 +251,8 @@ namespace FilmCRUD
                     ripToLink.Movie = this._unitOfWork.Movies.FindByExternalId(item.Value);
                 }
             }
+            
+            PersistErrorInfo("manual_linking_errors.txt", rateLimitErrors);
 
             this._unitOfWork.Complete();
         }
@@ -263,20 +266,31 @@ namespace FilmCRUD
         {
             Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
-            var validationTasks = new Dictionary<string, Task<bool>>();
+            AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
+
+            // letting the token bucket fill for the current timespan...
+            await Task.Delay(initialDelay);
+
+            var validIds = new List<int>();
+            var rateLimitErrors = new List<string>();
             foreach (var item in manualExternalIds)
             {
-                validationTasks.Add(item.Key, this._movieAPIClient.ExternalIdExistsAsync(item.Value));
+                try
+                {
+                    if (await this._movieAPIClient.ExternalIdExistsAsync(item.Value)) validIds.Add(item.Value);   
+                }
+                // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run//
+                catch (RateLimitRejectedException ex)
+                {
+                    rateLimitErrors.Add($"Rate Limit error while validating external id {item.Value}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                }
             }
 
-            await Task.WhenAll(validationTasks.Values);
-
-            // keys of the original dict `manualExternalIds` for valid external ids
-            IEnumerable<string> validIdKeys = validationTasks.Where(kvp => kvp.Value.Result).Select(kvp => kvp.Key);
+            PersistErrorInfo("external_ids_validation_errors.txt", rateLimitErrors);
 
             return new Dictionary<string, Dictionary<string, int>>() {
-                ["valid"] = manualExternalIds.Where(kvp => validIdKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
-                ["invalid"] = manualExternalIds.Where(kvp => !validIdKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+                ["valid"] = manualExternalIds.Where(kvp => validIds.Contains(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
+                ["invalid"] = manualExternalIds.Where(kvp => !validIds.Contains(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
             };
         }
 
