@@ -198,6 +198,11 @@ namespace FilmCRUD
         {
             Dictionary<string, int> allManualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
+            if (!allManualExternalIds.Any())
+            {
+                return;
+            }
+
             // filtering the manual configuration to consider only movierips whose filename exists in the repo
             IEnumerable<string> ripFileNamesInRepo = _unitOfWork.MovieRips.GetAll().GetFileNames();
             Dictionary<string, int> manualExternalIds = allManualExternalIds
