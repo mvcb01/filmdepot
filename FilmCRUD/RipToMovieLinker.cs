@@ -243,6 +243,7 @@ namespace FilmCRUD
             // links each manually configured movierip to a new Movie entity or to an existing one
             foreach (var item in manualExternalIds)
             {
+                // ignore external ids that caused ratelimit or notfound errors
                 if (errors.ContainsKey(item.Value)) continue;
 
                 MovieRip ripToLink = this._unitOfWork.MovieRips.FindByFileName(item.Key);
