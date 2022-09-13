@@ -215,7 +215,7 @@ namespace FilmCRUD
             await Task.Delay(initialDelay);
 
             var newMovies = new List<Movie>();
-            var rateLimitErrors = new List<string>();
+            var errors = new List<string>();
             foreach (int externalId in externalIdsForApiCalls)
             {
                 try
@@ -227,7 +227,7 @@ namespace FilmCRUD
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
                 catch (RateLimitRejectedException ex)
                 {
-                    rateLimitErrors.Add($"Rate Limit error for external id {externalId}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                    errors.Add($"Rate Limit error for external id {externalId}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
                 }
                 // abort for other exceptions, entity changes are not persisted
                 catch (Exception)
@@ -252,7 +252,7 @@ namespace FilmCRUD
                 }
             }
             
-            PersistErrorInfo("manual_linking_errors.txt", rateLimitErrors);
+            PersistErrorInfo("manual_linking_errors.txt", errors);
 
             this._unitOfWork.Complete();
         }
