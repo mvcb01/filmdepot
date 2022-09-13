@@ -132,18 +132,10 @@ namespace FilmCRUD
                 }
             }
 
-            // policies;
-            // notice the order of the async policies when calling Policy.WrapAsync:
-            //      outermost (at left) to innermost (at right)
-            IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
-            IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
-            AsyncPolicyWrap policyWrap = Policy.WrapAsync(
-                APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(retryConfig),
-                APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig)
-            );
+            AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
             // letting the token bucket fill for the current timespan...
-            await Task.Delay(rateLimitConfig.PerTimeSpan);
+            await Task.Delay(initialDelay);
 
             // to save the new Movie entities linked to some MovieRip
             var newMovieEntities = new List<Movie>();
@@ -333,6 +325,20 @@ namespace FilmCRUD
 
             // explicit conversion is defined
             return (Movie)result;
+        }
+
+        private AsyncPolicyWrap GetPolicyWrapFromConfigs(out TimeSpan initialDelay)
+        {
+            // notice the order of the async policies when calling Policy.WrapAsync:
+            //      outermost (at left) to innermost (at right)
+            IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
+            IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
+
+            initialDelay = rateLimitConfig.PerTimeSpan;
+            return Policy.WrapAsync(
+                APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(retryConfig),
+                APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig)
+            );
         }
 
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
