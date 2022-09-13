@@ -624,7 +624,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task ValidateManualExternalIdsAsync_WithManualExternalIds_ShouldReturnCorrectDictionary()
+        public async Task ValidateManualExternalIdsAsync_WithManualExternalIds_ShouldReturnCorrectResult()
         {
             // arrange
             int validExternalId0 = 101;
