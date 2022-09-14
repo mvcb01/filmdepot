@@ -16,7 +16,6 @@ using FilmCRUD.Interfaces;
 using FilmCRUD.Helpers;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-using CommandLine;
 using System.Net.Http;
 using System.Net;
 
