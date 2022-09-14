@@ -16,5 +16,4 @@ namespace FilmCRUD.Verbs
             HelpText = "read the warehouse contents textfile with the provided date and persist in repo")]
         public string PersistContents { get; set; }
     }
-
 }
