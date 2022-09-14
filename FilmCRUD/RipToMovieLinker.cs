@@ -180,7 +180,8 @@ namespace FilmCRUD
                 }
             }
 
-            PersistErrorInfo("linking_errors.txt", errors);
+            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
+            PersistErrorInfo($"linking_errors_{dtNow}.txt", errors);
 
             this._unitOfWork.Complete();
         }
@@ -256,8 +257,9 @@ namespace FilmCRUD
                     ripToLink.Movie = this._unitOfWork.Movies.FindByExternalId(item.Value);
                 }
             }
-            
-            PersistErrorInfo("manual_linking_errors.txt", errors.Values);
+
+            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
+            PersistErrorInfo($"manual_linking_errors_{dtNow}.txt", errors.Values);
 
             this._unitOfWork.Complete();
         }
@@ -291,7 +293,8 @@ namespace FilmCRUD
                 }
             }
 
-            PersistErrorInfo("external_ids_validation_errors.txt", rateLimitErrors);
+            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
+            PersistErrorInfo($"external_ids_validation_errors_{dtNow}.txt", rateLimitErrors);
 
             return new Dictionary<string, Dictionary<string, int>>() {
                 ["valid"] = manualExternalIds.Where(kvp => validIds.Contains(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
