@@ -35,8 +35,11 @@ namespace FilmDomain.Extensions
                 value = RemoveDiacritics(value);
             }
 
-            IEnumerable<Char> charsToRemove = value.Where(c => !Char.IsLetterOrDigit(c)).Distinct();
-            return value.Split().Select(s => s.Trim(charsToRemove.ToArray())).Where(s => !string.IsNullOrEmpty(s));
+            IEnumerable<Char> charsToRemove = value.Where(c => !Char.IsLetterOrDigit(c)).Distinct().Where(c => c != '_');
+
+            var charsToRemoveExpr = charsToRemove.Any() ? @"\" + string.Join(@"|\", charsToRemove) : string.Empty;
+
+            return value.Split().Select(s => Regex.Replace(s, charsToRemoveExpr, " ").Replace("_", " ").Trim()).Where(s => !string.IsNullOrEmpty(s));//.Select(s => s.Split()).SelectMany(s => s);
         }
 
         public static IEnumerable<T> GetEntitiesFromNameFuzzyMatching<T>(
