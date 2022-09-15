@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using FilmDomain.Entities;
@@ -23,10 +24,7 @@ namespace FilmDomain.Extensions
 
         public static IEnumerable<string> GetStringTokensWithoutPunctuation(this string value, bool removeDiacritics = false)
         {
-            if (value == null)
-            {
-                return Enumerable.Empty<string>();
-            }
+            if (value == null) return Enumerable.Empty<string>();
 
             value = value.Trim().ToLower();
 
@@ -35,11 +33,25 @@ namespace FilmDomain.Extensions
                 value = RemoveDiacritics(value);
             }
 
-            IEnumerable<Char> charsToRemove = value.Where(c => !Char.IsLetterOrDigit(c)).Distinct().Where(c => c != '_');
+            // IDE0039: local function instead of a lambda
+            // made static so that variables defined in GetStringTokensWithoutPunctuation are not available inside
+            static string CharReplacer(string original, IEnumerable<Char> charsToRemove, char replacement)
+            {
+                var resultBuilder = new StringBuilder(original);
+                foreach (char c in charsToRemove)
+                {
+                    resultBuilder.Replace(c, replacement);
+                }
+                return resultBuilder.ToString();
+            }
 
-            var charsToRemoveExpr = charsToRemove.Any() ? @"\" + string.Join(@"|\", charsToRemove) : string.Empty;
+            IEnumerable<Char> charsToRemove = value.Where(c => !Char.IsLetterOrDigit(c)).Distinct();
+            IEnumerable<string> tokensWithReplacement = value
+                .Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => CharReplacer(s, charsToRemove, ' ').Trim())
+                .Where(s => !(string.IsNullOrEmpty(s) || string.IsNullOrWhiteSpace(s)));
 
-            return value.Split().Select(s => Regex.Replace(s, charsToRemoveExpr, " ").Replace("_", " ").Trim()).Where(s => !string.IsNullOrEmpty(s));//.Select(s => s.Split()).SelectMany(s => s);
+            return tokensWithReplacement.Select(s => s.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries)).SelectMany(s => s);
         }
 
         public static IEnumerable<T> GetEntitiesFromNameFuzzyMatching<T>(
