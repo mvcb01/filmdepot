@@ -20,5 +20,9 @@ namespace ConfigUtils.Interfaces
 
         Dictionary<string, int> GetManualExternalIds();
 
+        IRateLimitPolicyConfig GetRateLimitPolicyConfig();
+
+        IRetryPolicyConfig GetRetryPolicyConfig();
+
     }
 }

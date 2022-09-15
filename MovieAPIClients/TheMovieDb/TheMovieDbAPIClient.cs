@@ -56,16 +56,13 @@ namespace MovieAPIClients.TheMovieDb
             else
             {
                 HttpStatusCode code = result.StatusCode;
-                if (code == HttpStatusCode.NotFound)
-                {
-                    exists = false;
-                }
-                else
+                if (code != HttpStatusCode.NotFound)
                 {
                     string msg = $"Error when calling TheMovieDbAPIClient.ExternalIdExists with externalId = {externalId};" +
                         $" StatusCode: {code}, Message: {result.ReasonPhrase}";
                     throw new HttpRequestException(msg);
                 }
+                exists = false;
             }
             return exists;
         }
