@@ -307,9 +307,9 @@ namespace FilmCRUD
             // filters results using both Title and OriginalTitle
             IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
             List<MovieSearchResult> searchResult = searchResultAll
-                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation())
+                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
                     ||
-                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation()))
+                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true)))
                 .ToList();
 
             int resultCount = searchResult.Count();
