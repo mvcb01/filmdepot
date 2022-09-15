@@ -76,7 +76,7 @@ namespace FilmCRUD
                 bool toContinue = Console.ReadLine().Trim().ToLower() == "y";
                 if (!toContinue)
                 {
-                    System.Console.WriteLine("A sair...");
+                    System.Console.WriteLine("Quitting...");
                     return;
                 }
                 visitCrudManager.WriteMovieWarehouseContentsToTextFile();
