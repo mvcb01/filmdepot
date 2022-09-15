@@ -72,7 +72,7 @@ namespace FilmCRUD
             {
                 System.Console.WriteLine("-------------");
                 System.Console.WriteLine($"Movie warehouse: {visitCrudManager.MovieWarehouseDirectory}");
-                System.Console.WriteLine("Garantir que o disco está ligado... Y para sim, outra para não.");
+                System.Console.WriteLine("Will access the storage directory, press \"y\" to confirm, other key to deny");
                 bool toContinue = Console.ReadLine().Trim().ToLower() == "y";
                 if (!toContinue)
                 {
