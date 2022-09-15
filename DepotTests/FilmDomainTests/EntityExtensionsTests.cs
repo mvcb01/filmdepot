@@ -20,9 +20,10 @@ namespace DepotTests.FilmDomainTests
         [InlineData("Andrés Gertrúdix", new string[] { "andres", "gertrudix" })]
         [InlineData("Göran", new string[] { "goran" })]
         [InlineData("Carlos 'Bochita' Martinetti", new string[] { "carlos", "bochita", "martinetti"})]
-        [InlineData("James O'Connell", new string[] { "james", "o'connell" })]
+        [InlineData("James O'Connell", new string[] { "james", "o", "connell" })]
         [InlineData("Nina Šunevič", new string[] { "nina", "sunevic" })]
         [InlineData("Petr Vaněk", new string[] { "petr", "vanek" })]
+        [InlineData("13(tzameti)", new string[] { "13", "tzameti" })]
         public void GetStringTokensWithoutPunctuationAndDiacritics_ShouldReturnCorrectComponents(string name, IEnumerable<string> expected)
         {
             IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation(removeDiacritics: true);
@@ -43,9 +44,10 @@ namespace DepotTests.FilmDomainTests
         [InlineData("Andrés Gertrúdix", new string[] { "andrés", "gertrúdix" })]
         [InlineData("Göran", new string[] { "göran" })]
         [InlineData("Carlos 'Bochita' Martinetti", new string[] { "carlos", "bochita", "martinetti"})]
-        [InlineData("James O'Connell", new string[] { "james", "o'connell" })]
+        [InlineData("James O'Connell", new string[] { "james", "o", "connell" })]
         [InlineData("Nina Šunevič", new string[] { "nina", "šunevič" })]
         [InlineData("Petr Vaněk", new string[] { "petr", "vaněk" })]
+        [InlineData("13(tzameti)", new string[] { "13", "tzameti" })]
         public void GetStringTokensWithoutPunctuation_ShouldReturnCorrectComponents(string name, IEnumerable<string> expected)
         {
             IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation(removeDiacritics: false);
