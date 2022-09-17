@@ -63,7 +63,7 @@ namespace DepotTests.CRUDTests
 
             // default policy configs
             this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(5);
-            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(2000));
+            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(50));
 
             this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(2);
             this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(50));
