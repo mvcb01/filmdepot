@@ -11,6 +11,7 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
+using FilmCRUD.Interfaces;
 
 namespace DepotTests.CRUDTests
 {
@@ -21,6 +22,8 @@ namespace DepotTests.CRUDTests
         private readonly Mock<IActorRepository> _actorRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+
+        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapper;
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
@@ -39,10 +42,13 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Actors)
                 .Returns(this._actorRepositoryMock.Object);
 
+            this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>();
+
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherActors = new MovieDetailsFetcherActors(
                 this._unitOfWorkMock.Object,
+                this._fileSystemIOWrapper.Object,
                 this._movieAPIClientMock.Object);
         }
 
