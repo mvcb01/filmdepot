@@ -29,7 +29,7 @@ namespace DepotTests.CRUDTests
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
-        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapper;
+        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapperMock;
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
@@ -54,7 +54,7 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Movies)
                 .Returns(this._movieRepositoryMock.Object);
 
-            this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>();
+            this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
             this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
             this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
 
@@ -73,7 +73,7 @@ namespace DepotTests.CRUDTests
 
             this._ripToMovieLinker = new RipToMovieLinker(
                 this._unitOfWorkMock.Object,
-                this._fileSystemIOWrapper.Object,
+                this._fileSystemIOWrapperMock.Object,
                 this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
         }

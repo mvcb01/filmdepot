@@ -23,7 +23,7 @@ namespace DepotTests.CRUDTests
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
-        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapper;
+        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapperMock;
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
@@ -42,13 +42,13 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Directors)
                 .Returns(this._directorRepositoryMock.Object);
 
-            this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>();
+            this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
 
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherDirectors = new MovieDetailsFetcherDirectors(
                 this._unitOfWorkMock.Object,
-                this._fileSystemIOWrapper.Object,
+                this._fileSystemIOWrapperMock.Object,
                 this._movieAPIClientMock.Object);
         }
 
