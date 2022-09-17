@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FilmCRUD.Interfaces;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients;
@@ -9,7 +10,8 @@ namespace FilmCRUD
 {
     public class MovieDetailsFetcherActors : MovieDetailsFetcherAbstract<Actor, MovieActorResult>
     {
-        public MovieDetailsFetcherActors(IUnitOfWork unitOfWork, IMovieAPIClient movieAPIClient) : base(unitOfWork, movieAPIClient)
+        public MovieDetailsFetcherActors(IUnitOfWork unitOfWork, IFileSystemIOWrapper fileSystemIOWrapper, IMovieAPIClient movieAPIClient)
+            : base(unitOfWork, fileSystemIOWrapper, movieAPIClient)
         { }
 
         public override IEnumerable<Actor> GetExistingDetailEntitiesInRepo() => this._unitOfWork.Actors.GetAll();
