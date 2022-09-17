@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ConfigUtils.Interfaces;
 using FilmCRUD.Interfaces;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
@@ -10,9 +11,12 @@ namespace FilmCRUD
 {
     public class MovieDetailsFetcherGenres : MovieDetailsFetcherAbstract<Genre, MovieGenreResult>
     {
-        public MovieDetailsFetcherGenres(IUnitOfWork unitOfWork, IFileSystemIOWrapper fileSystemIOWrapper, IMovieAPIClient movieAPIClient)
-            : base(unitOfWork, fileSystemIOWrapper, movieAPIClient)
-        { }
+        public MovieDetailsFetcherGenres(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient)
+            : base(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) { }
 
         public override IEnumerable<Genre> GetExistingDetailEntitiesInRepo() => this._unitOfWork.Genres.GetAll();
 

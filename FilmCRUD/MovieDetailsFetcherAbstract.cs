@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ConfigUtils.Interfaces;
 using FilmCRUD.Interfaces;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
@@ -23,12 +24,19 @@ namespace FilmCRUD
 
         private IFileSystemIOWrapper _fileSystemIOWrapper { get; init; }
 
+        private IAppSettingsManager _appSettingsManager { get; init; }
+
         protected IMovieAPIClient _movieAPIClient { get; init; }
 
-        public MovieDetailsFetcherAbstract(IUnitOfWork unitOfWork, IFileSystemIOWrapper fileSystemIOWrapper, IMovieAPIClient movieAPIClient)
+        public MovieDetailsFetcherAbstract(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient)
         {
             this._unitOfWork = unitOfWork;
             this._fileSystemIOWrapper = fileSystemIOWrapper;
+            this._appSettingsManager = appSettingsManager;
             this._movieAPIClient = movieAPIClient;
         }
 
