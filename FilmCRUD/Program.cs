@@ -46,7 +46,7 @@ namespace FilmCRUD
             parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanRipsManager));
             parsed.WithParsed<ScanMoviesOptions>(opts => HandleScanMoviesOptions(opts, scanMoviesManager));
             await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
-            await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, fileSystemIOWrapper, movieAPIClient));
+            await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient));
             parsed.WithNotParsed(HandleParseError);
 
             {}
@@ -321,23 +321,28 @@ namespace FilmCRUD
 
         }
 
-        public static async Task HandleFetchOptions(FetchOptions opts, IUnitOfWork unitOfWork, IFileSystemIOWrapper fileSystemIOWrapper, IMovieAPIClient movieAPIClient)
+        public static async Task HandleFetchOptions(
+            FetchOptions opts,
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient)
         {
             if (opts.Genres)
             {
-                var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, fileSystemIOWrapper, movieAPIClient);
+                var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching genres for movies...");
                 await genresFetcher.PopulateDetails();
             }
             else if (opts.Actors)
             {
-                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, fileSystemIOWrapper, movieAPIClient);
+                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching actors for movies...");
                 await actorsFetcher.PopulateDetails();
             }
             else if (opts.Directors)
             {
-                var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, fileSystemIOWrapper, movieAPIClient);
+                var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching directors for movies...");
                 await directorsFetcher.PopulateDetails();
             }
