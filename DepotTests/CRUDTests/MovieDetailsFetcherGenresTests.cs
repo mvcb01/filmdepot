@@ -47,11 +47,14 @@ namespace DepotTests.CRUDTests
 
             this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
 
+            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
+
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherGenres = new MovieDetailsFetcherGenres(
                 this._unitOfWorkMock.Object,
                 this._fileSystemIOWrapperMock.Object,
+                this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
         }
 

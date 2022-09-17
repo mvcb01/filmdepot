@@ -12,6 +12,7 @@ using FilmDomain.Interfaces;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
 using FilmCRUD.Interfaces;
+using ConfigUtils.Interfaces;
 
 namespace DepotTests.CRUDTests
 {
@@ -24,6 +25,8 @@ namespace DepotTests.CRUDTests
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
         private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapperMock;
+
+        private readonly Mock<IAppSettingsManager> _appSettingsManagerMock;
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
@@ -44,11 +47,14 @@ namespace DepotTests.CRUDTests
 
             this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
 
+            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
+
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherActors = new MovieDetailsFetcherActors(
                 this._unitOfWorkMock.Object,
                 this._fileSystemIOWrapperMock.Object,
+                this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
         }
 
