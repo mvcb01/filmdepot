@@ -109,6 +109,43 @@ namespace FilmCRUD
         {
             IEnumerable<Movie> moviesWithoutIMDBId = this._unitOfWork.Movies.GetMoviesWithoutImdbId();
 
+            AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
+
+            await Task.Delay(initialDelay);
+
+            var errors = new List<string>();
+
+            foreach (Movie movie in moviesWithoutIMDBId)
+            {
+                try
+                {
+                    movie.IMDBId = await policyWrap.ExecuteAsync(() => this._movieAPIClient.GetMovieIMDBIdAsync(movie.ExternalId));
+                }
+                catch (RateLimitRejectedException ex)
+                {
+                    errors.Add($"Rate Limit error for {movie.Title} ({movie.ReleaseDate}); Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    errors.Add($"Invalid external id for {movie.Title} ({movie.ReleaseDate}): {movie.ExternalId}");
+                }
+                catch (Exception)
+                {
+                    this._unitOfWork.Dispose();
+                    throw;
+                }
+            }
+
+            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
+            PersistErrorInfo($"details_fetcher_errors_IMDBIds_{dtNow}.txt", errors);
+
+            this._unitOfWork.Complete();
+        }
+
+        public async Task PopulateMovieIMDBIds_OLD()
+        {
+            IEnumerable<Movie> moviesWithoutIMDBId = this._unitOfWork.Movies.GetMoviesWithoutImdbId();
+
             var IMDBIdTasks = new Dictionary<int, Task<string>>();
 
             foreach (var movie in moviesWithoutIMDBId)
