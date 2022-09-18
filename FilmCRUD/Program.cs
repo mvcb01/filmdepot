@@ -136,7 +136,7 @@ namespace FilmCRUD
                 Dictionary<DateTime, int> countByVisit = scanRipsManager.GetRipCountByVisit();
                 foreach (var item in countByVisit.OrderBy(kvp => kvp.Key))
                 {
-                    string visitStr = item.Key.ToString("yyyyMMdd");
+                    string visitStr = item.Key.ToString("MMMM dd yyyy");
                     System.Console.WriteLine($"{visitStr} : {item.Value}");
                 }
             }
@@ -427,7 +427,7 @@ namespace FilmCRUD
             scanManager.ListVisitDates()
                 .OrderByDescending(dt => dt)
                 .ToList()
-                .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+                .ForEach(dt => System.Console.WriteLine(dt.ToString("MMMM dd yyyy")));
         }
 
         private static void PrintVisitDiff(Dictionary<string, IEnumerable<string>> visitDiff)
