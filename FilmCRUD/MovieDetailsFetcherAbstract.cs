@@ -63,10 +63,7 @@ namespace FilmCRUD
         public async Task PopulateDetails()
         {
             IEnumerable<Movie> moviesWithoutDetails = GetMoviesWithoutDetails();
-            if (!moviesWithoutDetails.Any())
-            {
-                return;
-            }
+            if (!moviesWithoutDetails.Any()) return;
 
             // notice the order of the async policies when calling Policy.WrapAsync:
             //      outermost (at left) to innermost (at right)
