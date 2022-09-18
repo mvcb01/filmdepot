@@ -193,5 +193,56 @@ namespace DepotTests.CRUDTests
             }
         }
 
+
+        [Fact]
+        public async Task PopulateDetails_WithMoviesMissingGenres_WithoutSuchGenresInRepo_WithSameGenreForAllMovies_ShouldBePopulatedWithTheSameGenreEntity()
+        {
+            var dramaGenreResult = new MovieGenreResult() { Name = "drama", ExternalId = 201 };
+            var dramaGenre = (Genre)dramaGenreResult;
+
+            var horrorGenreResult = new MovieGenreResult() { Name = "horror", ExternalId = 202 };
+            var horrorGenre = (Genre)horrorGenreResult;
+
+            int firstExternalId = 101;
+            int secondExternalId = 102;
+            var firstMovieWithoutGenres = new Movie()
+            {
+                Title = "the fly",
+                ReleaseDate = 1986,
+                ExternalId = firstExternalId,
+                Genres = new List<Genre>()
+            };
+            var secondMovieWithoutGenres = new Movie()
+            {
+                Title = "gummo",
+                ReleaseDate = 1997,
+                ExternalId = secondExternalId,
+                Genres = new List<Genre>()
+            };
+
+            this._genreRepositoryMock
+                .Setup(g => g.GetAll())
+                .Returns(Enumerable.Empty<Genre>());
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutGenres())
+                .Returns(new Movie[] { firstMovieWithoutGenres, secondMovieWithoutGenres });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieGenresAsync(firstExternalId))
+                .ReturnsAsync(new MovieGenreResult[] { horrorGenreResult, dramaGenreResult });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieGenresAsync(secondExternalId))
+                .ReturnsAsync(new MovieGenreResult[] { dramaGenreResult });
+
+            // act
+            await this._movieDetailsFetcherGenres.PopulateDetails();
+
+            // assert
+            // both movies should hold the same exact object for the drama genre
+            firstMovieWithoutGenres.Genres
+                .First(g => g.Name == dramaGenre.Name)
+                .Should()
+                .BeSameAs(secondMovieWithoutGenres.Genres.First(g => g.Name == dramaGenre.Name));
+        }
+
     }
 }
