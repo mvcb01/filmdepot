@@ -216,7 +216,7 @@ namespace FilmCRUD
             {
                 try
                 {
-                    MovieSearchResult movieInfo = await this._movieAPIClient.GetMovieInfoAsync(externalId);
+                    MovieSearchResult movieInfo = await policyWrap.ExecuteAsync(() => this._movieAPIClient.GetMovieInfoAsync(externalId));
                     // explicit casting is defined
                     newMovies.Add((Movie)movieInfo);
                 }
