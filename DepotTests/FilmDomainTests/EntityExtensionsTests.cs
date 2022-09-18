@@ -20,9 +20,10 @@ namespace DepotTests.FilmDomainTests
         [InlineData("Andrés Gertrúdix", new string[] { "andres", "gertrudix" })]
         [InlineData("Göran", new string[] { "goran" })]
         [InlineData("Carlos 'Bochita' Martinetti", new string[] { "carlos", "bochita", "martinetti"})]
-        [InlineData("James O'Connell", new string[] { "james", "o'connell" })]
+        [InlineData("James O'Connell", new string[] { "james", "o", "connell" })]
         [InlineData("Nina Šunevič", new string[] { "nina", "sunevic" })]
         [InlineData("Petr Vaněk", new string[] { "petr", "vanek" })]
+        [InlineData("13(tzameti)", new string[] { "13", "tzameti" })]
         public void GetStringTokensWithoutPunctuationAndDiacritics_ShouldReturnCorrectComponents(string name, IEnumerable<string> expected)
         {
             IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation(removeDiacritics: true);
@@ -43,9 +44,10 @@ namespace DepotTests.FilmDomainTests
         [InlineData("Andrés Gertrúdix", new string[] { "andrés", "gertrúdix" })]
         [InlineData("Göran", new string[] { "göran" })]
         [InlineData("Carlos 'Bochita' Martinetti", new string[] { "carlos", "bochita", "martinetti"})]
-        [InlineData("James O'Connell", new string[] { "james", "o'connell" })]
+        [InlineData("James O'Connell", new string[] { "james", "o", "connell" })]
         [InlineData("Nina Šunevič", new string[] { "nina", "šunevič" })]
         [InlineData("Petr Vaněk", new string[] { "petr", "vaněk" })]
+        [InlineData("13(tzameti)", new string[] { "13", "tzameti" })]
         public void GetStringTokensWithoutPunctuation_ShouldReturnCorrectComponents(string name, IEnumerable<string> expected)
         {
             IEnumerable<string> actual = name.GetStringTokensWithoutPunctuation(removeDiacritics: false);
@@ -57,6 +59,7 @@ namespace DepotTests.FilmDomainTests
         [InlineData("benoit _Poelvoorde-->")]
         [InlineData("benoîT     póelvõörDe")]
         [InlineData("[ -> benoîT     póelvõörDe <-]")]
+        [InlineData("poelvoorDe")]
         public void GetEntitiesFromNameFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string nameToSearch)
         {
             // arrange
@@ -76,6 +79,7 @@ namespace DepotTests.FilmDomainTests
         [InlineData("benoit _Poelvoorde-->")]
         [InlineData("%-(//) benoiT     poelvoorDe")]
         [InlineData("[ -> benoiT     poelvoorDe <-]")]
+        [InlineData("poelvoorDe")]
         public void GetEntitiesFromNameFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches(string nameToSearch)
         {
             // arrange
@@ -93,10 +97,10 @@ namespace DepotTests.FilmDomainTests
         }
 
         [Theory]
-        [InlineData("$$#!(!) Sátántangó")]
-        [InlineData("  sáTânTãnGó  (1994)")]
-        [InlineData("satantango 1994")]
-        [InlineData("satantango")]
+        [InlineData("$$#!(!)  thE Turin  !!!$$Horsé")]
+        [InlineData("túrin horse ")]
+        [InlineData("turin horse (2011)")]
+        [InlineData("horse 2011")]
         public void GetMoviesFromTitleFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string title)
         {
             // arrange
@@ -110,7 +114,7 @@ namespace DepotTests.FilmDomainTests
             IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
 
             // assert
-            searchResult.Should().BeEquivalentTo(new[] { firstMovie });
+            searchResult.Should().BeEquivalentTo(new[] { secondMovie });
         }
 
         [Theory]

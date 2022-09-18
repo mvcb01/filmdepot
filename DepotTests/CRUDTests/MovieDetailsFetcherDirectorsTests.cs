@@ -11,6 +11,9 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
+using FilmCRUD.Interfaces;
+using ConfigUtils.Interfaces;
+using System;
 
 namespace DepotTests.CRUDTests
 {
@@ -21,6 +24,14 @@ namespace DepotTests.CRUDTests
         private readonly Mock<IDirectorRepository> _directorRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+
+        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapperMock;
+
+        private readonly Mock<IRateLimitPolicyConfig> _rateLimitConfigMock;
+
+        private readonly Mock<IRetryPolicyConfig> _retryConfigMock;
+
+        private readonly Mock<IAppSettingsManager> _appSettingsManagerMock;
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
@@ -39,10 +50,29 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Directors)
                 .Returns(this._directorRepositoryMock.Object);
 
+            this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
+
+            this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
+            this._retryConfigMock = new Mock<IRetryPolicyConfig>();
+
+            // default policy configs
+            this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(5);
+            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(50));
+
+            this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(2);
+            this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(50));
+
+            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
+
+            this._appSettingsManagerMock.Setup(a => a.GetRateLimitPolicyConfig()).Returns(this._rateLimitConfigMock.Object);
+            this._appSettingsManagerMock.Setup(a => a.GetRetryPolicyConfig()).Returns(this._retryConfigMock.Object);
+
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherDirectors = new MovieDetailsFetcherDirectors(
                 this._unitOfWorkMock.Object,
+                this._fileSystemIOWrapperMock.Object,
+                this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
         }
 
@@ -166,6 +196,53 @@ namespace DepotTests.CRUDTests
                 secondMovieWithoutDirectors.Directors.Should().BeEquivalentTo(new List<Director>() { secondDirector });
                 thirdMovieWithoutDirectors.Directors.Should().BeEquivalentTo(new List<Director>() { secondDirector });
             }
+        }
+
+
+        [Fact]
+        public async Task PopulateDetails_WithMoviesMissingDirectors_WithoutSuchDirectorsInRepo_WithSameDirectorForAllMovies_ShouldBePopulatedWithTheSameDirectorEntity()
+        {
+            // arrange
+            var directorResult = new MovieDirectorResult() { Name = "terrence malick", ExternalId = 201 };
+
+            int firstExternalId = 101;
+            int secondExternalId = 102;
+            var firstMovieWithoutDirectors = new Movie()
+            {
+                Title = "badlands",
+                ReleaseDate = 1973,
+                ExternalId = firstExternalId,
+                Directors = new List<Director>()
+            };
+            var secondMovieWithoutDirectors = new Movie()
+            {
+                Title = "the thin red line",
+                ReleaseDate = 1998,
+                ExternalId = secondExternalId,
+                Directors = new List<Director>()
+            };
+
+            this._directorRepositoryMock
+                .Setup(d => d.GetAll())
+                .Returns(Enumerable.Empty<Director>());
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutDirectors())
+                .Returns(new Movie[] { firstMovieWithoutDirectors, secondMovieWithoutDirectors });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieDirectorsAsync(firstExternalId))
+                .ReturnsAsync(new MovieDirectorResult[] { directorResult });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieDirectorsAsync(secondExternalId))
+                .ReturnsAsync(new MovieDirectorResult[] { directorResult });
+
+            // act
+            await this._movieDetailsFetcherDirectors.PopulateDetails();
+
+            // assert
+            firstMovieWithoutDirectors.Directors
+                .First(d => d.ExternalId == directorResult.ExternalId)
+                .Should()
+                .BeSameAs(secondMovieWithoutDirectors.Directors.First(d => d.ExternalId == directorResult.ExternalId));
         }
     }
 }

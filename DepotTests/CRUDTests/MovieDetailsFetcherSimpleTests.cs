@@ -9,6 +9,9 @@ using FilmCRUD;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients.Interfaces;
+using FilmCRUD.Interfaces;
+using ConfigUtils.Interfaces;
+using System;
 
 namespace DepotTests.CRUDTests
 {
@@ -17,6 +20,14 @@ namespace DepotTests.CRUDTests
         private readonly Mock<IMovieRepository> _movieRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+
+        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapperMock;
+
+        private readonly Mock<IRateLimitPolicyConfig> _rateLimitConfigMock;
+
+        private readonly Mock<IRetryPolicyConfig> _retryConfigMock;
+
+        private readonly Mock<IAppSettingsManager> _appSettingsManagerMock;
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
@@ -31,10 +42,29 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Movies)
                 .Returns(this._movieRepositoryMock.Object);
 
+            this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
+
+            this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
+            this._retryConfigMock = new Mock<IRetryPolicyConfig>();
+
+            // default policy configs
+            this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(5);
+            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(50));
+
+            this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(2);
+            this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(50));
+
+            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
+
+            this._appSettingsManagerMock.Setup(a => a.GetRateLimitPolicyConfig()).Returns(this._rateLimitConfigMock.Object);
+            this._appSettingsManagerMock.Setup(a => a.GetRetryPolicyConfig()).Returns(this._retryConfigMock.Object);
+
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherSimple = new MovieDetailsFetcherSimple(
                 this._unitOfWorkMock.Object,
+                this._fileSystemIOWrapperMock.Object,
+                this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
         }
 

@@ -11,7 +11,9 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-
+using FilmCRUD.Interfaces;
+using ConfigUtils.Interfaces;
+using System;
 
 namespace DepotTests.CRUDTests
 {
@@ -22,6 +24,14 @@ namespace DepotTests.CRUDTests
         private readonly Mock<IGenreRepository> _genreRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+
+        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapperMock;
+
+        private readonly Mock<IRateLimitPolicyConfig> _rateLimitConfigMock;
+
+        private readonly Mock<IRetryPolicyConfig> _retryConfigMock;
+
+        private readonly Mock<IAppSettingsManager> _appSettingsManagerMock;
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
@@ -40,10 +50,29 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Genres)
                 .Returns(this._genreRepositoryMock.Object);
 
+            this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
+
+            this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
+            this._retryConfigMock = new Mock<IRetryPolicyConfig>();
+
+            // default policy configs
+            this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(5);
+            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(50));
+
+            this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(2);
+            this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(50));
+
+            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
+
+            this._appSettingsManagerMock.Setup(a => a.GetRateLimitPolicyConfig()).Returns(this._rateLimitConfigMock.Object);
+            this._appSettingsManagerMock.Setup(a => a.GetRetryPolicyConfig()).Returns(this._retryConfigMock.Object);
+
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherGenres = new MovieDetailsFetcherGenres(
                 this._unitOfWorkMock.Object,
+                this._fileSystemIOWrapperMock.Object,
+                this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
         }
 
@@ -162,6 +191,54 @@ namespace DepotTests.CRUDTests
                 firstMovieWithoutGenres.Genres.Should().BeEquivalentTo(new List<Genre>() { horrorGenre, dramaGenre });
                 secondMovieWithoutGenres.Genres.Should().BeEquivalentTo(new List<Genre>() { dramaGenre });
             }
+        }
+
+
+        [Fact]
+        public async Task PopulateDetails_WithMoviesMissingGenres_WithoutSuchGenresInRepo_WithSameGenreForAllMovies_ShouldBePopulatedWithTheSameGenreEntity()
+        {
+            var dramaGenreResult = new MovieGenreResult() { Name = "drama", ExternalId = 201 };
+            var horrorGenreResult = new MovieGenreResult() { Name = "horror", ExternalId = 202 };
+
+            int firstExternalId = 101;
+            int secondExternalId = 102;
+            var firstMovieWithoutGenres = new Movie()
+            {
+                Title = "the fly",
+                ReleaseDate = 1986,
+                ExternalId = firstExternalId,
+                Genres = new List<Genre>()
+            };
+            var secondMovieWithoutGenres = new Movie()
+            {
+                Title = "gummo",
+                ReleaseDate = 1997,
+                ExternalId = secondExternalId,
+                Genres = new List<Genre>()
+            };
+
+            this._genreRepositoryMock
+                .Setup(g => g.GetAll())
+                .Returns(Enumerable.Empty<Genre>());
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutGenres())
+                .Returns(new Movie[] { firstMovieWithoutGenres, secondMovieWithoutGenres });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieGenresAsync(firstExternalId))
+                .ReturnsAsync(new MovieGenreResult[] { horrorGenreResult, dramaGenreResult });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieGenresAsync(secondExternalId))
+                .ReturnsAsync(new MovieGenreResult[] { dramaGenreResult });
+
+            // act
+            await this._movieDetailsFetcherGenres.PopulateDetails();
+
+            // assert
+            // both movies should hold the same exact object for the drama genre
+            firstMovieWithoutGenres.Genres
+                .First(g => g.ExternalId == dramaGenreResult.ExternalId)
+                .Should()
+                .BeSameAs(secondMovieWithoutGenres.Genres.First(g => g.ExternalId == dramaGenreResult.ExternalId));
         }
 
     }
