@@ -16,10 +16,13 @@ namespace DepotTests.CRUDTests
     public class ScanRipsManagerTests
     {
         private readonly Mock<IMovieRipRepository> _movieRipRepositoryMock;
+
         private readonly  Mock<IMovieWarehouseVisitRepository> _movieWarehouseVisitRepositoryMock;
+
         private readonly  Mock<IUnitOfWork> _unitOfWorkMock;
 
         private readonly ScanRipsManager _scanRipsManager;
+
         public ScanRipsManagerTests()
         {
             this._movieRipRepositoryMock = new Mock<IMovieRipRepository>(MockBehavior.Strict);

@@ -5,6 +5,8 @@ using System.Linq;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients.Interfaces;
+using ConfigUtils.Interfaces;
+using FilmCRUD.Interfaces;
 
 namespace FilmCRUD
 {
@@ -18,11 +20,21 @@ namespace FilmCRUD
     {
         private IUnitOfWork _unitOfWork { get; init; }
 
+        private IFileSystemIOWrapper _fileSystemIOWrapper { get; init; }
+
+        private IAppSettingsManager _appSettingsManager { get; init; }
+
         private IMovieAPIClient _movieAPIClient { get; init; }
 
-        public MovieDetailsFetcherSimple(IUnitOfWork unitOfWork, IMovieAPIClient movieAPIClient)
+        public MovieDetailsFetcherSimple(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient)
         {
             this._unitOfWork = unitOfWork;
+            this._fileSystemIOWrapper = fileSystemIOWrapper;
+            this._appSettingsManager = appSettingsManager;
             this._movieAPIClient = movieAPIClient;
         }
 

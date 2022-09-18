@@ -348,13 +348,13 @@ namespace FilmCRUD
             }
             else if (opts.Keywords)
             {
-                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, movieAPIClient);
+                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching keywords for movies...");
                 await keywordsFetcher.PopulateMovieKeywords();
             }
             else if (opts.IMDBIds)
             {
-                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, movieAPIClient);
+                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching imdb ids for movies...");
                 await IMDBIdFetcher.PopulateMovieIMDBIds();
             }
