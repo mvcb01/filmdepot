@@ -85,26 +85,6 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
-        public async Task PopulateMovieKeywords_OLD()
-        {
-            IEnumerable<Movie> moviesWithoutKeywords = this._unitOfWork.Movies.GetMoviesWithoutKeywords();
-
-            var keywordTasks = new Dictionary<int, Task<IEnumerable<string>>>();
-            foreach (var movie in moviesWithoutKeywords)
-            {
-                keywordTasks.Add(movie.ExternalId, this._movieAPIClient.GetMovieKeywordsAsync(movie.ExternalId));
-            }
-
-            await Task.WhenAll(keywordTasks.Values);
-
-            foreach (var movie in moviesWithoutKeywords)
-            {
-                movie.Keywords = keywordTasks[movie.ExternalId].Result.ToList();
-            }
-
-            this._unitOfWork.Complete();
-        }
-
         public async Task PopulateMovieIMDBIds()
         {
             IEnumerable<Movie> moviesWithoutIMDBId = this._unitOfWork.Movies.GetMoviesWithoutImdbId();
@@ -138,27 +118,6 @@ namespace FilmCRUD
 
             string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
             PersistErrorInfo($"details_fetcher_errors_IMDBIds_{dtNow}.txt", errors);
-
-            this._unitOfWork.Complete();
-        }
-
-        public async Task PopulateMovieIMDBIds_OLD()
-        {
-            IEnumerable<Movie> moviesWithoutIMDBId = this._unitOfWork.Movies.GetMoviesWithoutImdbId();
-
-            var IMDBIdTasks = new Dictionary<int, Task<string>>();
-
-            foreach (var movie in moviesWithoutIMDBId)
-            {
-                IMDBIdTasks.Add(movie.ExternalId, this._movieAPIClient.GetMovieIMDBIdAsync(movie.ExternalId));
-            }
-
-            await Task.WhenAll(IMDBIdTasks.Values);
-
-            foreach (var movie in moviesWithoutIMDBId)
-            {
-                movie.IMDBId = IMDBIdTasks[movie.ExternalId].Result;
-            }
 
             this._unitOfWork.Complete();
         }
