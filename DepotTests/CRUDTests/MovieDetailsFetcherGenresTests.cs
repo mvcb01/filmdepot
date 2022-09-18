@@ -198,10 +198,7 @@ namespace DepotTests.CRUDTests
         public async Task PopulateDetails_WithMoviesMissingGenres_WithoutSuchGenresInRepo_WithSameGenreForAllMovies_ShouldBePopulatedWithTheSameGenreEntity()
         {
             var dramaGenreResult = new MovieGenreResult() { Name = "drama", ExternalId = 201 };
-            var dramaGenre = (Genre)dramaGenreResult;
-
             var horrorGenreResult = new MovieGenreResult() { Name = "horror", ExternalId = 202 };
-            var horrorGenre = (Genre)horrorGenreResult;
 
             int firstExternalId = 101;
             int secondExternalId = 102;
@@ -239,9 +236,9 @@ namespace DepotTests.CRUDTests
             // assert
             // both movies should hold the same exact object for the drama genre
             firstMovieWithoutGenres.Genres
-                .First(g => g.ExternalId == dramaGenre.ExternalId)
+                .First(g => g.ExternalId == dramaGenreResult.ExternalId)
                 .Should()
-                .BeSameAs(secondMovieWithoutGenres.Genres.First(g => g.ExternalId == dramaGenre.ExternalId));
+                .BeSameAs(secondMovieWithoutGenres.Genres.First(g => g.ExternalId == dramaGenreResult.ExternalId));
         }
 
     }

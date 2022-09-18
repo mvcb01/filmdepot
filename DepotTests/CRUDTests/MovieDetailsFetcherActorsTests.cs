@@ -218,10 +218,7 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             var firstActorResult = new MovieActorResult() { Name = "joaquin phoenix", ExternalId = 201 };
-            var firstActor = (Actor)firstActorResult;
-
             var secondActorResult = new MovieActorResult() { Name = "adrien brody", ExternalId = 202 };
-            var secondActor = (Actor)secondActorResult;
 
             int firstExternalId = 101;
             int secondExternalId = 102;
@@ -258,10 +255,9 @@ namespace DepotTests.CRUDTests
 
             // assert
             firstMovieWithoutActors.Actors
-                .First(a => a.ExternalId == firstActor.ExternalId)
+                .First(a => a.ExternalId == firstActorResult.ExternalId)
                 .Should()
-                .BeSameAs(secondMovieWithoutActors.Actors.First(a => a.ExternalId == firstActor.ExternalId));
-
+                .BeSameAs(secondMovieWithoutActors.Actors.First(a => a.ExternalId == firstActorResult.ExternalId));
         }
 
     }
