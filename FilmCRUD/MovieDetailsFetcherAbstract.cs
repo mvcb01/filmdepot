@@ -107,7 +107,6 @@ namespace FilmCRUD
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
                 catch (RateLimitRejectedException ex)
                 {
-
                     errors.Add($"Rate Limit error for {movie.Title} ({movie.ReleaseDate}); Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
                 }
                 // invalid external ids should not stop execution
