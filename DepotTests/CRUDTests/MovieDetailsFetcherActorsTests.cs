@@ -94,8 +94,12 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             int externalId = 101;
-            var movieWithoutActors = new Movie() {
-                Title = "the fly", ReleaseDate = 1986, ExternalId = externalId, Actors = new List<Actor>()
+            var movieWithoutActors = new Movie()
+            {
+                Title = "the fly",
+                ReleaseDate = 1986,
+                ExternalId = externalId,
+                Actors = new List<Actor>()
             };
             this._actorRepositoryMock
                 .Setup(a => a.GetAll())
@@ -123,11 +127,19 @@ namespace DepotTests.CRUDTests
 
             int firstExternalId = 101;
             int secondExternalId = 102;
-            var firstMovieWithoutActors = new Movie() {
-                Title = "i'm still here", ReleaseDate = 2010, ExternalId = firstExternalId, Actors = new List<Actor>()
+            var firstMovieWithoutActors = new Movie()
+            {
+                Title = "i'm still here",
+                ReleaseDate = 2010,
+                ExternalId = firstExternalId,
+                Actors = new List<Actor>()
             };
-            var secondMovieWithoutActors = new Movie() {
-                Title = "joker", ReleaseDate = 2019, ExternalId = secondExternalId, Actors = new List<Actor>()
+            var secondMovieWithoutActors = new Movie()
+            {
+                Title = "joker",
+                ReleaseDate = 2019,
+                ExternalId = secondExternalId,
+                Actors = new List<Actor>()
             };
             this._actorRepositoryMock
                 .Setup(a => a.GetAll())
@@ -162,11 +174,19 @@ namespace DepotTests.CRUDTests
 
             int firstExternalId = 101;
             int secondExternalId = 102;
-            var firstMovieWithoutActors = new Movie() {
-                Title = "i'm still here", ReleaseDate = 2010, ExternalId = firstExternalId, Actors = new List<Actor>()
+            var firstMovieWithoutActors = new Movie()
+            {
+                Title = "i'm still here",
+                ReleaseDate = 2010,
+                ExternalId = firstExternalId,
+                Actors = new List<Actor>()
             };
-            var secondMovieWithoutActors = new Movie() {
-                Title = "the village", ReleaseDate = 2004, ExternalId = secondExternalId, Actors = new List<Actor>()
+            var secondMovieWithoutActors = new Movie()
+            {
+                Title = "the village",
+                ReleaseDate = 2004,
+                ExternalId = secondExternalId,
+                Actors = new List<Actor>()
             };
 
             this._actorRepositoryMock
@@ -192,5 +212,58 @@ namespace DepotTests.CRUDTests
                 secondMovieWithoutActors.Actors.Should().BeEquivalentTo(new List<Actor>() { firstActor, secondActor });
             }
         }
+
+        [Fact]
+        public async Task PopulateDetails_WithMoviesMissingActors_WithoutSuchActorsInRepo_WithSameActorForAllMovies_ShouldBePopulatedWithTheSameActorEntity()
+        {
+            // arrange
+            var firstActorResult = new MovieActorResult() { Name = "joaquin phoenix", ExternalId = 201 };
+            var firstActor = (Actor)firstActorResult;
+
+            var secondActorResult = new MovieActorResult() { Name = "adrien brody", ExternalId = 202 };
+            var secondActor = (Actor)secondActorResult;
+
+            int firstExternalId = 101;
+            int secondExternalId = 102;
+            var firstMovieWithoutActors = new Movie()
+            {
+                Title = "i'm still here",
+                ReleaseDate = 2010,
+                ExternalId = firstExternalId,
+                Actors = new List<Actor>()
+            };
+            var secondMovieWithoutActors = new Movie()
+            {
+                Title = "the village",
+                ReleaseDate = 2004,
+                ExternalId = secondExternalId,
+                Actors = new List<Actor>()
+            };
+
+            this._actorRepositoryMock
+                .Setup(a => a.GetAll())
+                .Returns(Enumerable.Empty<Actor>());
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutActors())
+                .Returns(new Movie[] { firstMovieWithoutActors, secondMovieWithoutActors });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieActorsAsync(firstExternalId))
+                .ReturnsAsync(new MovieActorResult[] { firstActorResult });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieActorsAsync(secondExternalId))
+                .ReturnsAsync(new MovieActorResult[] { firstActorResult, secondActorResult });
+
+            // act
+            await this._movieDetailsFetcherActors.PopulateDetails();
+
+            // assert
+            firstMovieWithoutActors.Actors
+                .First(a => a.ExternalId == firstActor.ExternalId)
+                .Should()
+                .BeSameAs(secondMovieWithoutActors.Actors.First(a => a.ExternalId == firstActor.ExternalId));
+
+        }
+
     }
+
 }

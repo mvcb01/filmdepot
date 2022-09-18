@@ -239,9 +239,9 @@ namespace DepotTests.CRUDTests
             // assert
             // both movies should hold the same exact object for the drama genre
             firstMovieWithoutGenres.Genres
-                .First(g => g.Name == dramaGenre.Name)
+                .First(g => g.ExternalId == dramaGenre.ExternalId)
                 .Should()
-                .BeSameAs(secondMovieWithoutGenres.Genres.First(g => g.Name == dramaGenre.Name));
+                .BeSameAs(secondMovieWithoutGenres.Genres.First(g => g.ExternalId == dramaGenre.ExternalId));
         }
 
     }
