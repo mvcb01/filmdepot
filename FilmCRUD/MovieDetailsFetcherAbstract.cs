@@ -90,7 +90,7 @@ namespace FilmCRUD
             {
                 try
                 {
-                    IEnumerable<TAPIResult> details = await GetMovieDetailsFromApiAsync(movie.ExternalId);
+                    IEnumerable<TAPIResult> details = await policyWrap.ExecuteAsync(() => GetMovieDetailsFromApiAsync(movie.ExternalId));
 
                     // saving new TDetailEntity objects
                     IEnumerable<TAPIResult> detailsNew = details.Where(
