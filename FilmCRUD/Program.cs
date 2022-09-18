@@ -46,7 +46,7 @@ namespace FilmCRUD
             parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanRipsManager));
             parsed.WithParsed<ScanMoviesOptions>(opts => HandleScanMoviesOptions(opts, scanMoviesManager));
             await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
-            await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, movieAPIClient));
+            await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient));
             parsed.WithNotParsed(HandleParseError);
 
             {}
@@ -76,7 +76,7 @@ namespace FilmCRUD
                 bool toContinue = Console.ReadLine().Trim().ToLower() == "y";
                 if (!toContinue)
                 {
-                    System.Console.WriteLine("A sair...");
+                    System.Console.WriteLine("Quitting...");
                     return;
                 }
                 visitCrudManager.WriteMovieWarehouseContentsToTextFile();
@@ -136,7 +136,7 @@ namespace FilmCRUD
                 Dictionary<DateTime, int> countByVisit = scanRipsManager.GetRipCountByVisit();
                 foreach (var item in countByVisit.OrderBy(kvp => kvp.Key))
                 {
-                    string visitStr = item.Key.ToString("yyyyMMdd");
+                    string visitStr = item.Key.ToString("MMMM dd yyyy");
                     System.Console.WriteLine($"{visitStr} : {item.Value}");
                 }
             }
@@ -321,35 +321,40 @@ namespace FilmCRUD
 
         }
 
-        public static async Task HandleFetchOptions(FetchOptions opts, IUnitOfWork unitOfWork, IMovieAPIClient movieAPIClient)
+        public static async Task HandleFetchOptions(
+            FetchOptions opts,
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient)
         {
             if (opts.Genres)
             {
-                var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, movieAPIClient);
+                var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching genres for movies...");
                 await genresFetcher.PopulateDetails();
             }
             else if (opts.Actors)
             {
-                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, movieAPIClient);
+                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching actors for movies...");
                 await actorsFetcher.PopulateDetails();
             }
             else if (opts.Directors)
             {
-                var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, movieAPIClient);
+                var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching directors for movies...");
                 await directorsFetcher.PopulateDetails();
             }
             else if (opts.Keywords)
             {
-                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, movieAPIClient);
+                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching keywords for movies...");
                 await keywordsFetcher.PopulateMovieKeywords();
             }
             else if (opts.IMDBIds)
             {
-                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, movieAPIClient);
+                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
                 System.Console.WriteLine("fetching imdb ids for movies...");
                 await IMDBIdFetcher.PopulateMovieIMDBIds();
             }
@@ -422,7 +427,7 @@ namespace FilmCRUD
             scanManager.ListVisitDates()
                 .OrderByDescending(dt => dt)
                 .ToList()
-                .ForEach(dt => System.Console.WriteLine(dt.ToString("yyyyMMdd")));
+                .ForEach(dt => System.Console.WriteLine(dt.ToString("MMMM dd yyyy")));
         }
 
         private static void PrintVisitDiff(Dictionary<string, IEnumerable<string>> visitDiff)

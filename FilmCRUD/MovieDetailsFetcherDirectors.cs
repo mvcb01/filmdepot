@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ConfigUtils.Interfaces;
+using FilmCRUD.Interfaces;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients;
@@ -9,30 +11,24 @@ namespace FilmCRUD
 {
     public class MovieDetailsFetcherDirectors : MovieDetailsFetcherAbstract<Director, MovieDirectorResult>
     {
-        public MovieDetailsFetcherDirectors(IUnitOfWork unitOfWork, IMovieAPIClient movieAPIClient) : base(unitOfWork, movieAPIClient)
-        {
-        }
+        public MovieDetailsFetcherDirectors(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient)
+            : base(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) { }
 
-        public override IEnumerable<Director> GetExistingDetailEntitiesInRepo()
-        {
-            return this._unitOfWork.Directors.GetAll();
-        }
+        public override IEnumerable<Director> GetExistingDetailEntitiesInRepo() => this._unitOfWork.Directors.GetAll();
 
         public override async Task<IEnumerable<MovieDirectorResult>> GetMovieDetailsFromApiAsync(int externalId)
         {
             return await this._movieAPIClient.GetMovieDirectorsAsync(externalId);
         }
 
-        public override IEnumerable<Movie> GetMoviesWithoutDetails()
-        {
-            return this._unitOfWork.Movies.GetMoviesWithoutDirectors();
-        }
+        public override IEnumerable<Movie> GetMoviesWithoutDetails() => this._unitOfWork.Movies.GetMoviesWithoutDirectors();
 
-        public override Director CastApiResultToDetailEntity(MovieDirectorResult apiresult)
-        {
-            // explicit cast is defined in MovieDirectorResult
-            return (Director)apiresult;
-        }
+        // explicit cast is defined in MovieDirectorResult
+        public override Director CastApiResultToDetailEntity(MovieDirectorResult apiresult) => (Director)apiresult;
 
         public override void AddDetailsToMovieEntity(Movie movie, IEnumerable<Director> details)
         {

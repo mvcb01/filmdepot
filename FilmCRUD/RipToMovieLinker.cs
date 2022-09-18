@@ -284,7 +284,8 @@ namespace FilmCRUD
             {
                 try
                 {
-                    if (await this._movieAPIClient.ExternalIdExistsAsync(item.Value)) validIds.Add(item.Value);   
+                    bool isValid = await policyWrap.ExecuteAsync(() => this._movieAPIClient.ExternalIdExistsAsync(item.Value));
+                    if (isValid) validIds.Add(item.Value);   
                 }
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run//
                 catch (RateLimitRejectedException ex)
@@ -307,9 +308,9 @@ namespace FilmCRUD
             // filters results using both Title and OriginalTitle
             IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
             List<MovieSearchResult> searchResult = searchResultAll
-                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation())
+                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
                     ||
-                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation()))
+                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true)))
                 .ToList();
 
             int resultCount = searchResult.Count();

@@ -59,6 +59,7 @@ namespace DepotTests.FilmDomainTests
         [InlineData("benoit _Poelvoorde-->")]
         [InlineData("benoîT     póelvõörDe")]
         [InlineData("[ -> benoîT     póelvõörDe <-]")]
+        [InlineData("poelvoorDe")]
         public void GetEntitiesFromNameFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string nameToSearch)
         {
             // arrange
@@ -78,6 +79,7 @@ namespace DepotTests.FilmDomainTests
         [InlineData("benoit _Poelvoorde-->")]
         [InlineData("%-(//) benoiT     poelvoorDe")]
         [InlineData("[ -> benoiT     poelvoorDe <-]")]
+        [InlineData("poelvoorDe")]
         public void GetEntitiesFromNameFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches(string nameToSearch)
         {
             // arrange
@@ -95,10 +97,10 @@ namespace DepotTests.FilmDomainTests
         }
 
         [Theory]
-        [InlineData("$$#!(!) Sátántangó")]
-        [InlineData("  sáTânTãnGó  (1994)")]
-        [InlineData("satantango 1994")]
-        [InlineData("satantango")]
+        [InlineData("$$#!(!)  thE Turin  !!!$$Horsé")]
+        [InlineData("túrin horse ")]
+        [InlineData("turin horse (2011)")]
+        [InlineData("horse 2011")]
         public void GetMoviesFromTitleFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string title)
         {
             // arrange
@@ -112,7 +114,7 @@ namespace DepotTests.FilmDomainTests
             IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
 
             // assert
-            searchResult.Should().BeEquivalentTo(new[] { firstMovie });
+            searchResult.Should().BeEquivalentTo(new[] { secondMovie });
         }
 
         [Theory]

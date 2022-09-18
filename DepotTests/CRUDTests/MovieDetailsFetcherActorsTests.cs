@@ -11,6 +11,9 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
+using FilmCRUD.Interfaces;
+using ConfigUtils.Interfaces;
+using System;
 
 namespace DepotTests.CRUDTests
 {
@@ -21,6 +24,14 @@ namespace DepotTests.CRUDTests
         private readonly Mock<IActorRepository> _actorRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+
+        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapperMock;
+
+        private readonly Mock<IRateLimitPolicyConfig> _rateLimitConfigMock;
+
+        private readonly Mock<IRetryPolicyConfig> _retryConfigMock;
+
+        private readonly Mock<IAppSettingsManager> _appSettingsManagerMock;
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
@@ -39,10 +50,29 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Actors)
                 .Returns(this._actorRepositoryMock.Object);
 
+            this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
+
+            this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
+            this._retryConfigMock = new Mock<IRetryPolicyConfig>();
+
+            // default policy configs
+            this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(5);
+            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(50));
+
+            this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(2);
+            this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(50));
+
+            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
+
+            this._appSettingsManagerMock.Setup(a => a.GetRateLimitPolicyConfig()).Returns(this._rateLimitConfigMock.Object);
+            this._appSettingsManagerMock.Setup(a => a.GetRetryPolicyConfig()).Returns(this._retryConfigMock.Object);
+
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
             this._movieDetailsFetcherActors = new MovieDetailsFetcherActors(
                 this._unitOfWorkMock.Object,
+                this._fileSystemIOWrapperMock.Object,
+                this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
         }
 
@@ -64,8 +94,12 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             int externalId = 101;
-            var movieWithoutActors = new Movie() {
-                Title = "the fly", ReleaseDate = 1986, ExternalId = externalId, Actors = new List<Actor>()
+            var movieWithoutActors = new Movie()
+            {
+                Title = "the fly",
+                ReleaseDate = 1986,
+                ExternalId = externalId,
+                Actors = new List<Actor>()
             };
             this._actorRepositoryMock
                 .Setup(a => a.GetAll())
@@ -93,11 +127,19 @@ namespace DepotTests.CRUDTests
 
             int firstExternalId = 101;
             int secondExternalId = 102;
-            var firstMovieWithoutActors = new Movie() {
-                Title = "i'm still here", ReleaseDate = 2010, ExternalId = firstExternalId, Actors = new List<Actor>()
+            var firstMovieWithoutActors = new Movie()
+            {
+                Title = "i'm still here",
+                ReleaseDate = 2010,
+                ExternalId = firstExternalId,
+                Actors = new List<Actor>()
             };
-            var secondMovieWithoutActors = new Movie() {
-                Title = "joker", ReleaseDate = 2019, ExternalId = secondExternalId, Actors = new List<Actor>()
+            var secondMovieWithoutActors = new Movie()
+            {
+                Title = "joker",
+                ReleaseDate = 2019,
+                ExternalId = secondExternalId,
+                Actors = new List<Actor>()
             };
             this._actorRepositoryMock
                 .Setup(a => a.GetAll())
@@ -132,11 +174,19 @@ namespace DepotTests.CRUDTests
 
             int firstExternalId = 101;
             int secondExternalId = 102;
-            var firstMovieWithoutActors = new Movie() {
-                Title = "i'm still here", ReleaseDate = 2010, ExternalId = firstExternalId, Actors = new List<Actor>()
+            var firstMovieWithoutActors = new Movie()
+            {
+                Title = "i'm still here",
+                ReleaseDate = 2010,
+                ExternalId = firstExternalId,
+                Actors = new List<Actor>()
             };
-            var secondMovieWithoutActors = new Movie() {
-                Title = "the village", ReleaseDate = 2004, ExternalId = secondExternalId, Actors = new List<Actor>()
+            var secondMovieWithoutActors = new Movie()
+            {
+                Title = "the village",
+                ReleaseDate = 2004,
+                ExternalId = secondExternalId,
+                Actors = new List<Actor>()
             };
 
             this._actorRepositoryMock
@@ -162,5 +212,54 @@ namespace DepotTests.CRUDTests
                 secondMovieWithoutActors.Actors.Should().BeEquivalentTo(new List<Actor>() { firstActor, secondActor });
             }
         }
+
+        [Fact]
+        public async Task PopulateDetails_WithMoviesMissingActors_WithoutSuchActorsInRepo_WithSameActorForAllMovies_ShouldBePopulatedWithTheSameActorEntity()
+        {
+            // arrange
+            var firstActorResult = new MovieActorResult() { Name = "joaquin phoenix", ExternalId = 201 };
+            var secondActorResult = new MovieActorResult() { Name = "adrien brody", ExternalId = 202 };
+
+            int firstExternalId = 101;
+            int secondExternalId = 102;
+            var firstMovieWithoutActors = new Movie()
+            {
+                Title = "i'm still here",
+                ReleaseDate = 2010,
+                ExternalId = firstExternalId,
+                Actors = new List<Actor>()
+            };
+            var secondMovieWithoutActors = new Movie()
+            {
+                Title = "the village",
+                ReleaseDate = 2004,
+                ExternalId = secondExternalId,
+                Actors = new List<Actor>()
+            };
+
+            this._actorRepositoryMock
+                .Setup(a => a.GetAll())
+                .Returns(Enumerable.Empty<Actor>());
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutActors())
+                .Returns(new Movie[] { firstMovieWithoutActors, secondMovieWithoutActors });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieActorsAsync(firstExternalId))
+                .ReturnsAsync(new MovieActorResult[] { firstActorResult });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieActorsAsync(secondExternalId))
+                .ReturnsAsync(new MovieActorResult[] { firstActorResult, secondActorResult });
+
+            // act
+            await this._movieDetailsFetcherActors.PopulateDetails();
+
+            // assert
+            firstMovieWithoutActors.Actors
+                .First(a => a.ExternalId == firstActorResult.ExternalId)
+                .Should()
+                .BeSameAs(secondMovieWithoutActors.Actors.First(a => a.ExternalId == firstActorResult.ExternalId));
+        }
+
     }
+
 }
