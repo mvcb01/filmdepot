@@ -51,37 +51,22 @@ namespace FilmCRUD
         {
             IEnumerable<Movie> moviesWithoutKeywords = this._unitOfWork.Movies.GetMoviesWithoutKeywords();
 
-            AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
+            Dictionary<int, IEnumerable<string>> kwds = await GetDetailsSimple<IEnumerable<string>>(moviesWithoutKeywords, this._movieAPIClient.GetMovieKeywordsAsync, "details_fetcher_errors_KeyWords");
 
-            await Task.Delay(initialDelay);
-
-            var errors = new List<string>();
-
-            foreach (Movie movie in moviesWithoutKeywords)
+            try
             {
-                try
+                foreach (Movie movie in moviesWithoutKeywords)
                 {
-                    IEnumerable<string> movieKwds = await policyWrap.ExecuteAsync(() => this._movieAPIClient.GetMovieKeywordsAsync(movie.ExternalId));
-                    movie.Keywords = movieKwds.ToList();
-                }
-                catch (RateLimitRejectedException ex)
-                {
-                    errors.Add($"Rate Limit error for {movie.Title} ({movie.ReleaseDate}); Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
-                }
-                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-                {
-                    errors.Add($"Invalid external id for {movie.Title} ({movie.ReleaseDate}): {movie.ExternalId}");
-                }
-                catch (Exception)
-                {
-                    this._unitOfWork.Dispose();
-                    throw;
+                    if (!kwds.ContainsKey(movie.ExternalId)) continue;
+                    movie.Keywords = kwds[movie.ExternalId].ToList();
                 }
             }
+            catch (Exception)
+            {
+                this._unitOfWork.Dispose();
+                throw;
+            }
 
-            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
-            PersistErrorInfo($"details_fetcher_errors_KeyWords_{dtNow}.txt", errors);
-            
             this._unitOfWork.Complete();
         }
 
@@ -89,17 +74,47 @@ namespace FilmCRUD
         {
             IEnumerable<Movie> moviesWithoutIMDBId = this._unitOfWork.Movies.GetMoviesWithoutImdbId();
 
-            AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
+            Dictionary<int, string> imdbIds = await GetDetailsSimple<string>(moviesWithoutIMDBId, this._movieAPIClient.GetMovieIMDBIdAsync, "details_fetcher_errors_IMDBIds");
 
-            await Task.Delay(initialDelay);
+            try
+            {
+                foreach (Movie movie in moviesWithoutIMDBId)
+                {
+                    if (!imdbIds.ContainsKey(movie.ExternalId)) continue;
+                    movie.IMDBId = imdbIds[movie.ExternalId];
+                }
+            }
+            catch (Exception)
+            {
+                this._unitOfWork.Dispose();
+                throw;
+            }
+
+            this._unitOfWork.Complete();
+        }
+
+        private async Task<Dictionary<int, TDetail>> GetDetailsSimple<TDetail>(IEnumerable<Movie> movies, Func<int, Task<TDetail>> detailsFunc, string errorsFileName)
+
+        {
+            // notice the order of the async policies when calling Policy.WrapAsync:
+            //      outermost (at left) to innermost (at right)
+            IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
+            AsyncPolicyWrap policyWrap = Policy.WrapAsync(
+                APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(this._appSettingsManager.GetRetryPolicyConfig()),
+                APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig));
+
+            await Task.Delay(rateLimitConfig.PerTimeSpan);
+
+            var detailsDict = new Dictionary<int, TDetail>();
 
             var errors = new List<string>();
 
-            foreach (Movie movie in moviesWithoutIMDBId)
+            foreach (Movie movie in movies)
             {
                 try
                 {
-                    movie.IMDBId = await policyWrap.ExecuteAsync(() => this._movieAPIClient.GetMovieIMDBIdAsync(movie.ExternalId));
+                    TDetail detail = await policyWrap.ExecuteAsync(() => detailsFunc(movie.ExternalId));
+                    detailsDict.Add(movie.ExternalId, detail);  
                 }
                 catch (RateLimitRejectedException ex)
                 {
@@ -117,23 +132,9 @@ namespace FilmCRUD
             }
 
             string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
-            PersistErrorInfo($"details_fetcher_errors_IMDBIds_{dtNow}.txt", errors);
+            PersistErrorInfo($"{errorsFileName}_{dtNow}.txt", errors);
 
-            this._unitOfWork.Complete();
-        }
-
-        private AsyncPolicyWrap GetPolicyWrapFromConfigs(out TimeSpan initialDelay)
-        {
-            // notice the order of the async policies when calling Policy.WrapAsync:
-            //      outermost (at left) to innermost (at right)
-            IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
-            IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
-
-            initialDelay = rateLimitConfig.PerTimeSpan;
-            return Policy.WrapAsync(
-                APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(retryConfig),
-                APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig)
-            );
+            return detailsDict;
         }
 
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)

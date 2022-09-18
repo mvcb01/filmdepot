@@ -284,7 +284,8 @@ namespace FilmCRUD
             {
                 try
                 {
-                    if (await this._movieAPIClient.ExternalIdExistsAsync(item.Value)) validIds.Add(item.Value);   
+                    bool isValid = await policyWrap.ExecuteAsync(() => this._movieAPIClient.ExternalIdExistsAsync(item.Value));
+                    if (isValid) validIds.Add(item.Value);   
                 }
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run//
                 catch (RateLimitRejectedException ex)
