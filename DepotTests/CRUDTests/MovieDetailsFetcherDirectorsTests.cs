@@ -197,5 +197,52 @@ namespace DepotTests.CRUDTests
                 thirdMovieWithoutDirectors.Directors.Should().BeEquivalentTo(new List<Director>() { secondDirector });
             }
         }
+
+
+        [Fact]
+        public async Task PopulateDetails_WithMoviesMissingDirectors_WithoutSuchDirectorsInRepo_WithSameDirectorForAllMovies_ShouldBePopulatedWithTheSameDirectorEntity()
+        {
+            // arrange
+            var directorResult = new MovieDirectorResult() { Name = "terrence malick", ExternalId = 201 };
+
+            int firstExternalId = 101;
+            int secondExternalId = 102;
+            var firstMovieWithoutDirectors = new Movie()
+            {
+                Title = "badlands",
+                ReleaseDate = 1973,
+                ExternalId = firstExternalId,
+                Directors = new List<Director>()
+            };
+            var secondMovieWithoutDirectors = new Movie()
+            {
+                Title = "the thin red line",
+                ReleaseDate = 1998,
+                ExternalId = secondExternalId,
+                Directors = new List<Director>()
+            };
+
+            this._directorRepositoryMock
+                .Setup(d => d.GetAll())
+                .Returns(Enumerable.Empty<Director>());
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutDirectors())
+                .Returns(new Movie[] { firstMovieWithoutDirectors, secondMovieWithoutDirectors });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieDirectorsAsync(firstExternalId))
+                .ReturnsAsync(new MovieDirectorResult[] { directorResult });
+            this._movieAPIClientMock
+                .Setup(cl => cl.GetMovieDirectorsAsync(secondExternalId))
+                .ReturnsAsync(new MovieDirectorResult[] { directorResult });
+
+            // act
+            await this._movieDetailsFetcherDirectors.PopulateDetails();
+
+            // assert
+            firstMovieWithoutDirectors.Directors
+                .First(d => d.ExternalId == directorResult.ExternalId)
+                .Should()
+                .BeSameAs(secondMovieWithoutDirectors.Directors.First(d => d.ExternalId == directorResult.ExternalId));
+        }
     }
 }
