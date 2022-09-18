@@ -132,7 +132,6 @@ namespace FilmCRUD
             PersistErrorInfo($"details_fetcher_errors_{detailClassName}_{dtNow}.txt", errors);
 
             this._unitOfWork.Complete();
-
         }
 
         private void PersistErrorInfo(string filename, IEnumerable<string> errors)
