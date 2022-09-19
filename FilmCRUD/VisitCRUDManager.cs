@@ -51,7 +51,7 @@ namespace FilmCRUD
 
         public void WriteMovieWarehouseContentsToTextFile()
         {
-            if (!_fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
+            if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
             {
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
@@ -65,7 +65,7 @@ namespace FilmCRUD
         public void ReadWarehouseContentsAndRegisterVisit(string fileDateString, bool failOnParsingErrors = false)
         {
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
-            if (_unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
+            if (this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
                 throw new DoubleVisitError($"There's already a MovieWarehouseVisit for date {visitDate}");
             }
@@ -161,7 +161,7 @@ namespace FilmCRUD
         public void ProcessManuallyProvidedMovieRipsForExistingVisit(string fileDateString)
         {
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
-            if (_unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
+            if (this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
                 throw new ArgumentException($"There's already a MovieWarehouseVisit for date {visitDate}");
             }
@@ -216,7 +216,7 @@ namespace FilmCRUD
 
         private string GetWarehouseContentsFilePath(string fileDateString)
         {
-            if (!_fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
+            if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
             {
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
