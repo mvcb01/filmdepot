@@ -12,6 +12,7 @@ using FilmCRUD;
 using FilmCRUD.CustomExceptions;
 using System;
 using System.Collections.Generic;
+using FluentAssertions.Execution;
 
 namespace DepotTests.CRUDTests
 {
@@ -185,15 +186,21 @@ namespace DepotTests.CRUDTests
                 allParsingErrors) = _visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
 
             // assert
-            oldMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
+            using (new AssertionScope())
+            {
+                oldMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
                 "The.Deer.Hunter.1978.REMASTERED.1080p.BluRay.x264.DTS-HD.MA.5.1-FGT",
                 "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
-            });
-            newMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
-                "Sicario 2015 1080p BluRay x264 AC3-JYK"
-            });
-            newMovieRipsManual.Should().BeEmpty();
-            allParsingErrors.Should().BeEmpty();
+                });
+
+                newMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
+                    "Sicario 2015 1080p BluRay x264 AC3-JYK"
+                });
+                
+                newMovieRipsManual.Should().BeEmpty();
+                
+                allParsingErrors.Should().BeEmpty();
+            }
         }
 
         [Fact]
@@ -226,15 +233,20 @@ namespace DepotTests.CRUDTests
                 allParsingErrors) = _visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
 
             // assert
-            oldMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
-                "The.Deer.Hunter.1978.REMASTERED.1080p.BluRay.x264.DTS-HD.MA.5.1-FGT"
-            });
-            newMovieRips.Should().HaveCount(0);
-            newMovieRipsManual.GetFileNames().Should().BeEquivalentTo(new string[] {
-                "2011 - some movie name - 720p"
-            });
-            allParsingErrors.Should().BeEmpty();
+            using (new AssertionScope())
+            {
+                oldMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
+                    "The.Deer.Hunter.1978.REMASTERED.1080p.BluRay.x264.DTS-HD.MA.5.1-FGT"
+                });
 
+                newMovieRips.Should().HaveCount(0);
+
+                newMovieRipsManual.GetFileNames().Should().BeEquivalentTo(new string[] {
+                    "2011 - some movie name - 720p"
+                });
+
+                allParsingErrors.Should().BeEmpty();
+            }
         }
 
     }
