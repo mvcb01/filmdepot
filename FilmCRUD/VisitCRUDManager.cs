@@ -65,7 +65,7 @@ namespace FilmCRUD
         public void ReadWarehouseContentsAndRegisterVisit(string fileDateString, bool failOnParsingErrors = false)
         {
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
-            if (_unitOfWork.MovieWarehouseVisits.GetAll().GetVisitDates().Contains(visitDate))
+            if (_unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
                 throw new DoubleVisitError($"There's already a MovieWarehouseVisit for date {visitDate}");
             }
@@ -156,6 +156,15 @@ namespace FilmCRUD
             return _fileSystemIOWrapper.ReadAllLines(filePath)
                 .Select(f => f.Trim())
                 .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!filesToIgnore.Contains(f)));
+        }
+
+        public void ProcessManuallyProvidedMovieRipsForExistingVisit(string fileDateString)
+        {
+            DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
+            if (_unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
+            {
+                throw new ArgumentException($"There's already a MovieWarehouseVisit for date {visitDate}");
+            }
         }
 
         private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
