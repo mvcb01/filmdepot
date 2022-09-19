@@ -136,15 +136,12 @@ namespace FilmCRUD
             // rip filenames novos sem info manual
             IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo).ToList();
 
-
-            List<string> manualParsingErrors;
             IEnumerable<MovieRip> newMovieRipsManual = GetManualMovieRipsFromDictionaries(
                 manualMovieRips.Where(kvp => newRipFileNamesWithManualInfo.Contains(kvp.Key)),
-                out manualParsingErrors
+                out List<string> manualParsingErrors
                 );
 
-            List<string> parsingErrors;
-            IEnumerable<MovieRip> newMovieRips = ConvertFileNamesToMovieRips(newRipFileNamesWithoutManualInfo, out parsingErrors);
+            IEnumerable<MovieRip> newMovieRips = ConvertFileNamesToMovieRips(newRipFileNamesWithoutManualInfo, out List<string> parsingErrors);
 
             List<string> allParsingErrors = manualParsingErrors.Concat(parsingErrors).ToList();
 
