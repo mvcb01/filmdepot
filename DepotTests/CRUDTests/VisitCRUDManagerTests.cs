@@ -33,7 +33,7 @@ namespace DepotTests.CRUDTests
 
         public VisitCRUDManagerTests()
         {
-            this._movieWarehouseVisitRepositoryMock = new Mock<IMovieWarehouseVisitRepository>();
+            this._movieWarehouseVisitRepositoryMock = new Mock<IMovieWarehouseVisitRepository>(MockBehavior.Strict);
             this._movieRipRepositoryMock = new Mock<IMovieRipRepository>();
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
