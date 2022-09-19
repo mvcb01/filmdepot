@@ -57,8 +57,12 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string inexistentMovieWarehousePath = "Z:\\Some\\Inexistent\\Dir";
-            _appSettingsManagerMock.Setup(a => a.GetMovieWarehouseDirectory()).Returns(inexistentMovieWarehousePath);
-            _fileSystemIOWrapperMock.Setup(f => f.DirectoryExists(inexistentMovieWarehousePath)).Returns(false);
+            _appSettingsManagerMock
+                .Setup(a => a.GetMovieWarehouseDirectory())
+                .Returns(inexistentMovieWarehousePath);
+            _fileSystemIOWrapperMock
+                .Setup(f => f.DirectoryExists(inexistentMovieWarehousePath))
+                .Returns(false);
 
             // act
             // nothing to do...
@@ -113,8 +117,12 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string textFilesPath = "S:\\Some\\TextFiles\\Directory";
-            _appSettingsManagerMock.Setup(a => a.GetWarehouseContentsTextFilesDirectory()).Returns(textFilesPath);
-            _fileSystemIOWrapperMock.Setup(f => f.DirectoryExists(It.IsAny<string>())).Returns(true);
+            _appSettingsManagerMock
+                .Setup(a => a.GetWarehouseContentsTextFilesDirectory())
+                .Returns(textFilesPath);
+            _fileSystemIOWrapperMock
+                .Setup(f => f.DirectoryExists(It.IsAny<string>()))
+                .Returns(true);
             _fileSystemIOWrapperMock
                 .Setup(f => f.GetFiles(textFilesPath))
                 .Returns(new string[] { Path.Combine(textFilesPath, "movies_20220102.txt") });
@@ -142,8 +150,12 @@ namespace DepotTests.CRUDTests
                 "      ",
                 "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
             };
-            _appSettingsManagerMock.Setup(a => a.GetFilesToIgnore()).Returns(filesToIgnore);
-            _fileSystemIOWrapperMock.Setup(f => f.ReadAllLines(It.IsAny<string>())).Returns(textFileLines);
+            _appSettingsManagerMock
+                .Setup(a => a.GetFilesToIgnore())
+                .Returns(filesToIgnore);
+            _fileSystemIOWrapperMock
+                .Setup(f => f.ReadAllLines(It.IsAny<string>()))
+                .Returns(textFileLines);
 
             // act
             var fileNamesInVisit = _visitCRUDManager.GetMovieRipFileNamesInVisit("F:\\filepath\\does\\not\\matter.txt");
@@ -219,7 +231,9 @@ namespace DepotTests.CRUDTests
                     ["ParsedTitle"] = "some movie name"
                 }
             };
-            _movieRipRepositoryMock.Setup(m => m.GetAll()).Returns(movieRipsInRepo);
+            _movieRipRepositoryMock
+                .Setup(m => m.GetAll())
+                .Returns(movieRipsInRepo);
             _appSettingsManagerMock
                 .Setup(a => a.GetManualMovieRips())
                 .Returns(manualMovieRips);
