@@ -2,6 +2,10 @@ using System.IO;
 using Xunit;
 using FluentAssertions;
 using Moq;
+using System;
+using System.Collections.Generic;
+using FluentAssertions.Execution;
+using System.Linq;
 
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
@@ -10,9 +14,7 @@ using FilmCRUD.Interfaces;
 using ConfigUtils.Interfaces;
 using FilmCRUD;
 using FilmCRUD.CustomExceptions;
-using System;
-using System.Collections.Generic;
-using FluentAssertions.Execution;
+
 
 namespace DepotTests.CRUDTests
 {
@@ -57,10 +59,10 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string inexistentMovieWarehousePath = "Z:\\Some\\Inexistent\\Dir";
-            _appSettingsManagerMock
+            this._appSettingsManagerMock
                 .Setup(a => a.GetMovieWarehouseDirectory())
                 .Returns(inexistentMovieWarehousePath);
-            _fileSystemIOWrapperMock
+            this._fileSystemIOWrapperMock
                 .Setup(f => f.DirectoryExists(inexistentMovieWarehousePath))
                 .Returns(false);
 
@@ -79,17 +81,15 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string fileDateString = "20220101";
-            MovieWarehouseVisit visit = new();
-            visit.VisitDateTime = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
-            _movieWarehouseVisitRepositoryMock
-                .Setup(m => m.GetAll())
-                .Returns(new MovieWarehouseVisit[] { visit });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(v => v.GetVisitDates())
+                .Returns(new DateTime[] { DateTime.ParseExact(fileDateString, "yyyyMMdd", null) });
 
             // act
             // nothing to do...
 
             // assert
-            _visitCRUDManager
+            this._visitCRUDManager
                 .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit(fileDateString, failOnParsingErrors: false))
                 .Should()
                 .Throw<DoubleVisitError>();
@@ -100,7 +100,11 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             // will always return false in bool methods
-            _fileSystemIOWrapperMock.SetReturnsDefault<bool>(false);
+            this._fileSystemIOWrapperMock.SetReturnsDefault<bool>(false);
+
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(v => v.GetVisitDates())
+                .Returns(Enumerable.Empty<DateTime>());
 
             // act
             // nothing to do...
@@ -117,21 +121,24 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string textFilesPath = "S:\\Some\\TextFiles\\Directory";
-            _appSettingsManagerMock
+            this._appSettingsManagerMock
                 .Setup(a => a.GetWarehouseContentsTextFilesDirectory())
                 .Returns(textFilesPath);
-            _fileSystemIOWrapperMock
+            this._fileSystemIOWrapperMock
                 .Setup(f => f.DirectoryExists(It.IsAny<string>()))
                 .Returns(true);
-            _fileSystemIOWrapperMock
+            this._fileSystemIOWrapperMock
                 .Setup(f => f.GetFiles(textFilesPath))
                 .Returns(new string[] { Path.Combine(textFilesPath, "movies_20220102.txt") });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(v => v.GetVisitDates())
+                .Returns(Enumerable.Empty<DateTime>());
 
             // act
             // nothing to do...
 
             // assert
-            _visitCRUDManager
+            this._visitCRUDManager
                 .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit("20220101", failOnParsingErrors: false))
                 .Should()
                 .Throw<FileNotFoundException>();
