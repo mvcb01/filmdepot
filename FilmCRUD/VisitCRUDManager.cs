@@ -196,7 +196,7 @@ namespace FilmCRUD
 
         private static IEnumerable<MovieRip> ConvertFileNamesToMovieRips(IEnumerable<string> ripFileNames, out List<string> parsingErrors)
         {
-            List<MovieRip> movieRips = new();
+            var movieRips = new List<MovieRip>();
             parsingErrors = new List<string>();
             foreach (var fileName in ripFileNames)
             {
