@@ -61,7 +61,7 @@ namespace DepotTests.CRUDTests
             _fileSystemIOWrapperMock.Setup(f => f.DirectoryExists(inexistentMovieWarehousePath)).Returns(false);
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             this._visitCRUDManager
@@ -82,7 +82,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new MovieWarehouseVisit[] { visit });
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             _visitCRUDManager
@@ -99,7 +99,7 @@ namespace DepotTests.CRUDTests
             _fileSystemIOWrapperMock.SetReturnsDefault<bool>(false);
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             _visitCRUDManager
@@ -120,7 +120,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new string[] { Path.Combine(textFilesPath, "movies_20220102.txt") });
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             _visitCRUDManager
@@ -171,7 +171,8 @@ namespace DepotTests.CRUDTests
                 new MovieRip() { FileName = "My.Cousin.Vinny.1992.1080p.BluRay.H264.AAC-RARBG" },
             };
             _movieRipRepositoryMock.Setup(m => m.GetAll()).Returns(movieRipsInRepo);
-            // sem manual info
+            
+            // no manual info
             _appSettingsManagerMock
                 .Setup(a => a.GetManualMovieRips())
                 .Returns(new Dictionary<string, Dictionary<string, string>>());
@@ -184,8 +185,6 @@ namespace DepotTests.CRUDTests
                 allParsingErrors) = _visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
 
             // assert
-            // só se testam os filenames, não as properties ParsedReleaseDate, ParsedTitle etc...;
-            // essas properties já são testadas em FileNameParserTests
             oldMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
                 "The.Deer.Hunter.1978.REMASTERED.1080p.BluRay.x264.DTS-HD.MA.5.1-FGT",
                 "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
@@ -202,7 +201,6 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string[] ripFileNamesInVisit = {
-                // o método FileNameParser.ParseFileNameIntoMovieRip iria lançar excepção neste caso
                 "2011 - some movie name - 720p",
                 "The.Deer.Hunter.1978.REMASTERED.1080p.BluRay.x264.DTS-HD.MA.5.1-FGT"
             };

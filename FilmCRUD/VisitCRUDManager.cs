@@ -221,13 +221,13 @@ namespace FilmCRUD
 
             List<string> filesWithDate = relevantFiles.Where(f => f.EndsWith($"_{fileDateString}.txt")).ToList();
 
-            if (filesWithDate.Count() == 0)
+            if (!filesWithDate.Any())
             {
-                throw new FileNotFoundException($"Não há ficheiros de warehouse contents com sufixo _{fileDateString}.txt");
+                throw new FileNotFoundException($"No warehouse contents files with suffix _{fileDateString}.txt");
             }
-            else if (filesWithDate.Count() > 1)
+            else if (filesWithDate.Count > 1)
             {
-                throw new FileNotFoundException($"Vários ficheiros de warehouse contents com sufixo _{fileDateString}.txt");
+                throw new FileNotFoundException($"Several warehouse contents files with suffix _{fileDateString}.txt");
             }
 
             return filesWithDate.First();
