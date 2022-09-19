@@ -42,5 +42,9 @@ namespace FilmDataAccess.EFCore.Repositories
             return allDateTimes.OrderBy(_dt => Math.Abs((_dt - dt).Ticks)).First();
         }
 
+        public IEnumerable<DateTime> GetVisitDates()
+        {
+            return GetAll().Select(v => v.VisitDateTime);
+        }
     }
 }
