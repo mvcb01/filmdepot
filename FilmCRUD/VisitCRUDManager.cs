@@ -26,7 +26,7 @@ namespace FilmCRUD
 
         private DirectoryFileLister _directoryFileLister { get; init; }
 
-        // para dar match a ficheiros da forma movies_20220321.txt
+        // to match filenames like "movies_20220321.txt"
         private const string TxtFileRegex = @"^movies_20([0-9]{2})(0|1)[1-9][0-3][0-9].txt$";
 
         public string MovieWarehouseDirectory { get { return _appSettingsManager.GetMovieWarehouseDirectory(); }}
@@ -70,10 +70,10 @@ namespace FilmCRUD
                 throw new DoubleVisitError($"Já existe uma MovieWarehouseVisit na data {visitDate}");
             }
 
-            // txt com os movie rips
+            // text file with the movie rip filenames
             string filePath = GetWarehouseContentsFilePath(fileDateString);
 
-            // todos os rip filenames que estão no txt e que não são para ignorar nem são strings vazias
+            // discards filenames to ignore, empty lines etc...
             IEnumerable<string> ripFileNamesInVisit = GetMovieRipFileNamesInVisit(filePath);
 
             var (oldMovieRips, newMovieRips, newMovieRipsManual, parsingErrors) = GetMovieRipsInVisit(ripFileNamesInVisit);
@@ -85,7 +85,7 @@ namespace FilmCRUD
                 string toWrite = "\nparsing errors: \n" + string.Join("\n", parsingErrors);
                 _fileSystemIOWrapper.WriteAllText(errorsFpath, toWrite);
 
-                string _msg = $"Erros no parse de filenames para objectos MovieRip : {errorCount}; detalhes em {errorsFpath}";
+                string _msg = $"Errors while parsing movie rip filenames : {errorCount}; details in {errorsFpath}";
                 if (failOnParsingErrors)
                 {
                     throw new FileNameParserError(_msg);
@@ -97,13 +97,14 @@ namespace FilmCRUD
             }
             List<MovieRip> allMovieRipsInVisit = oldMovieRips.Concat(newMovieRips).Concat(newMovieRipsManual).ToList();
 
-            System.Console.WriteLine($"MovieWarehouseVisit: {fileDateString}");
-            System.Console.WriteLine($"Total de movie rips na visita: {allMovieRipsInVisit.Count()}");
-            System.Console.WriteLine($"Movie rips já existentes: {oldMovieRips.Count()}");
-            System.Console.WriteLine($"Movie rips novos sem info manual: {newMovieRips.Count()}");
-            System.Console.WriteLine($"Movie rips novos com info manual: {newMovieRipsManual.Count()}");
+            string visitDateStr = visitDate.ToString("MMMM dd yyyy");
+            System.Console.WriteLine($"MovieWarehouseVisit: {visitDateStr}");
+            System.Console.WriteLine($"Total rip count: {allMovieRipsInVisit.Count()}");
+            System.Console.WriteLine($"Pre existing rips já existentes: {oldMovieRips.Count()}");
+            System.Console.WriteLine($"New rips without manual info: {newMovieRips.Count()}");
+            System.Console.WriteLine($"New rips with manual info: {newMovieRipsManual.Count()}");
 
-            // persistência
+            // persisting
             _unitOfWork.MovieWarehouseVisits.Add(new MovieWarehouseVisit() {
                 VisitDateTime = visitDate,
                 MovieRips = allMovieRipsInVisit
@@ -118,10 +119,10 @@ namespace FilmCRUD
             IEnumerable<MovieRip> NewMovieRipsManual,
             IEnumerable<string> AllParsingErrors) GetMovieRipsInVisit(IEnumerable<string> ripFileNamesInVisit)
         {
-            // rips já existentes no repositório
+            // pre existing MovieRip entities
             IEnumerable<MovieRip> allMovieRipsInRepo = _unitOfWork.MovieRips.GetAll();
 
-            // MovieRips que já estavam no repo e que fazem parte desta visita
+            // pre existing MovieRip entities in this visit
             IEnumerable<MovieRip> oldMovieRips = allMovieRipsInRepo.Where(m => ripFileNamesInVisit.Contains(m.FileName));
 
             IEnumerable<string> _allRipFileNamesInRepo = allMovieRipsInRepo.GetFileNames().Select(f => f.Trim());
@@ -129,11 +130,9 @@ namespace FilmCRUD
 
             Dictionary<string, Dictionary<string, string>> manualMovieRips = this.ManualMovieRips;
 
-            // rip filenames novos com info manual
             IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(
-                r => manualMovieRips.Keys.Contains(r)
+                r => manualMovieRips.ContainsKey(r)
                 );
-            // rip filenames novos sem info manual
             IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo).ToList();
 
             IEnumerable<MovieRip> newMovieRipsManual = GetManualMovieRipsFromDictionaries(
@@ -145,7 +144,7 @@ namespace FilmCRUD
 
             List<string> allParsingErrors = manualParsingErrors.Concat(parsingErrors).ToList();
 
-            // todos os objects MovieRip desta visita
+            // tuple with all movie rips in visit
             return (oldMovieRips, newMovieRips, newMovieRipsManual, allParsingErrors);
         }
 
