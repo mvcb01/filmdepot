@@ -95,7 +95,7 @@ namespace DepotTests.CRUDTests
         public void ReadWarehouseContentsAndRegisterVisit_WithInexistentTextFilesDirectory_ShouldThrowDirectoryNotFoundException()
         {
             // arrange
-            // vai devolver sempre false nos métodos que devolvem bool
+            // will always return false in bool methods
             _fileSystemIOWrapperMock.SetReturnsDefault<bool>(false);
 
             // act
