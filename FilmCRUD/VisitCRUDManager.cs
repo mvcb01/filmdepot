@@ -56,7 +56,7 @@ namespace FilmCRUD
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
 
-            System.Console.WriteLine($"\nA escrever os conteúdos da warehouse para {WarehouseContentsTextFilesDirectory}");
+            System.Console.WriteLine($"\nWriting the warehouse contents to {WarehouseContentsTextFilesDirectory}");
 
             _directoryFileLister.ListMoviesAndPersistToTextFile(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory);
         }
@@ -67,7 +67,7 @@ namespace FilmCRUD
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
             if (_unitOfWork.MovieWarehouseVisits.GetAll().GetVisitDates().Contains(visitDate))
             {
-                throw new DoubleVisitError($"Já existe uma MovieWarehouseVisit na data {visitDate}");
+                throw new DoubleVisitError($"There's already a MovieWarehouseVisit for date {visitDate}");
             }
 
             // text file with the movie rip filenames
@@ -100,7 +100,7 @@ namespace FilmCRUD
             string visitDateStr = visitDate.ToString("MMMM dd yyyy");
             System.Console.WriteLine($"MovieWarehouseVisit: {visitDateStr}");
             System.Console.WriteLine($"Total rip count: {allMovieRipsInVisit.Count()}");
-            System.Console.WriteLine($"Pre existing rips já existentes: {oldMovieRips.Count()}");
+            System.Console.WriteLine($"Pre existing rips: {oldMovieRips.Count()}");
             System.Console.WriteLine($"New rips without manual info: {newMovieRips.Count()}");
             System.Console.WriteLine($"New rips with manual info: {newMovieRipsManual.Count()}");
 
