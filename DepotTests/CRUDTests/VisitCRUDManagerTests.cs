@@ -49,8 +49,7 @@ namespace DepotTests.CRUDTests
             this._visitCRUDManager = new VisitCRUDManager(
                 this._unitOfWorkMock.Object,
                 this._fileSystemIOWrapperMock.Object,
-                this._appSettingsManagerMock.Object
-                );
+                this._appSettingsManagerMock.Object);
         }
 
         [Fact]
