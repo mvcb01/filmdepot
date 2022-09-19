@@ -158,12 +158,12 @@ namespace FilmCRUD
                 .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!filesToIgnore.Contains(f)));
         }
 
-        public void ProcessManuallyProvidedMovieRipsForExistingVisit(string fileDateString)
+        public void ProcessManuallyProvidedMovieRipsForExistingVisit(string visitDateString)
         {
-            DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
-            if (this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
+            DateTime visitDate = DateTime.ParseExact(visitDateString, "yyyyMMdd", null);
+            if (!this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
-                throw new ArgumentException($"There's already a MovieWarehouseVisit for date {visitDate}");
+                throw new ArgumentException($"There's no MovieWarehouseVisit for date {visitDate}");
             }
         }
 

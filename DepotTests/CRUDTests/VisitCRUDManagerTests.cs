@@ -269,5 +269,25 @@ namespace DepotTests.CRUDTests
             }
         }
 
+
+        [Fact]
+        public void ProcessManuallyProvidedMovieRipsForExistingVisit_WithoutExistingMovieWarehouseVisit_ShouldThrowArgumentException()
+        {
+            // arrange
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(v => v.GetVisitDates())
+                .Returns(Enumerable.Empty<DateTime>());
+
+
+            // act
+            // nothing to do...
+
+            // assert
+            this._visitCRUDManager
+                .Invoking(v => v.ProcessManuallyProvidedMovieRipsForExistingVisit("20220901"))
+                .Should()
+                .Throw<ArgumentException>();
+        }
+
     }
 }
