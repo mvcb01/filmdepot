@@ -271,7 +271,7 @@ namespace DepotTests.CRUDTests
 
 
         [Fact]
-        public void ProcessManuallyProvidedMovieRipsForExistingVisit_WithoutExistingMovieWarehouseVisit_ShouldThrowArgumentException()
+        public void ProcessManuallyProvidedMovieRipsForExistingVisit_WithoutExistingMovieWarehouseVisitForInputDate_ShouldThrowArgumentException()
         {
             // arrange
             this._movieWarehouseVisitRepositoryMock
