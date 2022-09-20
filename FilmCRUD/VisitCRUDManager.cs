@@ -165,6 +165,9 @@ namespace FilmCRUD
             {
                 throw new ArgumentException($"There's no MovieWarehouseVisit for date {visitDate}");
             }
+
+            string filePath = GetWarehouseContentsFilePath(visitDateString);
+
         }
 
         private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(

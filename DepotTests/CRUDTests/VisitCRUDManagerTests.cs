@@ -289,5 +289,36 @@ namespace DepotTests.CRUDTests
                 .Throw<ArgumentException>();
         }
 
+
+        [Fact]
+        public void ProcessManuallyProvidedMovieRipsForExistingVisit_WithInexistentWarehouseContentsFile_ShouldThrowFileNotFoundException()
+        {
+            // arrange
+            string visitDateString = "20220901";
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetVisitDates())
+                .Returns(new DateTime[] { DateTime.ParseExact(visitDateString, "yyyyMMdd", null) });
+
+            string textFilesPath = "S:\\Some\\TextFiles\\Directory";
+            this._appSettingsManagerMock
+                .Setup(a => a.GetWarehouseContentsTextFilesDirectory())
+                .Returns(textFilesPath);
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.DirectoryExists(textFilesPath))
+                .Returns(true);
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.GetFiles(textFilesPath))
+                .Returns(new string[] { "dummy_file.txt", "movies_20220115.txt"});
+
+            // act
+            // nothing to do...
+
+            // assert
+            this._visitCRUDManager
+                .Invoking(v => v.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDateString))
+                .Should()
+                .Throw<FileNotFoundException>();
+        }
+
     }
 }
