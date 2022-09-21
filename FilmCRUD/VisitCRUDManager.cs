@@ -191,10 +191,12 @@ namespace FilmCRUD
                     MovieRip existingMovieRip = movieRipsInVisit.Where(r => r.FileName == movieRip.FileName).FirstOrDefault();
                     if (existingMovieRip == null)
                     {
+                        Console.WriteLine($"Adding: {movieRip.FileName}");
                         visit.MovieRips.Add(movieRip);
                     }
                     else
                     {
+                        Console.WriteLine($"Updating: {existingMovieRip.FileName}");
                         existingMovieRip.ParsedTitle = movieRip.ParsedTitle;
                         existingMovieRip.ParsedReleaseDate = movieRip.ParsedReleaseDate;
                         existingMovieRip.ParsedRipQuality = movieRip.ParsedRipQuality;
