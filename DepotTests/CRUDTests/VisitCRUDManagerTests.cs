@@ -295,9 +295,13 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string visitDateString = "20220901";
+            DateTime visitDate = DateTime.ParseExact(visitDateString, "yyyyMMdd", null);
             this._movieWarehouseVisitRepositoryMock
                 .Setup(m => m.GetVisitDates())
-                .Returns(new DateTime[] { DateTime.ParseExact(visitDateString, "yyyyMMdd", null) });
+                .Returns(new DateTime[] { visitDate });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetClosestMovieWarehouseVisit(visitDate))
+                .Returns(new MovieWarehouseVisit());
 
             string textFilesPath = "S:\\Some\\TextFiles\\Directory";
             this._appSettingsManagerMock
