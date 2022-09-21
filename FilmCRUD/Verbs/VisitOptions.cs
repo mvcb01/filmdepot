@@ -15,5 +15,10 @@ namespace FilmCRUD.Verbs
             SetName = "PersistingContents",
             HelpText = "read the warehouse contents textfile with the provided date and persist in repo")]
         public string PersistContents { get; set; }
+
+        [Option(
+            SetName = "ReprocessingExistingVisit",
+            HelpText = "process the manuallly configured movie rips for an existing visit; a visit date is expected")]
+        public string ProcessManual { get; set; }
     }
 }
