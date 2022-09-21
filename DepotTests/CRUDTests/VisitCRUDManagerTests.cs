@@ -2,6 +2,10 @@ using System.IO;
 using Xunit;
 using FluentAssertions;
 using Moq;
+using System;
+using System.Collections.Generic;
+using FluentAssertions.Execution;
+using System.Linq;
 
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
@@ -10,8 +14,7 @@ using FilmCRUD.Interfaces;
 using ConfigUtils.Interfaces;
 using FilmCRUD;
 using FilmCRUD.CustomExceptions;
-using System;
-using System.Collections.Generic;
+
 
 namespace DepotTests.CRUDTests
 {
@@ -32,7 +35,7 @@ namespace DepotTests.CRUDTests
 
         public VisitCRUDManagerTests()
         {
-            this._movieWarehouseVisitRepositoryMock = new Mock<IMovieWarehouseVisitRepository>();
+            this._movieWarehouseVisitRepositoryMock = new Mock<IMovieWarehouseVisitRepository>(MockBehavior.Strict);
             this._movieRipRepositoryMock = new Mock<IMovieRipRepository>();
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -48,8 +51,7 @@ namespace DepotTests.CRUDTests
             this._visitCRUDManager = new VisitCRUDManager(
                 this._unitOfWorkMock.Object,
                 this._fileSystemIOWrapperMock.Object,
-                this._appSettingsManagerMock.Object
-                );
+                this._appSettingsManagerMock.Object);
         }
 
         [Fact]
@@ -57,11 +59,15 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string inexistentMovieWarehousePath = "Z:\\Some\\Inexistent\\Dir";
-            _appSettingsManagerMock.Setup(a => a.GetMovieWarehouseDirectory()).Returns(inexistentMovieWarehousePath);
-            _fileSystemIOWrapperMock.Setup(f => f.DirectoryExists(inexistentMovieWarehousePath)).Returns(false);
+            this._appSettingsManagerMock
+                .Setup(a => a.GetMovieWarehouseDirectory())
+                .Returns(inexistentMovieWarehousePath);
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.DirectoryExists(inexistentMovieWarehousePath))
+                .Returns(false);
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             this._visitCRUDManager
@@ -75,17 +81,15 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string fileDateString = "20220101";
-            MovieWarehouseVisit visit = new();
-            visit.VisitDateTime = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
-            _movieWarehouseVisitRepositoryMock
-                .Setup(m => m.GetAll())
-                .Returns(new MovieWarehouseVisit[] { visit });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(v => v.GetVisitDates())
+                .Returns(new DateTime[] { DateTime.ParseExact(fileDateString, "yyyyMMdd", null) });
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
-            _visitCRUDManager
+            this._visitCRUDManager
                 .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit(fileDateString, failOnParsingErrors: false))
                 .Should()
                 .Throw<DoubleVisitError>();
@@ -95,11 +99,15 @@ namespace DepotTests.CRUDTests
         public void ReadWarehouseContentsAndRegisterVisit_WithInexistentTextFilesDirectory_ShouldThrowDirectoryNotFoundException()
         {
             // arrange
-            // vai devolver sempre false nos métodos que devolvem bool
-            _fileSystemIOWrapperMock.SetReturnsDefault<bool>(false);
+            // will always return false in bool methods
+            this._fileSystemIOWrapperMock.SetReturnsDefault<bool>(false);
+
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(v => v.GetVisitDates())
+                .Returns(Enumerable.Empty<DateTime>());
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             _visitCRUDManager
@@ -113,17 +121,24 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string textFilesPath = "S:\\Some\\TextFiles\\Directory";
-            _appSettingsManagerMock.Setup(a => a.GetWarehouseContentsTextFilesDirectory()).Returns(textFilesPath);
-            _fileSystemIOWrapperMock.Setup(f => f.DirectoryExists(It.IsAny<string>())).Returns(true);
-            _fileSystemIOWrapperMock
+            this._appSettingsManagerMock
+                .Setup(a => a.GetWarehouseContentsTextFilesDirectory())
+                .Returns(textFilesPath);
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.DirectoryExists(It.IsAny<string>()))
+                .Returns(true);
+            this._fileSystemIOWrapperMock
                 .Setup(f => f.GetFiles(textFilesPath))
                 .Returns(new string[] { Path.Combine(textFilesPath, "movies_20220102.txt") });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(v => v.GetVisitDates())
+                .Returns(Enumerable.Empty<DateTime>());
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
-            _visitCRUDManager
+            this._visitCRUDManager
                 .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit("20220101", failOnParsingErrors: false))
                 .Should()
                 .Throw<FileNotFoundException>();
@@ -142,8 +157,12 @@ namespace DepotTests.CRUDTests
                 "      ",
                 "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
             };
-            _appSettingsManagerMock.Setup(a => a.GetFilesToIgnore()).Returns(filesToIgnore);
-            _fileSystemIOWrapperMock.Setup(f => f.ReadAllLines(It.IsAny<string>())).Returns(textFileLines);
+            _appSettingsManagerMock
+                .Setup(a => a.GetFilesToIgnore())
+                .Returns(filesToIgnore);
+            _fileSystemIOWrapperMock
+                .Setup(f => f.ReadAllLines(It.IsAny<string>()))
+                .Returns(textFileLines);
 
             // act
             var fileNamesInVisit = _visitCRUDManager.GetMovieRipFileNamesInVisit("F:\\filepath\\does\\not\\matter.txt");
@@ -171,7 +190,8 @@ namespace DepotTests.CRUDTests
                 new MovieRip() { FileName = "My.Cousin.Vinny.1992.1080p.BluRay.H264.AAC-RARBG" },
             };
             _movieRipRepositoryMock.Setup(m => m.GetAll()).Returns(movieRipsInRepo);
-            // sem manual info
+            
+            // no manual info
             _appSettingsManagerMock
                 .Setup(a => a.GetManualMovieRips())
                 .Returns(new Dictionary<string, Dictionary<string, string>>());
@@ -184,17 +204,21 @@ namespace DepotTests.CRUDTests
                 allParsingErrors) = _visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
 
             // assert
-            // só se testam os filenames, não as properties ParsedReleaseDate, ParsedTitle etc...;
-            // essas properties já são testadas em FileNameParserTests
-            oldMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
+            using (new AssertionScope())
+            {
+                oldMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
                 "The.Deer.Hunter.1978.REMASTERED.1080p.BluRay.x264.DTS-HD.MA.5.1-FGT",
                 "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
-            });
-            newMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
-                "Sicario 2015 1080p BluRay x264 AC3-JYK"
-            });
-            newMovieRipsManual.Should().BeEmpty();
-            allParsingErrors.Should().BeEmpty();
+                });
+
+                newMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
+                    "Sicario 2015 1080p BluRay x264 AC3-JYK"
+                });
+                
+                newMovieRipsManual.Should().BeEmpty();
+                
+                allParsingErrors.Should().BeEmpty();
+            }
         }
 
         [Fact]
@@ -202,7 +226,6 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string[] ripFileNamesInVisit = {
-                // o método FileNameParser.ParseFileNameIntoMovieRip iria lançar excepção neste caso
                 "2011 - some movie name - 720p",
                 "The.Deer.Hunter.1978.REMASTERED.1080p.BluRay.x264.DTS-HD.MA.5.1-FGT"
             };
@@ -215,7 +238,9 @@ namespace DepotTests.CRUDTests
                     ["ParsedTitle"] = "some movie name"
                 }
             };
-            _movieRipRepositoryMock.Setup(m => m.GetAll()).Returns(movieRipsInRepo);
+            _movieRipRepositoryMock
+                .Setup(m => m.GetAll())
+                .Returns(movieRipsInRepo);
             _appSettingsManagerMock
                 .Setup(a => a.GetManualMovieRips())
                 .Returns(manualMovieRips);
@@ -228,15 +253,75 @@ namespace DepotTests.CRUDTests
                 allParsingErrors) = _visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
 
             // assert
-            oldMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
-                "The.Deer.Hunter.1978.REMASTERED.1080p.BluRay.x264.DTS-HD.MA.5.1-FGT"
-            });
-            newMovieRips.Should().HaveCount(0);
-            newMovieRipsManual.GetFileNames().Should().BeEquivalentTo(new string[] {
-                "2011 - some movie name - 720p"
-            });
-            allParsingErrors.Should().BeEmpty();
+            using (new AssertionScope())
+            {
+                oldMovieRips.GetFileNames().Should().BeEquivalentTo(new string[] {
+                    "The.Deer.Hunter.1978.REMASTERED.1080p.BluRay.x264.DTS-HD.MA.5.1-FGT"
+                });
 
+                newMovieRips.Should().HaveCount(0);
+
+                newMovieRipsManual.GetFileNames().Should().BeEquivalentTo(new string[] {
+                    "2011 - some movie name - 720p"
+                });
+
+                allParsingErrors.Should().BeEmpty();
+            }
+        }
+
+
+        [Fact]
+        public void ProcessManuallyProvidedMovieRipsForExistingVisit_WithoutExistingMovieWarehouseVisitForInputDate_ShouldThrowArgumentException()
+        {
+            // arrange
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(v => v.GetVisitDates())
+                .Returns(Enumerable.Empty<DateTime>());
+
+
+            // act
+            // nothing to do...
+
+            // assert
+            this._visitCRUDManager
+                .Invoking(v => v.ProcessManuallyProvidedMovieRipsForExistingVisit("20220901"))
+                .Should()
+                .Throw<ArgumentException>();
+        }
+
+
+        [Fact]
+        public void ProcessManuallyProvidedMovieRipsForExistingVisit_WithInexistentWarehouseContentsFile_ShouldThrowFileNotFoundException()
+        {
+            // arrange
+            string visitDateString = "20220901";
+            DateTime visitDate = DateTime.ParseExact(visitDateString, "yyyyMMdd", null);
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetVisitDates())
+                .Returns(new DateTime[] { visitDate });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetClosestMovieWarehouseVisit(visitDate))
+                .Returns(new MovieWarehouseVisit());
+
+            string textFilesPath = "S:\\Some\\TextFiles\\Directory";
+            this._appSettingsManagerMock
+                .Setup(a => a.GetWarehouseContentsTextFilesDirectory())
+                .Returns(textFilesPath);
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.DirectoryExists(textFilesPath))
+                .Returns(true);
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.GetFiles(textFilesPath))
+                .Returns(new string[] { "dummy_file.txt", "movies_20220115.txt"});
+
+            // act
+            // nothing to do...
+
+            // assert
+            this._visitCRUDManager
+                .Invoking(v => v.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDateString))
+                .Should()
+                .Throw<FileNotFoundException>();
         }
 
     }

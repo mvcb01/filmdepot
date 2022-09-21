@@ -38,7 +38,7 @@ namespace FilmCRUD.Helpers
                 throw new DirectoryNotFoundException(movieWarehousePath);
             }
 
-            // os filmes são directorios
+            // movie rips are considered to be directories, not strict files
             IEnumerable<string> allMoviePaths = _fileSystemIOWrapper.GetSubdirectories(movieWarehousePath);
             List<string> allFileNames = allMoviePaths.Select(m => Path.GetFileName(m)).ToList();
 

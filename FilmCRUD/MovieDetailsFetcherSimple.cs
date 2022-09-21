@@ -94,7 +94,6 @@ namespace FilmCRUD
         }
 
         private async Task<Dictionary<int, TDetail>> GetDetailsSimple<TDetail>(IEnumerable<Movie> movies, Func<int, Task<TDetail>> detailsFunc, string errorsFileName)
-
         {
             // notice the order of the async policies when calling Policy.WrapAsync:
             //      outermost (at left) to innermost (at right)
