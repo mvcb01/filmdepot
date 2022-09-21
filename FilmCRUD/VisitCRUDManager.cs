@@ -163,7 +163,8 @@ namespace FilmCRUD
             DateTime visitDate = DateTime.ParseExact(visitDateString, "yyyyMMdd", null);
             if (!this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
-                throw new ArgumentException($"There's no MovieWarehouseVisit for date {visitDate}");
+                string _dateStr = visitDate.ToString("MMMM dd yyyy");
+                throw new ArgumentException($"There's no MovieWarehouseVisit for date {_dateStr}");
             }
 
             MovieWarehouseVisit visit = this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(visitDate);
