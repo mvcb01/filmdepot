@@ -166,11 +166,53 @@ namespace FilmCRUD
                 throw new ArgumentException($"There's no MovieWarehouseVisit for date {visitDate}");
             }
 
+            MovieWarehouseVisit visit = this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(visitDate);
+
             string filePath = GetWarehouseContentsFilePath(visitDateString);
 
-        }
+            IEnumerable<string> fileNamesInVisit = GetMovieRipFileNamesInVisit(filePath);
 
-        private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
+            IEnumerable<MovieRip> manualMovieRips = GetManualMovieRipsFromDictionaries(
+                this.ManualMovieRips.Where(kvp => fileNamesInVisit.Contains(kvp.Key)),
+                out List<string> manualParsingErrors);
+
+            if (manualParsingErrors.Any())
+            {
+                string errorsFpath = Path.Combine(WarehouseContentsTextFilesDirectory, $"parsing_errors_manual_{visitDateString}.txt");
+                string toWrite = "\nparsing errors: \n" + string.Join("\n", manualParsingErrors);
+                _fileSystemIOWrapper.WriteAllText(errorsFpath, toWrite);
+            }
+
+            IEnumerable<MovieRip> movieRipsInVisit = this._unitOfWork.MovieRips.GetAllRipsInVisit(visit);
+            foreach (var movieRip in manualMovieRips)
+            {
+                try
+                {
+                    MovieRip existingMovieRip = movieRipsInVisit.Where(r => r.FileName == movieRip.FileName).FirstOrDefault();
+                    if (existingMovieRip == null)
+                    {
+                        visit.MovieRips.Add(movieRip);
+                    }
+                    else
+                    {
+                        existingMovieRip.ParsedTitle = movieRip.ParsedTitle;
+                        existingMovieRip.ParsedReleaseDate = movieRip.ParsedReleaseDate;
+                        existingMovieRip.ParsedRipQuality = movieRip.ParsedRipQuality;
+                        existingMovieRip.ParsedRipInfo = movieRip.ParsedRipInfo;
+                        existingMovieRip.ParsedRipGroup = movieRip.ParsedRipGroup;
+                    }
+                }
+                catch (Exception)
+                {
+                    this._unitOfWork.Dispose();
+                    throw;
+                }
+            }
+
+            this._unitOfWork.Complete();
+            }
+
+            private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
             IEnumerable<KeyValuePair<string, Dictionary<string, string>>> manualMovieRipDictionaries,
             out List<string> manualParsingErrors)
         {
