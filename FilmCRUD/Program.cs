@@ -90,7 +90,6 @@ namespace FilmCRUD
                 string visitDate = opts.ProcessManual;
                 Console.WriteLine($"Processing manual movie rips for visit date {visitDate}");
                 visitCrudManager.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDate);
-
             }
             else
             {
