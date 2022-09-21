@@ -66,9 +66,9 @@ namespace FilmCRUD
             services.AddSingleton<IMovieAPIClient, TheMovieDbAPIClient>(_ => new TheMovieDbAPIClient(apiKey));
         }
 
-        private static void HandleVisitOptions(VisitOptions visitOpts, VisitCRUDManager visitCrudManager)
+        private static void HandleVisitOptions(VisitOptions opts, VisitCRUDManager visitCrudManager)
         {
-            if (visitOpts.ListContents)
+            if (opts.ListContents)
             {
                 System.Console.WriteLine("-------------");
                 System.Console.WriteLine($"Movie warehouse: {visitCrudManager.MovieWarehouseDirectory}");
@@ -81,9 +81,16 @@ namespace FilmCRUD
                 }
                 visitCrudManager.WriteMovieWarehouseContentsToTextFile();
             }
-            else if (!string.IsNullOrEmpty(visitOpts.PersistContents))
+            else if (!string.IsNullOrEmpty(opts.PersistContents))
             {
-                visitCrudManager.ReadWarehouseContentsAndRegisterVisit(visitOpts.PersistContents, failOnParsingErrors: false);
+                visitCrudManager.ReadWarehouseContentsAndRegisterVisit(opts.PersistContents, failOnParsingErrors: false);
+            }
+            else if (!string.IsNullOrEmpty(opts.ProcessManual))
+            {
+                string visitDate = opts.ProcessManual;
+                Console.WriteLine($"Processing manual movie rips for visit date {visitDate}");
+                visitCrudManager.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDate);
+
             }
             else
             {
