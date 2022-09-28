@@ -16,9 +16,7 @@ namespace ConfigUtils
             var cwd = Directory.GetCurrentDirectory();
 
             IConfigurationBuilder configBuilder = new ConfigurationBuilder();
-            configBuilder
-                .SetBasePath(cwd)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
             IEnumerable<string> appSettingsEnvs = Directory
                 .GetFiles(cwd, "appsettings.*.json")
