@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-
 using ConfigUtils.Interfaces;
-using System.Net.WebSockets;
+using System.IO;
+using System.Linq;
 
 namespace ConfigUtils
 {
@@ -13,22 +13,23 @@ namespace ConfigUtils
 
         public AppSettingsManager()
         {
-            // general access order:
-            //    user secrets
-            //    appsettings.ENV.json
-            //    appsettings.json
-            // NOTA: access order for different ENVs:
-            //      https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-6.0#hi2low
-            var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJsonFile("appsettings.json");
+            var cwd = Directory.GetCurrentDirectory();
 
-            var env = Environment.GetEnvironmentVariable("FILMCRUD_ENVIRONMENT");
-            if (env != null)
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder();
+            configBuilder
+                .SetBasePath(cwd)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            IEnumerable<string> appSettingsEnvs = Directory
+                .GetFiles(cwd, "appsettings.*.json")
+                .Select(fpath => Path.GetFileNameWithoutExtension(fpath).Split('.').Last());
+
+            appSettingsEnvs.ToList().ForEach(envName => configBuilder.AddJsonFile($"appsettings.{envName}.json", optional: true));
+
+            if (appSettingsEnvs.Contains("Development"))
             {
-                configBuilder.AddJsonFile($"appsettings.{env}.json");
+                configBuilder.AddUserSecrets<AppSettingsManager>();
             }
-
-            configBuilder.AddUserSecrets<AppSettingsManager>();
 
             this.ConfigRoot = configBuilder.Build();
         }
