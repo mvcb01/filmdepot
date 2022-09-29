@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\ConfigUtils\ConfigUtils.csproj" />
     <ProjectReference Include="..\FilmDomain\FilmDomain.csproj" />
   </ItemGroup>
 
