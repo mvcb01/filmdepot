@@ -14,8 +14,6 @@ namespace ConfigUtils
 
         public AppSettingsManager()
         {
-            var cwd = Directory.GetCurrentDirectory();
-
             IConfigurationBuilder configBuilder = new ConfigurationBuilder();
             configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
