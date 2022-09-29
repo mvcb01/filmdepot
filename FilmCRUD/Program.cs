@@ -34,10 +34,10 @@ namespace FilmCRUD
             IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
             IMovieAPIClient movieAPIClient = serviceProvider.GetRequiredService<IMovieAPIClient>();
 
-            VisitCRUDManager visitCrudManager = new(unitOfWork, fileSystemIOWrapper, appSettingsManager);
-            ScanRipsManager scanRipsManager = new(unitOfWork);
-            RipToMovieLinker ripToMovieLinker = new(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
-            ScanMoviesManager scanMoviesManager = new(unitOfWork);
+            var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager);
+            var scanRipsManager = new ScanRipsManager(unitOfWork);
+            var ripToMovieLinker = new RipToMovieLinker(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
+            var scanMoviesManager = new ScanMoviesManager(unitOfWork);
 
             ParserResult<object> parsed = Parser
                 .Default
@@ -61,9 +61,7 @@ namespace FilmCRUD
 
             services.AddSingleton<IAppSettingsManager, AppSettingsManager>();
 
-            AppSettingsManager _appSettingsManager = new();
-            string apiKey = _appSettingsManager.GetApiKey("TheMovieDb");
-            services.AddSingleton<IMovieAPIClient, TheMovieDbAPIClient>(_ => new TheMovieDbAPIClient(apiKey));
+            services.AddSingleton<IMovieAPIClient, TheMovieDbAPIClient>();
         }
 
         private static void HandleVisitOptions(VisitOptions opts, VisitCRUDManager visitCrudManager)
