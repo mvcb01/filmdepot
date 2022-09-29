@@ -43,10 +43,16 @@ namespace FilmCRUD
                 .Default
                 .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);
             parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, visitCrudManager));
+            
             parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, scanRipsManager));
+            
             parsed.WithParsed<ScanMoviesOptions>(opts => HandleScanMoviesOptions(opts, scanMoviesManager));
+            
             await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, ripToMovieLinker));
-            await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient));
+            
+            await parsed.WithParsedAsync<FetchOptions>(
+                async opts => await HandleFetchOptions(opts, unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient));
+            
             parsed.WithNotParsed(HandleParseError);
 
             {}
