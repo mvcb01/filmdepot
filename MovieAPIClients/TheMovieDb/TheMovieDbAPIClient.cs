@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 
 using MovieAPIClients.Interfaces;
+using ConfigUtils.Interfaces;
 
 namespace MovieAPIClients.TheMovieDb
 {
@@ -25,6 +26,9 @@ namespace MovieAPIClients.TheMovieDb
             client.BaseAddress = new Uri(MovieDbBaseAddress);
             this._httpClient = client;
         }
+
+        public TheMovieDbAPIClient(IAppSettingsManager appSettingsManager) : this(appSettingsManager.GetApiKey("TheMovieDb"))
+        { }
 
         public async Task<IEnumerable<MovieSearchResult>> SearchMovieAsync(string title)
         {
