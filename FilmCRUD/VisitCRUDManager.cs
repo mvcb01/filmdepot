@@ -215,7 +215,7 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
             }
 
-            private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
+        private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
             IEnumerable<KeyValuePair<string, Dictionary<string, string>>> manualMovieRipDictionaries,
             out List<string> manualParsingErrors)
         {
