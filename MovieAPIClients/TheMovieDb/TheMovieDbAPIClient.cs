@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 
 using MovieAPIClients.Interfaces;
+using ConfigUtils.Interfaces;
 
 namespace MovieAPIClients.TheMovieDb
 {
@@ -21,10 +22,11 @@ namespace MovieAPIClients.TheMovieDb
         public TheMovieDbAPIClient(string apiKey)
         {
             this._apiKey = apiKey;
-            HttpClient client = new();
-            client.BaseAddress = new Uri(MovieDbBaseAddress);
-            this._httpClient = client;
+            this._httpClient = new HttpClient() { BaseAddress = new Uri(MovieDbBaseAddress) };
         }
+
+        public TheMovieDbAPIClient(IAppSettingsManager appSettingsManager) : this(appSettingsManager.GetApiKey("TheMovieDb"))
+        { }
 
         public async Task<IEnumerable<MovieSearchResult>> SearchMovieAsync(string title)
         {
@@ -134,5 +136,6 @@ namespace MovieAPIClients.TheMovieDb
             string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/credits?api_key={_apiKey}");
             return JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
         }
+
     }
 }
