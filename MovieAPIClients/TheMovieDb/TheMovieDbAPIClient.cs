@@ -134,5 +134,6 @@ namespace MovieAPIClients.TheMovieDb
             string resultString = await _httpClient.GetStringAsync($"movie/{externalId}/credits?api_key={_apiKey}");
             return JsonSerializer.Deserialize<MovieCreditsResultTMDB>(resultString);
         }
+
     }
 }
