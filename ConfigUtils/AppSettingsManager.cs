@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-
 using ConfigUtils.Interfaces;
-using System.Net.WebSockets;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace ConfigUtils
 {
@@ -13,22 +14,33 @@ namespace ConfigUtils
 
         public AppSettingsManager()
         {
-            // general access order:
-            //    user secrets
-            //    appsettings.ENV.json
-            //    appsettings.json
-            // NOTA: access order for different ENVs:
-            //      https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-6.0#hi2low
-            var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJsonFile("appsettings.json");
+            var cwd = Directory.GetCurrentDirectory();
 
-            var env = Environment.GetEnvironmentVariable("FILMCRUD_ENVIRONMENT");
-            if (env != null)
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder();
+            configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            // filenames that match appsettings.*.json in the assembly directory
+            IEnumerable<string> appSettingsEnvs = Directory
+                .GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "appsettings.*.json")
+                .Select(fpath => Path.GetFileNameWithoutExtension(fpath).Split('.').Last());
+
+            // some validations since this both Development and "Production" will run locally
+            bool isDev = appSettingsEnvs.Contains("Development");
+            bool isProd = appSettingsEnvs.Contains("Production");
+            if (isDev && isProd)
             {
-                configBuilder.AddJsonFile($"appsettings.{env}.json");
+                throw new Exception("Both appsettings files are present: appsettings.Development.json and appsettings.Production.json");
             }
 
-            configBuilder.AddUserSecrets<AppSettingsManager>();
+            if (isProd)
+            {
+                configBuilder.AddJsonFile("appsettings.Production.json", optional: true);
+            }
+            else if (isDev)
+            {
+                configBuilder.AddJsonFile("appsettings.Development.json", optional: true);
+                configBuilder.AddUserSecrets<AppSettingsManager>();
+            }
 
             this.ConfigRoot = configBuilder.Build();
         }
@@ -167,4 +179,5 @@ namespace ConfigUtils
             };
         }
     }
+
 }
