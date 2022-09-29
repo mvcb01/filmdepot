@@ -151,11 +151,9 @@ namespace FilmCRUD
 
         public IEnumerable<string> GetMovieRipFileNamesInVisit(string filePath)
         {
-            IEnumerable<string> filesToIgnore = this.FilesToIgnore;
-
             return _fileSystemIOWrapper.ReadAllLines(filePath)
                 .Select(f => f.Trim())
-                .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!filesToIgnore.Contains(f)));
+                .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!this.FilesToIgnore.Contains(f)));
         }
 
         public void ProcessManuallyProvidedMovieRipsForExistingVisit(string visitDateString)
