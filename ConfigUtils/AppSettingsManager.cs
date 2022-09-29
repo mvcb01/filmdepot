@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using ConfigUtils.Interfaces;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace ConfigUtils
 {
@@ -18,14 +19,26 @@ namespace ConfigUtils
             IConfigurationBuilder configBuilder = new ConfigurationBuilder();
             configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
+            // filenames that match appsettings.*.json in the assembly directory
             IEnumerable<string> appSettingsEnvs = Directory
-                .GetFiles(cwd, "appsettings.*.json")
+                .GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "appsettings.*.json")
                 .Select(fpath => Path.GetFileNameWithoutExtension(fpath).Split('.').Last());
 
-            appSettingsEnvs.ToList().ForEach(envName => configBuilder.AddJsonFile($"appsettings.{envName}.json", optional: true));
-
-            if (appSettingsEnvs.Contains("Development"))
+            // some validations since this both Development and "Production" will run locally
+            bool isDev = appSettingsEnvs.Contains("Development");
+            bool isProd = appSettingsEnvs.Contains("Production");
+            if (isDev && isProd)
             {
+                throw new Exception("Both appsettings files are present: appsettings.Development.json and appsettings.Production.json");
+            }
+
+            if (isProd)
+            {
+                configBuilder.AddJsonFile("appsettings.Production.json", optional: true);
+            }
+            else if (isDev)
+            {
+                configBuilder.AddJsonFile("appsettings.Development.json", optional: true);
                 configBuilder.AddUserSecrets<AppSettingsManager>();
             }
 
