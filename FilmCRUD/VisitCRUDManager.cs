@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Text.Json;
-
+using Serilog;
 using ConfigUtils.Interfaces;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
@@ -29,6 +29,8 @@ namespace FilmCRUD
         // to match filenames like "movies_20220321.txt"
         private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[1-9][0-3][0-9].txt$";
 
+        private readonly ILogger _logger;
+
         public string MovieWarehouseDirectory { get => _appSettingsManager.GetMovieWarehouseDirectory(); }
 
         public string WarehouseContentsTextFilesDirectory { get => _appSettingsManager.GetWarehouseContentsTextFilesDirectory(); }
@@ -49,6 +51,15 @@ namespace FilmCRUD
             this._appSettingsManager = appSettingsManager;
         }
 
+        public VisitCRUDManager(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            ILogger logger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager)
+        {
+            this._logger = logger;
+        }
+
         public void WriteMovieWarehouseContentsToTextFile()
         {
             if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
@@ -64,6 +75,9 @@ namespace FilmCRUD
 
         public void ReadWarehouseContentsAndRegisterVisit(string fileDateString, bool failOnParsingErrors = false)
         {
+            Log.Information("Persisting: {d}", fileDateString);
+            this._logger?.Information("special logger - persisting: {d}", fileDateString);
+
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
             if (this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {

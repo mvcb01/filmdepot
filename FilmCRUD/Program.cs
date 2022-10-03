@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-
+using Serilog;
+using Serilog.Events;
 using FilmDataAccess.EFCore.UnitOfWork;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
@@ -25,6 +26,23 @@ namespace FilmCRUD
     {
         static async Task Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File(
+                    "logs/myapp_.txt",
+                    rollingInterval: RollingInterval.Day,
+                    // default template without the timezone
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
+                .CreateLogger();
+
+            Log.Verbose("TEST verbose!!");
+            Log.Information("TEST info!!");
+            Log.Debug("TEST debugging!!");
+            Log.Warning("TEST warning!!");
+            Log.Error("TEST error!!");
+            Log.Fatal("TEST fatal!!");
+
             ServiceCollection services = new();
             ConfigureServices(services);
             ServiceProvider serviceProvider = services.BuildServiceProvider();
@@ -45,7 +63,9 @@ namespace FilmCRUD
             
             parsed.WithNotParsed(HandleParseError);
 
-            {}
+            Log.CloseAndFlush();
+            
+            { }
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -61,10 +81,12 @@ namespace FilmCRUD
 
         private static void HandleVisitOptions(VisitOptions opts, ServiceProvider serviceProvider)
         {
+            var visitLogger = new LoggerConfiguration().WriteTo.File("logs/dummy.txt", rollingInterval: RollingInterval.Infinite).CreateLogger();
             var visitCrudManager = new VisitCRUDManager(
                 serviceProvider.GetRequiredService<IUnitOfWork>(),
                 serviceProvider.GetRequiredService<IFileSystemIOWrapper>(),
-                serviceProvider.GetRequiredService<IAppSettingsManager>());
+                serviceProvider.GetRequiredService<IAppSettingsManager>(),
+                visitLogger);
 
             if (opts.ListContents)
             {
