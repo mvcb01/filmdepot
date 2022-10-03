@@ -55,7 +55,7 @@ namespace FilmCRUD
         {
             if (visitRight == null)
             {
-                throw new ArgumentNullException("visitRight should not be null");
+                throw new ArgumentNullException(nameof(visitRight));
             }
 
             if (visitLeft == null)
