@@ -27,7 +27,7 @@ namespace FilmCRUD
         private DirectoryFileLister _directoryFileLister { get; init; }
 
         // to match filenames like "movies_20220321.txt"
-        private const string TxtFileRegex = @"^movies_20([0-9]{2})(0|1)[1-9][0-3][0-9].txt$";
+        private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[1-9][0-3][0-9].txt$";
 
         public string MovieWarehouseDirectory { get => _appSettingsManager.GetMovieWarehouseDirectory(); }
 
@@ -267,7 +267,7 @@ namespace FilmCRUD
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
 
-            Predicate<string> _isFileMatch = f => Regex.Matches(f, TxtFileRegex).Count() == 1;
+            Predicate<string> _isFileMatch = f => Regex.Matches(f, _txtFileRegex).Count() == 1;
 
             IEnumerable<string> relevantFiles = _fileSystemIOWrapper
                 .GetFiles(WarehouseContentsTextFilesDirectory)
