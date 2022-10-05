@@ -104,8 +104,7 @@ namespace FilmCRUD
             {
                 var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager);
 
-                Log.Information($"Storage directory: {visitCrudManager.MovieWarehouseDirectory}");
-                Log.Information("Will access the storage directory, press \"y\" to confirm, other key to deny");
+                Log.Information($"Will access the following storage directory, press \"y\" to confirm, other key to deny: {visitCrudManager.MovieWarehouseDirectory}");
                 bool toContinue = Console.ReadLine().Trim().ToLower() == "y";
                 if (!toContinue)
                 {
