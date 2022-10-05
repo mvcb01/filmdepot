@@ -90,7 +90,7 @@ namespace DepotTests.CRUDTests
 
             // assert
             this._visitCRUDManager
-                .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit(fileDateString, failOnParsingErrors: false))
+                .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit(fileDateString))
                 .Should()
                 .Throw<DoubleVisitError>();
         }
@@ -139,7 +139,7 @@ namespace DepotTests.CRUDTests
 
             // assert
             this._visitCRUDManager
-                .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit("20220101", failOnParsingErrors: false))
+                .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit("20220101"))
                 .Should()
                 .Throw<FileNotFoundException>();
         }

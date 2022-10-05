@@ -29,7 +29,7 @@ namespace FilmCRUD
         // to match filenames like "movies_20220321.txt"
         private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[1-9][0-3][0-9].txt$";
 
-        private readonly ILogger _logger;
+        private readonly ILogger _errorLogger;
 
         public string MovieWarehouseDirectory { get => _appSettingsManager.GetMovieWarehouseDirectory(); }
 
@@ -55,10 +55,8 @@ namespace FilmCRUD
             IUnitOfWork unitOfWork,
             IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
-            ILogger logger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager)
-        {
-            this._logger = logger;
-        }
+            ILogger errorLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager) => this._errorLogger = errorLogger;
+
 
         public void WriteMovieWarehouseContentsToTextFile()
         {
@@ -73,10 +71,10 @@ namespace FilmCRUD
         }
 
 
-        public void ReadWarehouseContentsAndRegisterVisit(string fileDateString, bool failOnParsingErrors = false)
+        public void ReadWarehouseContentsAndRegisterVisit(string fileDateString)
         {
             Log.Information("Persisting: {d}", fileDateString);
-            this._logger?.Information("special logger - persisting: {d}", fileDateString);
+            this._errorLogger?.Information("special logger - persisting: {d}", fileDateString);
 
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
             if (this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
@@ -100,14 +98,7 @@ namespace FilmCRUD
                 _fileSystemIOWrapper.WriteAllText(errorsFpath, toWrite);
 
                 string _msg = $"Errors while parsing movie rip filenames : {errorCount}; details in {errorsFpath}";
-                if (failOnParsingErrors)
-                {
-                    throw new FileNameParserError(_msg);
-                }
-                else
-                {
-                    System.Console.WriteLine(_msg);
-                }
+                System.Console.WriteLine(_msg);
             }
             List<MovieRip> allMovieRipsInVisit = oldMovieRips.Concat(newMovieRips).Concat(newMovieRipsManual).ToList();
 
