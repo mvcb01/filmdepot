@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using CommandLine;
 using Serilog;
 using Serilog.Events;
+using System.Globalization;
 using FilmDataAccess.EFCore.UnitOfWork;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
@@ -18,6 +19,7 @@ using ConfigUtils;
 using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using MovieAPIClients.TheMovieDb;
+
 
 namespace FilmCRUD
 {
@@ -98,7 +100,9 @@ namespace FilmCRUD
             {
                 var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager);
 
-                Log.Information($"Will access the following storage directory, press \"y\" to confirm, other key to deny: {visitCrudManager.MovieWarehouseDirectory}");
+                Log.Information(
+                    "Will access the following storage directory, press \"y\" to confirm, other key to deny: {DirPath}",
+                    visitCrudManager.MovieWarehouseDirectory);
                 bool toContinue = Console.ReadLine().Trim().ToLower() == "y";
                 if (!toContinue)
                 {
@@ -109,18 +113,26 @@ namespace FilmCRUD
             }
             else if (!string.IsNullOrEmpty(opts.PersistContents))
             {
-                string visitDate = opts.PersistContents;
+                string visitDateString = opts.PersistContents;
+                Log.Information("Persisting warehouse contents for date {VisitDateString}", visitDateString);
+
+                bool validDate = DateTime.TryParseExact(visitDateString, "yyyyMMdd", null, DateTimeStyles.None, out _);
+                if (!validDate)
+                {
+                    Log.Error("Invalid value for persistcontents, should be a date with format yyyyMMdd: {VisitDateString}", visitDateString);
+                    throw new FormatException(visitDateString);
+                }
 
                 // new file per application run
                 var visitErrorLogger = new LoggerConfiguration()
                     .WriteTo.File(
-                    $"logs/parsing_errors_{visitDate}.txt",
+                    $"logs/parsing_errors_{visitDateString}.txt",
                     rollingInterval: RollingInterval.Infinite)
                     .CreateLogger();
 
                 var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager, visitErrorLogger);
 
-                visitCrudManager.ReadWarehouseContentsAndRegisterVisit(visitDate);
+                visitCrudManager.ReadWarehouseContentsAndRegisterVisit(visitDateString);
             }
             else if (!string.IsNullOrEmpty(opts.ProcessManual))
             {

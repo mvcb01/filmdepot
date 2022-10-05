@@ -57,9 +57,9 @@ namespace FilmCRUD
 
         public void WriteMovieWarehouseContentsToTextFile()
         {
-            string filename = $"movies_{DateTime.Now.ToString("yyyyMMdd")}.txt";
+            string filename = $"movies_{DateTime.Now:yyyyMMdd}.txt";
 
-            Log.Information($"Writing the warehouse contents to {WarehouseContentsTextFilesDirectory}: {filename}");
+            Log.Information("Writing the warehouse contents to {DirPath}: {FileName}", WarehouseContentsTextFilesDirectory, filename);
 
             try
             {
@@ -76,13 +76,11 @@ namespace FilmCRUD
 
         public void ReadWarehouseContentsAndRegisterVisit(string fileDateString)
         {
-            Log.Information("Persisting: {d}", fileDateString);
-            this._errorLogger?.Information("special logger - persisting: {d}", fileDateString);
-
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
             if (this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
-                throw new DoubleVisitError($"There's already a MovieWarehouseVisit for date {visitDate}");
+                Log.Error("There's already a visit for date {VisitDate}", visitDate.ToString("MMMM dd yyyy"));
+                throw new DoubleVisitError(fileDateString);
             }
 
             // text file with the movie rip filenames
@@ -90,6 +88,8 @@ namespace FilmCRUD
 
             // discards filenames to ignore, empty lines etc...
             IEnumerable<string> ripFileNamesInVisit = GetMovieRipFileNamesInVisit(filePath);
+
+            Log.Information("Movie rips in visit - total: {RipCount}", ripFileNamesInVisit.Count());
 
             var (oldMovieRips, newMovieRips, newMovieRipsManual, parsingErrors) = GetMovieRipsInVisit(ripFileNamesInVisit);
 
@@ -136,15 +136,13 @@ namespace FilmCRUD
             IEnumerable<string> _allRipFileNamesInRepo = allMovieRipsInRepo.GetFileNames().Select(f => f.Trim());
             IEnumerable<string> _newRipFileNames = ripFileNamesInVisit.Where(f => !_allRipFileNamesInRepo.Contains(f));
 
-            Dictionary<string, Dictionary<string, string>> manualMovieRips = this.ManualMovieRips;
+            Log.Information("Movie rips in visit - new: {NewRipCount}", _newRipFileNames.Count());
 
-            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(
-                r => manualMovieRips.ContainsKey(r)
-                );
+            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => this.ManualMovieRips.ContainsKey(r));
             IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo).ToList();
 
             IEnumerable<MovieRip> newMovieRipsManual = GetManualMovieRipsFromDictionaries(
-                manualMovieRips.Where(kvp => newRipFileNamesWithManualInfo.Contains(kvp.Key)),
+                this.ManualMovieRips.Where(kvp => newRipFileNamesWithManualInfo.Contains(kvp.Key)),
                 out List<string> manualParsingErrors
                 );
 
@@ -224,24 +222,32 @@ namespace FilmCRUD
         private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
             IEnumerable<KeyValuePair<string, Dictionary<string, string>>> manualMovieRipDictionaries,
             out List<string> manualParsingErrors)
-        {
-            List<MovieRip> manualMovieRips = new();
+        {   
+            var manualMovieRips = new List<MovieRip>();
             manualParsingErrors = new List<string>();
 
-            foreach (var item in manualMovieRipDictionaries)
+            int totalCount = manualMovieRipDictionaries.Count();
+            foreach (var (item, idx) in manualMovieRipDictionaries.Select((value, idx) => (value, idx + 1)))
             {
                 string ripName = item.Key;
                 Dictionary<string, string> ripDict = item.Value;
 
                 try
                 {
+                    Log.Debug("Manual info for {RipName}", ripName);
                     string dictSerialized = JsonSerializer.Serialize(ripDict);
                     MovieRip rip = JsonSerializer.Deserialize<MovieRip>(dictSerialized);
                     manualMovieRips.Add(rip);
                 }
                 catch (Exception ex) when (ex is ArgumentNullException || ex is NotSupportedException || ex is JsonException)
                 {
+                    Log.Debug("---> ERROR: {RipName}", ripName);
                     manualParsingErrors.Add(ripName);
+                }
+
+                if (idx % 25 == 1 || idx == totalCount)
+                {
+                    Log.Information("Creating MovieRip entities from manual info: {Index} out of {Total}", idx, totalCount);
                 }
             }
 
@@ -254,6 +260,7 @@ namespace FilmCRUD
             parsingErrors = new List<string>();
             foreach (var fileName in ripFileNames)
             {
+                Log.Debug("parsing: {MovieRipFileName}", fileName);
                 try
                 {
                     MovieRip rip = FileNameParser.ParseFileNameIntoMovieRip(fileName);
@@ -261,6 +268,7 @@ namespace FilmCRUD
                 }
                 catch (FileNameParserError)
                 {
+                    Log.Debug("---> PARSING ERROR: {MovieRipFileName}", fileName);
                     parsingErrors.Add(fileName);
                 }
             }
@@ -272,6 +280,7 @@ namespace FilmCRUD
         {
             if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
             {
+                Log.Error("Not a directory: {DirPath}", WarehouseContentsTextFilesDirectory);
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
 
@@ -285,11 +294,13 @@ namespace FilmCRUD
 
             if (!filesWithDate.Any())
             {
-                throw new FileNotFoundException($"No warehouse contents files with suffix _{fileDateString}.txt");
+                Log.Error("No warehouse contents files with suffix _{FileDateString}.txt", fileDateString);
+                throw new FileNotFoundException(fileDateString);
             }
             else if (filesWithDate.Count > 1)
             {
-                throw new FileNotFoundException($"Several warehouse contents files with suffix _{fileDateString}.txt");
+                Log.Error("Several warehouse contents files with suffix _{FileDateString}.txt", fileDateString);
+                throw new FileNotFoundException(fileDateString);
             }
 
             return filesWithDate.First();
