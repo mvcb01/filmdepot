@@ -18,7 +18,6 @@ using ConfigUtils;
 using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using MovieAPIClients.TheMovieDb;
-using System.Threading;
 
 namespace FilmCRUD
 {
