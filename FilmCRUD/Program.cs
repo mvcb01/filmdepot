@@ -26,7 +26,7 @@ namespace FilmCRUD
     {
         static async Task Main(string[] args)
         {
-            // CONFIGURING MAIN LOGGER FROM THE Log STATIC CLASS
+            // CONFIGURING MAIN LOGGER FROM THE Serilog.Log STATIC CLASS
 
             // default template without the timezone
             string outputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
