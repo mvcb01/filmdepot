@@ -89,7 +89,7 @@ namespace FilmCRUD
             // discards filenames to ignore, empty lines etc...
             IEnumerable<string> ripFileNamesInVisit = GetMovieRipFileNamesInVisit(filePath);
 
-            Log.Information("Movie rips in visit - total: {RipCount}", ripFileNamesInVisit.Count());
+            Log.Information("Files in visit - total: {RipCount}", ripFileNamesInVisit.Count());
 
             var (oldMovieRips, newMovieRips, newMovieRipsManual, parsingErrors) = GetMovieRipsInVisit(ripFileNamesInVisit);
 
@@ -136,7 +136,7 @@ namespace FilmCRUD
             IEnumerable<string> _allRipFileNamesInRepo = allMovieRipsInRepo.GetFileNames().Select(f => f.Trim());
             IEnumerable<string> _newRipFileNames = ripFileNamesInVisit.Where(f => !_allRipFileNamesInRepo.Contains(f));
 
-            Log.Information("Movie rips in visit - new: {NewRipCount}", _newRipFileNames.Count());
+            Log.Information("Files in visit - new: {NewRipCount}", _newRipFileNames.Count());
 
             IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => this.ManualMovieRips.ContainsKey(r));
             IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo).ToList();
@@ -245,7 +245,7 @@ namespace FilmCRUD
                     manualParsingErrors.Add(ripName);
                 }
 
-                if (idx % 25 == 1 || idx == totalCount)
+                if (idx % 5 == 0 || idx == totalCount)
                 {
                     Log.Information("Creating MovieRip entities from manual info: {Index} out of {Total}", idx, totalCount);
                 }
@@ -258,9 +258,11 @@ namespace FilmCRUD
         {
             var movieRips = new List<MovieRip>();
             parsingErrors = new List<string>();
-            foreach (var fileName in ripFileNames)
+
+            int totalCount = ripFileNames.Count();
+            foreach (var (fileName, idx) in ripFileNames.Select((value, idx) => (value, idx + 1)))
             {
-                Log.Debug("parsing: {MovieRipFileName}", fileName);
+                Log.Debug("Parsing: {MovieRipFileName}", fileName);
                 try
                 {
                     MovieRip rip = FileNameParser.ParseFileNameIntoMovieRip(fileName);
@@ -270,6 +272,11 @@ namespace FilmCRUD
                 {
                     Log.Debug("---> PARSING ERROR: {MovieRipFileName}", fileName);
                     parsingErrors.Add(fileName);
+                }
+
+                if (idx % 20 == 0 || idx == totalCount)
+                {
+                    Log.Information("Parsing filenames into MovieRip entities: {Index} out of {Total}", idx, totalCount);
                 }
             }
 
