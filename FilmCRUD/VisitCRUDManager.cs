@@ -59,6 +59,7 @@ namespace FilmCRUD
         {
             if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
             {
+                Log.Error($"No such directory: {WarehouseContentsTextFilesDirectory}");
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
 
