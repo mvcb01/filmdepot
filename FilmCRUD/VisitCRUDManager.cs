@@ -62,8 +62,7 @@ namespace FilmCRUD
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
 
-            System.Console.WriteLine($"\nWriting the warehouse contents to {WarehouseContentsTextFilesDirectory}");
-
+            Log.Information($"Writing the warehouse contents to {WarehouseContentsTextFilesDirectory}");
             _directoryFileLister.ListMoviesAndPersistToTextFile(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory);
         }
 
