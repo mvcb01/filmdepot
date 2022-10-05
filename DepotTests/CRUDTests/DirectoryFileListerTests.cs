@@ -21,7 +21,7 @@ namespace DepotTests.CRUDTests
 
         public DirectoryFileListerTests()
         {
-            this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>();
+            this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>(MockBehavior.Strict);
             this._directoryFileLister = new DirectoryFileLister(this._fileSystemIOWrapper.Object);
         }
 
@@ -30,14 +30,20 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             string inexistentMovieWarehousePath = "Z:\\SomeDir";
-            _fileSystemIOWrapper.Setup(f => f.DirectoryExists(inexistentMovieWarehousePath)).Returns(false);
+            string existentDestinationDir = "D:\\DoesNotMatter";
+            this._fileSystemIOWrapper
+                .Setup(f => f.DirectoryExists(existentDestinationDir))
+                .Returns(true);
+            this._fileSystemIOWrapper
+                .Setup(f => f.DirectoryExists(inexistentMovieWarehousePath))
+                .Returns(false);
 
             // act
             // nothing to do...
 
             // assert
             _directoryFileLister
-                .Invoking(d => d.ListMoviesAndPersistToTextFile(inexistentMovieWarehousePath, "D:\\DoesNotMatter", "movies_20220101.txt"))
+                .Invoking(d => d.ListMoviesAndPersistToTextFile(inexistentMovieWarehousePath, existentDestinationDir, "movies_20220101.txt"))
                 .Should()
                 .Throw<DirectoryNotFoundException>()
                 .WithMessage(inexistentMovieWarehousePath);
@@ -69,7 +75,7 @@ namespace DepotTests.CRUDTests
             // arrange
             string existentMovieWarehousePath = "Z:\\WarehouseDir";
             string existentDestinationDirectory = "S:\\SomeDstDir";
-            string existentFileName = $"movies_{DateTime.Now.ToString("yyyyMMdd")}.txt";
+            string existentFileName = "movies_20220101.txt";
             string existentFilePath = Path.Combine(existentDestinationDirectory, existentFileName);
             _fileSystemIOWrapper.Setup(f => f.DirectoryExists(existentMovieWarehousePath)).Returns(true);
             _fileSystemIOWrapper.Setup(f => f.DirectoryExists(existentDestinationDirectory)).Returns(true);
