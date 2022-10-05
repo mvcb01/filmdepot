@@ -55,28 +55,6 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void WriteMovieWarehouseContentsToTextFile_WithInexistantMovieWarehousePath_ShouldThrowDirectoryNotFoundException()
-        {
-            // arrange
-            string inexistentMovieWarehousePath = "Z:\\Some\\Inexistent\\Dir";
-            this._appSettingsManagerMock
-                .Setup(a => a.GetMovieWarehouseDirectory())
-                .Returns(inexistentMovieWarehousePath);
-            this._fileSystemIOWrapperMock
-                .Setup(f => f.DirectoryExists(inexistentMovieWarehousePath))
-                .Returns(false);
-
-            // act
-            // nothing to do...
-
-            // assert
-            this._visitCRUDManager
-                .Invoking(v => v.WriteMovieWarehouseContentsToTextFile())
-                .Should()
-                .Throw<DirectoryNotFoundException>();
-        }
-
-        [Fact]
         public void ReadWarehouseContentsAndRegisterVisit_WithExistingMovieWarehouseVisit_ShouldThrowDoubleVisitError()
         {
             // arrange

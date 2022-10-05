@@ -82,6 +82,9 @@ namespace DepotTests.CRUDTests
             _fileSystemIOWrapper
                 .Setup(f => f.GetFiles(existentDestinationDirectory))
                 .Returns(new string[] { existentFilePath });
+            this._fileSystemIOWrapper
+                .Setup(f => f.GetSubdirectories(existentMovieWarehousePath))
+                .Returns(Enumerable.Empty<string>());
 
             // act
             // nothing to do...
