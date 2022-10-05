@@ -57,14 +57,20 @@ namespace FilmCRUD
 
         public void WriteMovieWarehouseContentsToTextFile()
         {
-            if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
-            {
-                Log.Error($"No such directory: {WarehouseContentsTextFilesDirectory}");
-                throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
-            }
+            string filename = $"movies_{DateTime.Now.ToString("yyyyMMdd")}.txt";
 
-            Log.Information($"Writing the warehouse contents to {WarehouseContentsTextFilesDirectory}");
-            _directoryFileLister.ListMoviesAndPersistToTextFile(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory);
+            Log.Information($"Writing the warehouse contents to {WarehouseContentsTextFilesDirectory}: {filename}");
+
+            try
+            {
+                _directoryFileLister.ListMoviesAndPersistToTextFile(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory, filename);
+            }
+            catch (Exception ex) when (ex is FileExistsError || ex is DirectoryNotFoundException)
+            {
+                Log.Error(ex, ex.Message);
+                Environment.Exit(1);
+            }
+            
         }
 
 

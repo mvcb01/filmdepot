@@ -33,11 +33,11 @@ namespace DepotTests.CRUDTests
             _fileSystemIOWrapper.Setup(f => f.DirectoryExists(inexistentMovieWarehousePath)).Returns(false);
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             _directoryFileLister
-                .Invoking(d => d.ListMoviesAndPersistToTextFile(inexistentMovieWarehousePath, "D:\\DoesNotMatter"))
+                .Invoking(d => d.ListMoviesAndPersistToTextFile(inexistentMovieWarehousePath, "D:\\DoesNotMatter", "movies_20220101.txt"))
                 .Should()
                 .Throw<DirectoryNotFoundException>()
                 .WithMessage(inexistentMovieWarehousePath);
@@ -53,11 +53,11 @@ namespace DepotTests.CRUDTests
             _fileSystemIOWrapper.Setup(f => f.DirectoryExists(inexistentDestinationDirectory)).Returns(false);
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             _directoryFileLister
-                .Invoking(d => d.ListMoviesAndPersistToTextFile(existentMovieWarehousePath, inexistentDestinationDirectory))
+                .Invoking(d => d.ListMoviesAndPersistToTextFile(existentMovieWarehousePath, inexistentDestinationDirectory, "movies_20220101.txt"))
                 .Should()
                 .Throw<DirectoryNotFoundException>()
                 .WithMessage(inexistentDestinationDirectory);
@@ -78,11 +78,11 @@ namespace DepotTests.CRUDTests
                 .Returns(new string[] { existentFilePath });
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             _directoryFileLister
-                .Invoking(d => d.ListMoviesAndPersistToTextFile(existentMovieWarehousePath, existentDestinationDirectory))
+                .Invoking(d => d.ListMoviesAndPersistToTextFile(existentMovieWarehousePath, existentDestinationDirectory, "movies_20220101.txt" ))
                 .Should()
                 .Throw<FileExistsError>()
                 .WithMessage(existentFilePath);
@@ -105,7 +105,7 @@ namespace DepotTests.CRUDTests
             List<string> result = _directoryFileLister.GetMovieFileNames(existentMovieWarehousePath);
 
             // assert
-            // da documentação:
+            // from the official docs:
             //     The two collections are equivalent when they both contain the same strings in any order.
             result.Should().BeEquivalentTo(movieFileNames);
         }
