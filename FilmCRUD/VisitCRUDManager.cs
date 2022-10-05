@@ -37,9 +37,6 @@ namespace FilmCRUD
 
         public Dictionary<string, Dictionary<string, string>> ManualMovieRips { get => _appSettingsManager.GetManualMovieRips(); }
 
-        public IEnumerable<string> FilesToIgnore { get => _appSettingsManager.GetFilesToIgnore(); }
-
-
         public VisitCRUDManager(
             IUnitOfWork unitOfWork,
             IFileSystemIOWrapper fileSystemIOWrapper,
@@ -158,7 +155,7 @@ namespace FilmCRUD
         {
             return _fileSystemIOWrapper.ReadAllLines(filePath)
                 .Select(f => f.Trim())
-                .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!this.FilesToIgnore.Contains(f)));
+                .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!this._appSettingsManager.GetFilesToIgnore().Contains(f)));
         }
 
         public void ProcessManuallyProvidedMovieRipsForExistingVisit(string visitDateString)
