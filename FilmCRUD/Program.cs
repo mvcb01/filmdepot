@@ -70,11 +70,6 @@ namespace FilmCRUD
                 parsed.WithNotParsed(HandleParseError);
 
             }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "App terminated unexpectedly");
-                Environment.Exit(1);
-            }
             finally
             {
                 // DISPOSING LOGGER

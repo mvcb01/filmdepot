@@ -63,12 +63,12 @@ namespace FilmCRUD
 
             try
             {
-                _directoryFileLister.ListMoviesAndPersistToTextFile(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory, filename);
+                this._directoryFileLister.ListMoviesAndPersistToTextFile(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory, filename);
             }
             catch (Exception ex) when (ex is FileExistsError || ex is DirectoryNotFoundException)
             {
                 Log.Error(ex, ex.Message);
-                Environment.Exit(1);
+                throw;
             }
             
         }
