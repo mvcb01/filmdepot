@@ -89,7 +89,7 @@ namespace FilmCRUD
             // discards filenames to ignore, empty lines etc...
             IEnumerable<string> ripFileNamesInVisit = GetMovieRipFileNamesInVisit(filePath);
 
-            Log.Information("Files in visit - total: {RipCount}", ripFileNamesInVisit.Count());
+            Log.Information("Movie files in visit - total: {RipCount}", ripFileNamesInVisit.Count());
 
             var (oldMovieRips, newMovieRips, newMovieRipsManual, parsingErrors) = GetMovieRipsInVisit(ripFileNamesInVisit);
 
@@ -136,7 +136,7 @@ namespace FilmCRUD
             IEnumerable<string> _allRipFileNamesInRepo = allMovieRipsInRepo.GetFileNames().Select(f => f.Trim());
             IEnumerable<string> _newRipFileNames = ripFileNamesInVisit.Where(f => !_allRipFileNamesInRepo.Contains(f));
 
-            Log.Information("Files in visit - new: {NewRipCount}", _newRipFileNames.Count());
+            Log.Information("Movie files in visit - new: {NewRipCount}", _newRipFileNames.Count());
 
             IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => this.ManualMovieRips.ContainsKey(r));
             IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo).ToList();
