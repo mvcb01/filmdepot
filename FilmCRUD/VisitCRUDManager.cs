@@ -227,6 +227,7 @@ namespace FilmCRUD
             manualParsingErrors = new List<string>();
 
             int totalCount = manualMovieRipDictionaries.Count();
+            var logStep = (int)Math.Ceiling((decimal)totalCount / 20.0m);
             foreach (var (item, idx) in manualMovieRipDictionaries.Select((value, idx) => (value, idx + 1)))
             {
                 string ripName = item.Key;
@@ -245,7 +246,7 @@ namespace FilmCRUD
                     manualParsingErrors.Add(ripName);
                 }
 
-                if (idx % 5 == 0 || idx == totalCount)
+                if (idx % logStep == 0 || idx == totalCount)
                 {
                     Log.Information("Creating MovieRip entities from manual info: {Index} out of {Total}", idx, totalCount);
                 }
@@ -260,6 +261,7 @@ namespace FilmCRUD
             parsingErrors = new List<string>();
 
             int totalCount = ripFileNames.Count();
+            var logStep = (int)Math.Ceiling((decimal)totalCount / 20.0m);
             foreach (var (fileName, idx) in ripFileNames.Select((value, idx) => (value, idx + 1)))
             {
                 Log.Debug("Parsing: {MovieRipFileName}", fileName);
@@ -274,7 +276,7 @@ namespace FilmCRUD
                     parsingErrors.Add(fileName);
                 }
 
-                if (idx % 20 == 0 || idx == totalCount)
+                if (idx % logStep == 0 || idx == totalCount)
                 {
                     Log.Information("Parsing filenames into MovieRip entities: {Index} out of {Total}", idx, totalCount);
                 }
