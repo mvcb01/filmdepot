@@ -19,7 +19,6 @@ using ConfigUtils;
 using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using MovieAPIClients.TheMovieDb;
-using Serilog.Core;
 
 namespace FilmCRUD
 {
