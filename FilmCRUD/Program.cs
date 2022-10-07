@@ -27,6 +27,7 @@ namespace FilmCRUD
     {
         // default serilog template without the timezone
         private const string _logOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+
         static async Task Main(string[] args)
         {
             // CONFIGURING MAIN LOGGER FROM THE Serilog.Log STATIC CLASS
