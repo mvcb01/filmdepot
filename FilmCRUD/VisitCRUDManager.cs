@@ -138,7 +138,8 @@ namespace FilmCRUD
 
             Dictionary<string, Dictionary<string, string>> manualMovieRipsCfg = this._appSettingsManager.GetManualMovieRips();
 
-            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => manualMovieRipsCfg.ContainsKey(r));
+            // calling .ToList to trigger loading
+            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => manualMovieRipsCfg.ContainsKey(r)).ToList();
             IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo).ToList();
 
             IEnumerable<MovieRip> newMovieRipsManual = GetManualMovieRipsFromDictionaries(
