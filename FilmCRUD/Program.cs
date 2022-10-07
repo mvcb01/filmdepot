@@ -1,10 +1,12 @@
-﻿using CommandLine;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-
+using CommandLine;
+using Serilog;
+using Serilog.Events;
+using System.Globalization;
 using FilmDataAccess.EFCore.UnitOfWork;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
@@ -18,35 +20,65 @@ using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using MovieAPIClients.TheMovieDb;
 
-
 namespace FilmCRUD
 {
     class Program
     {
+        // default serilog template without the timezone
+        private const string _logOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+
         static async Task Main(string[] args)
         {
-            ServiceCollection services = new();
-            ConfigureServices(services);
-            ServiceProvider serviceProvider = services.BuildServiceProvider();
+            // CONFIGURING MAIN LOGGER FROM THE Serilog.Log STATIC CLASS
 
-            ParserResult<object> parsed = Parser
-                .Default
-                .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);
-            
-            parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, serviceProvider));
-            
-            parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, serviceProvider));
-            
-            parsed.WithParsed<ScanMoviesOptions>(opts => HandleScanMoviesOptions(opts, serviceProvider));
-            
-            await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, serviceProvider));
-            
-            await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, serviceProvider));
-            
-            parsed.WithNotParsed(HandleParseError);
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information, outputTemplate: _logOutputTemplate)
+                .WriteTo.File(
+                    "logs/filmcrud_.txt",
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate: _logOutputTemplate)
+                .CreateLogger();
 
-            {}
+            try
+            {
+                // ------------------
+                // DI
 
+                ServiceCollection services = new();
+                ConfigureServices(services);
+                ServiceProvider serviceProvider = services.BuildServiceProvider();
+
+                // ------------------
+                // PARSING ARGS AND EXECUTING
+
+                // easier to see the beginning of each app run in the log files
+                Log.Information("----------------------------------");
+                Log.Information("------------ FilmCRUD ------------");
+                Log.Information("----------------------------------");
+
+                ParserResult<object> parsed = Parser
+                    .Default
+                    .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);
+
+                parsed.WithParsed<VisitOptions>(opts => HandleVisitOptions(opts, serviceProvider));
+
+                parsed.WithParsed<ScanRipsOptions>(opts => HandleScanRipsOptions(opts, serviceProvider));
+
+                parsed.WithParsed<ScanMoviesOptions>(opts => HandleScanMoviesOptions(opts, serviceProvider));
+
+                await parsed.WithParsedAsync<LinkOptions>(async opts => await HandleLinkOptions(opts, serviceProvider));
+
+                await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, serviceProvider));
+
+                parsed.WithNotParsed(HandleParseError);
+
+            }
+            finally
+            {
+                // DISPOSING LOGGER
+                Log.CloseAndFlush();
+            }
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -62,37 +94,65 @@ namespace FilmCRUD
 
         private static void HandleVisitOptions(VisitOptions opts, ServiceProvider serviceProvider)
         {
-            var visitCrudManager = new VisitCRUDManager(
-                serviceProvider.GetRequiredService<IUnitOfWork>(),
-                serviceProvider.GetRequiredService<IFileSystemIOWrapper>(),
-                serviceProvider.GetRequiredService<IAppSettingsManager>());
+            IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+            IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
+            IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
+
+            // local func to create the logger that saves parsing errors;
+            // made static since it does not need local variables or instance state
+            static ILogger GetLoggerForParsingErrors(string visitDateString)
+            {
+                bool validDate = DateTime.TryParseExact(visitDateString, "yyyyMMdd", null, DateTimeStyles.None, out _);
+                if (!validDate)
+                {
+                    Log.Error("Should be a date with format yyyyMMdd: {VisitDateString}", visitDateString);
+                    throw new FormatException(visitDateString);
+                }
+
+                return new LoggerConfiguration()
+                    .WriteTo.File(
+                        $"logs/parsing_errors_visit{visitDateString}.txt",
+                        rollingInterval: RollingInterval.Infinite,
+                        outputTemplate: _logOutputTemplate)
+                    .CreateLogger();
+            }
 
             if (opts.ListContents)
             {
-                Console.WriteLine("-------------");
-                Console.WriteLine($"Movie warehouse: {visitCrudManager.MovieWarehouseDirectory}");
-                Console.WriteLine("Will access the storage directory, press \"y\" to confirm, other key to deny");
+                var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager);
+
+                Log.Information(
+                    "Will access the following storage directory, press \"y\" to confirm, other key to deny: {DirPath}",
+                    visitCrudManager.MovieWarehouseDirectory);
                 bool toContinue = Console.ReadLine().Trim().ToLower() == "y";
                 if (!toContinue)
                 {
-                    Console.WriteLine("Quitting...");
+                    Log.Information("Quitting...");
                     return;
                 }
                 visitCrudManager.WriteMovieWarehouseContentsToTextFile();
             }
             else if (!string.IsNullOrEmpty(opts.PersistContents))
             {
-                visitCrudManager.ReadWarehouseContentsAndRegisterVisit(opts.PersistContents, failOnParsingErrors: false);
+                string visitDateString = opts.PersistContents;
+                ILogger parsingErrorsLogger = GetLoggerForParsingErrors(visitDateString);
+
+                Log.Information("Persisting warehouse contents for date {VisitDateString}", visitDateString);
+                var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager, parsingErrorsLogger);
+                visitCrudManager.ReadWarehouseContentsAndRegisterVisit(visitDateString);
             }
             else if (!string.IsNullOrEmpty(opts.ProcessManual))
             {
-                string visitDate = opts.ProcessManual;
-                Console.WriteLine($"Processing manual movie rips for visit date {visitDate}");
-                visitCrudManager.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDate);
+                string visitDateString = opts.ProcessManual;
+                ILogger parsingErrorsLogger = GetLoggerForParsingErrors(visitDateString);
+
+                Log.Information("Processing manually configured movie files for visit date {VisitDateString}", visitDateString);
+                var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager, parsingErrorsLogger);
+                visitCrudManager.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDateString);
             }
             else
             {
-                Console.WriteLine("No action requested...");
+                Log.Information("No action requested...");
             }
         }
 

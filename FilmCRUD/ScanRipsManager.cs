@@ -36,7 +36,7 @@ namespace FilmCRUD
 
         public Dictionary<DateTime, int> GetRipCountByVisit()
         {
-            IEnumerable<MovieWarehouseVisit> allVisits = unitOfWork.MovieWarehouseVisits.GetAll();
+            IEnumerable<MovieWarehouseVisit> allVisits = UnitOfWork.MovieWarehouseVisits.GetAll();
 
             return allVisits.ToDictionary(
                 visit => visit.VisitDateTime,
@@ -46,8 +46,8 @@ namespace FilmCRUD
 
         public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
         {
-            MovieWarehouseVisit lastVisit = this.unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
-            MovieWarehouseVisit previousVisit = this.unitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(lastVisit);
+            MovieWarehouseVisit lastVisit = this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
+            MovieWarehouseVisit previousVisit = this.UnitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(lastVisit);
             return GetVisitDiff(previousVisit, lastVisit);
         }
 
@@ -55,7 +55,7 @@ namespace FilmCRUD
         {
             if (visitRight == null)
             {
-                throw new ArgumentNullException("visitRight should not be null");
+                throw new ArgumentNullException(nameof(visitRight));
             }
 
             if (visitLeft == null)

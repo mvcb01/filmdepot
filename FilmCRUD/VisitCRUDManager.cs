@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Text.Json;
-
+using Serilog;
 using ConfigUtils.Interfaces;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
@@ -27,16 +27,13 @@ namespace FilmCRUD
         private DirectoryFileLister _directoryFileLister { get; init; }
 
         // to match filenames like "movies_20220321.txt"
-        private const string TxtFileRegex = @"^movies_20([0-9]{2})(0|1)[1-9][0-3][0-9].txt$";
+        private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[1-9][0-3][0-9].txt$";
+
+        private readonly ILogger _parsingErrorsLogger;
 
         public string MovieWarehouseDirectory { get => _appSettingsManager.GetMovieWarehouseDirectory(); }
 
         public string WarehouseContentsTextFilesDirectory { get => _appSettingsManager.GetWarehouseContentsTextFilesDirectory(); }
-
-        public Dictionary<string, Dictionary<string, string>> ManualMovieRips { get => _appSettingsManager.GetManualMovieRips(); }
-
-        public IEnumerable<string> FilesToIgnore { get => _appSettingsManager.GetFilesToIgnore(); }
-
 
         public VisitCRUDManager(
             IUnitOfWork unitOfWork,
@@ -49,25 +46,39 @@ namespace FilmCRUD
             this._appSettingsManager = appSettingsManager;
         }
 
+        public VisitCRUDManager(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            ILogger parsingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager) => this._parsingErrorsLogger = parsingErrorsLogger;
+
+
         public void WriteMovieWarehouseContentsToTextFile()
         {
-            if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
+            string filename = $"movies_{DateTime.Now:yyyyMMdd}.txt";
+
+            Log.Information("Writing the warehouse contents to {DirPath}: {FileName}", WarehouseContentsTextFilesDirectory, filename);
+
+            try
             {
-                throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
+                this._directoryFileLister.ListMoviesAndPersistToTextFile(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory, filename);
             }
-
-            System.Console.WriteLine($"\nWriting the warehouse contents to {WarehouseContentsTextFilesDirectory}");
-
-            _directoryFileLister.ListMoviesAndPersistToTextFile(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory);
+            catch (Exception ex) when (ex is FileExistsError || ex is DirectoryNotFoundException)
+            {
+                Log.Error(ex, ex.Message);
+                throw;
+            }
+            
         }
 
 
-        public void ReadWarehouseContentsAndRegisterVisit(string fileDateString, bool failOnParsingErrors = false)
+        public void ReadWarehouseContentsAndRegisterVisit(string fileDateString)
         {
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
             if (this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
-                throw new DoubleVisitError($"There's already a MovieWarehouseVisit for date {visitDate}");
+                Log.Error("There's already a visit for date {VisitDate}", visitDate.ToString("MMMM dd yyyy"));
+                throw new DoubleVisitError(fileDateString);
             }
 
             // text file with the movie rip filenames
@@ -76,35 +87,31 @@ namespace FilmCRUD
             // discards filenames to ignore, empty lines etc...
             IEnumerable<string> ripFileNamesInVisit = GetMovieRipFileNamesInVisit(filePath);
 
+            Log.Information("Movie files in visit - total: {RipCount}", ripFileNamesInVisit.Count());
+
             var (oldMovieRips, newMovieRips, newMovieRipsManual, parsingErrors) = GetMovieRipsInVisit(ripFileNamesInVisit);
 
             int errorCount = parsingErrors.Count();
             if (errorCount > 0)
             {
-                string errorsFpath = Path.Combine(WarehouseContentsTextFilesDirectory, $"parsing_errors_{fileDateString}.txt");
-                string toWrite = "\nparsing errors: \n" + string.Join("\n", parsingErrors);
-                _fileSystemIOWrapper.WriteAllText(errorsFpath, toWrite);
-
-                string _msg = $"Errors while parsing movie rip filenames : {errorCount}; details in {errorsFpath}";
-                if (failOnParsingErrors)
-                {
-                    throw new FileNameParserError(_msg);
-                }
-                else
-                {
-                    System.Console.WriteLine(_msg);
-                }
+                this._parsingErrorsLogger?.Information("----------------------------------");
+                this._parsingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._parsingErrorsLogger?.Information("----------------------------------");
+                parsingErrors.ToList().ForEach(e => this._parsingErrorsLogger?.Error(e));
             }
+
+            // calling .ToList since property MovieWarehouseVisit.MovieRips is a ICollection
             List<MovieRip> allMovieRipsInVisit = oldMovieRips.Concat(newMovieRips).Concat(newMovieRipsManual).ToList();
 
-            string visitDateStr = visitDate.ToString("MMMM dd yyyy");
-            System.Console.WriteLine($"MovieWarehouseVisit: {visitDateStr}");
-            System.Console.WriteLine($"Total rip count: {allMovieRipsInVisit.Count()}");
-            System.Console.WriteLine($"Pre existing rips: {oldMovieRips.Count()}");
-            System.Console.WriteLine($"New rips without manual info: {newMovieRips.Count()}");
-            System.Console.WriteLine($"New rips with manual info: {newMovieRipsManual.Count()}");
+            Log.Information("------------ VISIT SUMMARY ------------");
+            Log.Information("MovieWarehouseVisit: {VisitDate}", visitDate.ToString("MMMM dd yyyy"));
+            Log.Information("Parsing errors count: {Count}", errorCount);
+            Log.Information("Total parsed rips count: {TotalRipCount}", allMovieRipsInVisit.Count());
+            Log.Information("Pre existing rips: {PreExistingRips}", oldMovieRips.Count());
+            Log.Information("New rips without manual info: {NewRips}", newMovieRips.Count()); 
+            Log.Information("New rips with manual info: {NewRipsManual}", newMovieRipsManual.Count());
 
-            // persisting
+            // persisting changes
             _unitOfWork.MovieWarehouseVisits.Add(new MovieWarehouseVisit() {
                 VisitDateTime = visitDate,
                 MovieRips = allMovieRipsInVisit
@@ -120,7 +127,7 @@ namespace FilmCRUD
             IEnumerable<string> AllParsingErrors) GetMovieRipsInVisit(IEnumerable<string> ripFileNamesInVisit)
         {
             // pre existing MovieRip entities
-            IEnumerable<MovieRip> allMovieRipsInRepo = _unitOfWork.MovieRips.GetAll();
+            IEnumerable<MovieRip> allMovieRipsInRepo = this._unitOfWork.MovieRips.GetAll();
 
             // pre existing MovieRip entities in this visit
             IEnumerable<MovieRip> oldMovieRips = allMovieRipsInRepo.Where(m => ripFileNamesInVisit.Contains(m.FileName));
@@ -128,15 +135,16 @@ namespace FilmCRUD
             IEnumerable<string> _allRipFileNamesInRepo = allMovieRipsInRepo.GetFileNames().Select(f => f.Trim());
             IEnumerable<string> _newRipFileNames = ripFileNamesInVisit.Where(f => !_allRipFileNamesInRepo.Contains(f));
 
-            Dictionary<string, Dictionary<string, string>> manualMovieRips = this.ManualMovieRips;
+            Log.Information("Movie files in visit - new: {NewRipCount}", _newRipFileNames.Count());
 
-            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(
-                r => manualMovieRips.ContainsKey(r)
-                );
+            Dictionary<string, Dictionary<string, string>> manualMovieRipsCfg = this._appSettingsManager.GetManualMovieRips();
+
+            // calling .ToList to trigger loading
+            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => manualMovieRipsCfg.ContainsKey(r)).ToList();
             IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo).ToList();
 
             IEnumerable<MovieRip> newMovieRipsManual = GetManualMovieRipsFromDictionaries(
-                manualMovieRips.Where(kvp => newRipFileNamesWithManualInfo.Contains(kvp.Key)),
+                manualMovieRipsCfg.Where(kvp => newRipFileNamesWithManualInfo.Contains(kvp.Key)),
                 out List<string> manualParsingErrors
                 );
 
@@ -151,11 +159,9 @@ namespace FilmCRUD
 
         public IEnumerable<string> GetMovieRipFileNamesInVisit(string filePath)
         {
-            IEnumerable<string> filesToIgnore = this.FilesToIgnore;
-
-            return _fileSystemIOWrapper.ReadAllLines(filePath)
+            return this._fileSystemIOWrapper.ReadAllLines(filePath)
                 .Select(f => f.Trim())
-                .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!filesToIgnore.Contains(f)));
+                .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!this._appSettingsManager.GetFilesToIgnore().Contains(f)));
         }
 
         public void ProcessManuallyProvidedMovieRipsForExistingVisit(string visitDateString)
@@ -163,25 +169,32 @@ namespace FilmCRUD
             DateTime visitDate = DateTime.ParseExact(visitDateString, "yyyyMMdd", null);
             if (!this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
-                string _dateStr = visitDate.ToString("MMMM dd yyyy");
-                throw new ArgumentException($"There's no MovieWarehouseVisit for date {_dateStr}");
+                var dateStr = visitDate.ToString("MMMM dd yyyy");
+                Log.Error("There's no MovieWarehouseVisit for date {VisitDate}", dateStr);
+                throw new ArgumentException(dateStr);
             }
 
+            // exact match is guaranteed
             MovieWarehouseVisit visit = this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(visitDate);
 
             string filePath = GetWarehouseContentsFilePath(visitDateString);
 
             IEnumerable<string> fileNamesInVisit = GetMovieRipFileNamesInVisit(filePath);
 
+            Dictionary<string, Dictionary<string, string>> manualMovieRipsCfg = this._appSettingsManager.GetManualMovieRips();
+
             IEnumerable<MovieRip> manualMovieRips = GetManualMovieRipsFromDictionaries(
-                this.ManualMovieRips.Where(kvp => fileNamesInVisit.Contains(kvp.Key)),
+                manualMovieRipsCfg.Where(kvp => fileNamesInVisit.Contains(kvp.Key)),
                 out List<string> manualParsingErrors);
 
-            if (manualParsingErrors.Any())
+            int errorCount = manualParsingErrors.Count();
+            if (errorCount > 0)
             {
-                string errorsFpath = Path.Combine(WarehouseContentsTextFilesDirectory, $"parsing_errors_manual_{visitDateString}.txt");
-                string toWrite = "\nparsing errors: \n" + string.Join("\n", manualParsingErrors);
-                _fileSystemIOWrapper.WriteAllText(errorsFpath, toWrite);
+                Log.Information("Parsing error count for manually configured movie files: {Count}", errorCount);
+                this._parsingErrorsLogger?.Information("----------------------------------");
+                this._parsingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._parsingErrorsLogger?.Information("----------------------------------");
+                manualParsingErrors.ToList().ForEach(e => this._parsingErrorsLogger?.Error(e));
             }
 
             IEnumerable<MovieRip> movieRipsInVisit = this._unitOfWork.MovieRips.GetAllRipsInVisit(visit);
@@ -192,12 +205,14 @@ namespace FilmCRUD
                     MovieRip existingMovieRip = movieRipsInVisit.Where(r => r.FileName == movieRip.FileName).FirstOrDefault();
                     if (existingMovieRip == null)
                     {
-                        Console.WriteLine($"Adding: {movieRip.FileName}");
+                        // not too many files are expected to be manually configured so we use Information level
+                        Log.Information("Adding: {FileName}", movieRip.FileName);
                         visit.MovieRips.Add(movieRip);
                     }
                     else
                     {
-                        Console.WriteLine($"Updating: {existingMovieRip.FileName}");
+                        // not too many files are expected to be manually configured so we use Information level
+                        Log.Information("Updating: {FileName}", existingMovieRip.FileName);
                         existingMovieRip.ParsedTitle = movieRip.ParsedTitle;
                         existingMovieRip.ParsedReleaseDate = movieRip.ParsedReleaseDate;
                         existingMovieRip.ParsedRipQuality = movieRip.ParsedRipQuality;
@@ -205,8 +220,9 @@ namespace FilmCRUD
                         existingMovieRip.ParsedRipGroup = movieRip.ParsedRipGroup;
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Log.Error(ex, ex.Message);
                     this._unitOfWork.Dispose();
                     throw;
                 }
@@ -215,27 +231,36 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
             }
 
-            private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
+        private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
             IEnumerable<KeyValuePair<string, Dictionary<string, string>>> manualMovieRipDictionaries,
             out List<string> manualParsingErrors)
-        {
-            List<MovieRip> manualMovieRips = new();
+        {   
+            var manualMovieRips = new List<MovieRip>();
             manualParsingErrors = new List<string>();
 
-            foreach (var item in manualMovieRipDictionaries)
+            int totalCount = manualMovieRipDictionaries.Count();
+            var logStep = (int)Math.Ceiling((decimal)totalCount / 20.0m);
+            foreach (var (item, idx) in manualMovieRipDictionaries.Select((value, idx) => (value, idx + 1)))
             {
                 string ripName = item.Key;
                 Dictionary<string, string> ripDict = item.Value;
 
                 try
                 {
+                    Log.Debug("Manual info for {RipName}", ripName);
                     string dictSerialized = JsonSerializer.Serialize(ripDict);
                     MovieRip rip = JsonSerializer.Deserialize<MovieRip>(dictSerialized);
                     manualMovieRips.Add(rip);
                 }
                 catch (Exception ex) when (ex is ArgumentNullException || ex is NotSupportedException || ex is JsonException)
                 {
+                    Log.Debug("---> ERROR: {RipName}", ripName);
                     manualParsingErrors.Add(ripName);
+                }
+
+                if (idx % logStep == 0 || idx == totalCount)
+                {
+                    Log.Information("Creating MovieRip entities from manual info: {Index} out of {Total}", idx, totalCount);
                 }
             }
 
@@ -246,8 +271,12 @@ namespace FilmCRUD
         {
             var movieRips = new List<MovieRip>();
             parsingErrors = new List<string>();
-            foreach (var fileName in ripFileNames)
+
+            int totalCount = ripFileNames.Count();
+            var logStep = (int)Math.Ceiling((decimal)totalCount / 20.0m);
+            foreach (var (fileName, idx) in ripFileNames.Select((value, idx) => (value, idx + 1)))
             {
+                Log.Debug("Parsing: {MovieRipFileName}", fileName);
                 try
                 {
                     MovieRip rip = FileNameParser.ParseFileNameIntoMovieRip(fileName);
@@ -255,7 +284,13 @@ namespace FilmCRUD
                 }
                 catch (FileNameParserError)
                 {
+                    Log.Debug("\t-> PARSING ERROR: {MovieRipFileName}", fileName);
                     parsingErrors.Add(fileName);
+                }
+
+                if (idx % logStep == 0 || idx == totalCount)
+                {
+                    Log.Information("Parsing filenames into MovieRip entities: {Index} out of {Total}", idx, totalCount);
                 }
             }
 
@@ -266,10 +301,11 @@ namespace FilmCRUD
         {
             if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
             {
+                Log.Error("Not a directory: {DirPath}", WarehouseContentsTextFilesDirectory);
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
 
-            Predicate<string> _isFileMatch = f => Regex.Matches(f, TxtFileRegex).Count() == 1;
+            Predicate<string> _isFileMatch = f => Regex.Matches(f, _txtFileRegex).Count() == 1;
 
             IEnumerable<string> relevantFiles = _fileSystemIOWrapper
                 .GetFiles(WarehouseContentsTextFilesDirectory)
@@ -279,11 +315,13 @@ namespace FilmCRUD
 
             if (!filesWithDate.Any())
             {
-                throw new FileNotFoundException($"No warehouse contents files with suffix _{fileDateString}.txt");
+                Log.Error("No warehouse contents files with suffix _{FileDateString}.txt", fileDateString);
+                throw new FileNotFoundException(fileDateString);
             }
             else if (filesWithDate.Count > 1)
             {
-                throw new FileNotFoundException($"Several warehouse contents files with suffix _{fileDateString}.txt");
+                Log.Error("Several warehouse contents files with suffix _{FileDateString}.txt", fileDateString);
+                throw new FileNotFoundException(fileDateString);
             }
 
             return filesWithDate.First();

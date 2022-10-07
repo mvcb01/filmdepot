@@ -9,31 +9,31 @@ namespace FilmCRUD
     // to provide some useful methods to other Scan classes
     public class GeneralScanManager
     {
-        protected IUnitOfWork unitOfWork { get; init; }
+        protected IUnitOfWork UnitOfWork { get; init; }
 
         public GeneralScanManager(IUnitOfWork unitOfWork)
         {
-            this.unitOfWork = unitOfWork;
+            this.UnitOfWork = unitOfWork;
         }
 
         public MovieWarehouseVisit GetClosestVisit()
         {
-            return this.unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
+            return this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
         }
 
         public MovieWarehouseVisit GetClosestVisit(DateTime dt)
         {
-            return this.unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
+            return this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
         }
 
         public MovieWarehouseVisit GetPreviousVisit(MovieWarehouseVisit visit)
         {
-            return this.unitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(visit);
+            return this.UnitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(visit);
         }
 
         public IEnumerable<DateTime> ListVisitDates()
         {
-            return this.unitOfWork.MovieWarehouseVisits.GetAll().GetVisitDates();
+            return this.UnitOfWork.MovieWarehouseVisits.GetAll().GetVisitDates();
         }
 
     }

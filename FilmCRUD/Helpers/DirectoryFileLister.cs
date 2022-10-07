@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
+using Serilog;
 
 namespace FilmCRUD.Helpers
 {
@@ -17,17 +18,18 @@ namespace FilmCRUD.Helpers
             this._fileSystemIOWrapper = fileSystemIOWrapper;
         }
 
-        public void ListMoviesAndPersistToTextFile(string movieWarehousePath, string destinationDirectory)
+        public void ListMoviesAndPersistToTextFile(string movieWarehousePath, string destinationDirectory, string filename)
         {
+            if (!this._fileSystemIOWrapper.DirectoryExists(destinationDirectory))
+            {
+                throw new DirectoryNotFoundException(destinationDirectory);
+            }
+
             List<string> movieFiles = GetMovieFileNames(movieWarehousePath);
 
             string fileContents = String.Join("\n", movieFiles);
 
-            string dateToday = DateTime.Now.ToString("yyyyMMdd");
-
-            string fileName = $"movies_{dateToday}.txt";
-
-            PersistFileNamesToTextFile(destinationDirectory, fileName, fileContents);
+            PersistFileNamesToTextFile(destinationDirectory, filename, fileContents);
         }
 
         public List<string> GetMovieFileNames(string movieWarehousePath)

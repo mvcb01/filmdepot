@@ -19,7 +19,7 @@ namespace FilmCRUD
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithGenres(MovieWarehouseVisit visit, params Genre[] genres)
         {
-            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => genres.Intersect(m.Genres).Any());
         }
 
@@ -29,7 +29,7 @@ namespace FilmCRUD
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithActors(MovieWarehouseVisit visit, params Actor[] actors)
         {
-            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => actors.Intersect(m.Actors).Any());
         }
 
@@ -39,7 +39,7 @@ namespace FilmCRUD
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithDirectors(MovieWarehouseVisit visit, params Director[] directors)
         {
-            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => directors.Intersect(m.Directors).Any());
         }
 
@@ -49,13 +49,13 @@ namespace FilmCRUD
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithReleaseDates(MovieWarehouseVisit visit, params int[] dates)
         {
-            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => dates.Contains(m.ReleaseDate));
         }
 
         public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit)
         {
-            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
 
             // flatten -> group by Genre and count
             IEnumerable<IGrouping<Genre, Genre>> grouped = moviesInVisit.SelectMany(m => m.Genres).GroupBy(g => g);
@@ -64,7 +64,7 @@ namespace FilmCRUD
 
         public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit)
         {
-            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
 
             // flatten -> group by Actor and count
             IEnumerable<IGrouping<Actor, Actor>> grouped = moviesInVisit.SelectMany(m => m.Actors).GroupBy(a => a);
@@ -73,7 +73,7 @@ namespace FilmCRUD
 
         public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit)
         {
-            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
 
             // flatten -> group by Director and count
             IEnumerable<IGrouping<Director, Director>> grouped = moviesInVisit.SelectMany(m => m.Directors).GroupBy(a => a);
@@ -82,29 +82,29 @@ namespace FilmCRUD
 
         public IEnumerable<Movie> SearchMovieEntitiesByTitle(MovieWarehouseVisit visit, string title)
         {
-            IEnumerable<Movie> moviesInVisit = this.unitOfWork.Movies.GetAllMoviesInVisit(visit);
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
         }
 
         public IEnumerable<Genre> GenresFromName(string name)
         {
-            return this.unitOfWork.Genres.GetGenresFromName(name);
+            return this.UnitOfWork.Genres.GetGenresFromName(name);
         }
 
         public IEnumerable<Actor> GetActorsFromName(string name)
         {
-            return this.unitOfWork.Actors.GetActorsFromName(name);
+            return this.UnitOfWork.Actors.GetActorsFromName(name);
         }
 
         public IEnumerable<Director> GetDirectorsFromName(string name)
         {
-            return this.unitOfWork.Directors.GetDirectorsFromName(name);
+            return this.UnitOfWork.Directors.GetDirectorsFromName(name);
         }
 
         public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
         {
-            MovieWarehouseVisit lastVisit = this.unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
-            MovieWarehouseVisit previousVisit = this.unitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(lastVisit);
+            MovieWarehouseVisit lastVisit = this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
+            MovieWarehouseVisit previousVisit = this.UnitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(lastVisit);
             return GetVisitDiff(previousVisit, lastVisit);
         }
 
@@ -123,7 +123,7 @@ namespace FilmCRUD
             if (visitLeft == null)
             {
                 return new Dictionary<string, IEnumerable<string>>() {
-                    ["added"] = this.unitOfWork.Movies.GetAllMoviesInVisit(visitRight).Select(m => m.ToString()),
+                    ["added"] = this.UnitOfWork.Movies.GetAllMoviesInVisit(visitRight).Select(m => m.ToString()),
                     ["removed"] = Enumerable.Empty<string>()
                 };
             }
@@ -137,8 +137,8 @@ namespace FilmCRUD
                 throw new ArgumentException(msg);
             }
 
-            IEnumerable<Movie> visitLeftMovies = this.unitOfWork.Movies.GetAllMoviesInVisit(visitLeft);
-            IEnumerable<Movie> visitRightMovies = this.unitOfWork.Movies.GetAllMoviesInVisit(visitRight);
+            IEnumerable<Movie> visitLeftMovies = this.UnitOfWork.Movies.GetAllMoviesInVisit(visitLeft);
+            IEnumerable<Movie> visitRightMovies = this.UnitOfWork.Movies.GetAllMoviesInVisit(visitRight);
             return new Dictionary<string, IEnumerable<string>>() {
                 ["removed"] = visitLeftMovies.Except(visitRightMovies).Select(m => m.ToString()),
                 ["added"] = visitRightMovies.Except(visitLeftMovies).Select(m => m.ToString())
