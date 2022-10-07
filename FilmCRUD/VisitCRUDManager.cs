@@ -128,7 +128,7 @@ namespace FilmCRUD
             IEnumerable<string> AllParsingErrors) GetMovieRipsInVisit(IEnumerable<string> ripFileNamesInVisit)
         {
             // pre existing MovieRip entities
-            IEnumerable<MovieRip> allMovieRipsInRepo = _unitOfWork.MovieRips.GetAll();
+            IEnumerable<MovieRip> allMovieRipsInRepo = this._unitOfWork.MovieRips.GetAll();
 
             // pre existing MovieRip entities in this visit
             IEnumerable<MovieRip> oldMovieRips = allMovieRipsInRepo.Where(m => ripFileNamesInVisit.Contains(m.FileName));
