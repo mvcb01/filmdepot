@@ -19,25 +19,25 @@ using ConfigUtils;
 using ConfigUtils.Interfaces;
 using MovieAPIClients.Interfaces;
 using MovieAPIClients.TheMovieDb;
-
+using Serilog.Core;
 
 namespace FilmCRUD
 {
     class Program
     {
+        // default serilog template without the timezone
+        private const string _logOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
         static async Task Main(string[] args)
         {
             // CONFIGURING MAIN LOGGER FROM THE Serilog.Log STATIC CLASS
 
-            // default template without the timezone
-            string outputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information, outputTemplate: outputTemplate)
+                .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information, outputTemplate: _logOutputTemplate)
                 .WriteTo.File(
                     "logs/filmcrud_.txt",
                     rollingInterval: RollingInterval.Day,
-                    outputTemplate: outputTemplate)
+                    outputTemplate: _logOutputTemplate)
                 .CreateLogger();
 
             try
@@ -53,7 +53,9 @@ namespace FilmCRUD
                 // PARSING ARGS AND EXECUTING
 
                 // easier to see the beginning of each app run in the log files
+                Log.Information("----------------------------------");
                 Log.Information("------------ FilmCRUD ------------");
+                Log.Information("----------------------------------");
 
                 ParserResult<object> parsed = Parser
                     .Default
@@ -123,22 +125,21 @@ namespace FilmCRUD
                     throw new FormatException(visitDateString);
                 }
 
-                // new file per application run
-                var visitErrorLogger = new LoggerConfiguration()
+                // new file per visit date
+                var parsingErrorsLogger = new LoggerConfiguration()
                     .WriteTo.File(
-                    $"logs/parsing_errors_{visitDateString}.txt",
-                    rollingInterval: RollingInterval.Infinite)
+                    $"logs/parsing_errors_visit{visitDateString}.txt",
+                    rollingInterval: RollingInterval.Infinite,
+                    outputTemplate: _logOutputTemplate)
                     .CreateLogger();
-
-                var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager, visitErrorLogger);
-
+                var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager, parsingErrorsLogger);
                 visitCrudManager.ReadWarehouseContentsAndRegisterVisit(visitDateString);
             }
             else if (!string.IsNullOrEmpty(opts.ProcessManual))
             {
                 string visitDate = opts.ProcessManual;
 
-                // new file per application run
+                // one file per application run
                 var visitErrorLogger = new LoggerConfiguration()
                     .WriteTo.File(
                     $"logs/parsing_errors_{visitDate}.txt",

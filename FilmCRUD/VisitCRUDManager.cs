@@ -12,6 +12,7 @@ using FilmDomain.Entities;
 using FilmCRUD.Helpers;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
+using Serilog.Events;
 
 namespace FilmCRUD
 {
@@ -29,7 +30,7 @@ namespace FilmCRUD
         // to match filenames like "movies_20220321.txt"
         private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[1-9][0-3][0-9].txt$";
 
-        private readonly ILogger _errorLogger;
+        private readonly ILogger _parsingErrorsLogger;
 
         public string MovieWarehouseDirectory { get => _appSettingsManager.GetMovieWarehouseDirectory(); }
 
@@ -50,7 +51,7 @@ namespace FilmCRUD
             IUnitOfWork unitOfWork,
             IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
-            ILogger errorLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager) => this._errorLogger = errorLogger;
+            ILogger parsingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager) => this._parsingErrorsLogger = parsingErrorsLogger;
 
 
         public void WriteMovieWarehouseContentsToTextFile()
@@ -94,23 +95,24 @@ namespace FilmCRUD
             int errorCount = parsingErrors.Count();
             if (errorCount > 0)
             {
-                string errorsFpath = Path.Combine(WarehouseContentsTextFilesDirectory, $"parsing_errors_{fileDateString}.txt");
-                string toWrite = "\nparsing errors: \n" + string.Join("\n", parsingErrors);
-                _fileSystemIOWrapper.WriteAllText(errorsFpath, toWrite);
-
-                string _msg = $"Errors while parsing movie rip filenames : {errorCount}; details in {errorsFpath}";
-                System.Console.WriteLine(_msg);
+                Log.Information("Parsing errors count: {Count}", errorCount);
+                this._parsingErrorsLogger?.Information("----------------------------------");
+                this._parsingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._parsingErrorsLogger?.Information("----------------------------------");
+                parsingErrors.ToList().ForEach(e => this._parsingErrorsLogger?.Error(e));
             }
+
+            // calling .ToList since property MovieWarehouseVisit.MovieRips is a ICollection
             List<MovieRip> allMovieRipsInVisit = oldMovieRips.Concat(newMovieRips).Concat(newMovieRipsManual).ToList();
 
-            string visitDateStr = visitDate.ToString("MMMM dd yyyy");
-            System.Console.WriteLine($"MovieWarehouseVisit: {visitDateStr}");
-            System.Console.WriteLine($"Total rip count: {allMovieRipsInVisit.Count()}");
-            System.Console.WriteLine($"Pre existing rips: {oldMovieRips.Count()}");
-            System.Console.WriteLine($"New rips without manual info: {newMovieRips.Count()}");
-            System.Console.WriteLine($"New rips with manual info: {newMovieRipsManual.Count()}");
+            Log.Information("------------ VISIT SUMMARY ------------");
+            Log.Information("MovieWarehouseVisit: {VisitDate}", visitDate.ToString("MMMM dd yyyy"));
+            Log.Information("Total rip count: {TotalRipCount}", allMovieRipsInVisit.Count());
+            Log.Information("Pre existing rips: {PreExistingRips}", oldMovieRips.Count());
+            Log.Information("New rips without manual info: {NewRips}", newMovieRips.Count()); 
+            Log.Information("New rips with manual info: {NewRipsManual}", newMovieRipsManual.Count());
 
-            // persisting
+            // persisting changes
             _unitOfWork.MovieWarehouseVisits.Add(new MovieWarehouseVisit() {
                 VisitDateTime = visitDate,
                 MovieRips = allMovieRipsInVisit
@@ -275,7 +277,7 @@ namespace FilmCRUD
                 }
                 catch (FileNameParserError)
                 {
-                    Log.Debug("---> PARSING ERROR: {MovieRipFileName}", fileName);
+                    Log.Debug("\t-> PARSING ERROR: {MovieRipFileName}", fileName);
                     parsingErrors.Add(fileName);
                 }
 
