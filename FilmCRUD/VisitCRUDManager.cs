@@ -35,8 +35,6 @@ namespace FilmCRUD
 
         public string WarehouseContentsTextFilesDirectory { get => _appSettingsManager.GetWarehouseContentsTextFilesDirectory(); }
 
-        public Dictionary<string, Dictionary<string, string>> ManualMovieRips { get => _appSettingsManager.GetManualMovieRips(); }
-
         public VisitCRUDManager(
             IUnitOfWork unitOfWork,
             IFileSystemIOWrapper fileSystemIOWrapper,
@@ -138,11 +136,13 @@ namespace FilmCRUD
 
             Log.Information("Movie files in visit - new: {NewRipCount}", _newRipFileNames.Count());
 
-            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => this.ManualMovieRips.ContainsKey(r));
+            Dictionary<string, Dictionary<string, string>> manualMovieRipsCfg = this._appSettingsManager.GetManualMovieRips();
+
+            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => manualMovieRipsCfg.ContainsKey(r));
             IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo).ToList();
 
             IEnumerable<MovieRip> newMovieRipsManual = GetManualMovieRipsFromDictionaries(
-                this.ManualMovieRips.Where(kvp => newRipFileNamesWithManualInfo.Contains(kvp.Key)),
+                manualMovieRipsCfg.Where(kvp => newRipFileNamesWithManualInfo.Contains(kvp.Key)),
                 out List<string> manualParsingErrors
                 );
 
@@ -177,8 +177,10 @@ namespace FilmCRUD
 
             IEnumerable<string> fileNamesInVisit = GetMovieRipFileNamesInVisit(filePath);
 
+            Dictionary<string, Dictionary<string, string>> manualMovieRipsCfg = this._appSettingsManager.GetManualMovieRips();
+
             IEnumerable<MovieRip> manualMovieRips = GetManualMovieRipsFromDictionaries(
-                this.ManualMovieRips.Where(kvp => fileNamesInVisit.Contains(kvp.Key)),
+                manualMovieRipsCfg.Where(kvp => fileNamesInVisit.Contains(kvp.Key)),
                 out List<string> manualParsingErrors);
 
             if (manualParsingErrors.Any())
