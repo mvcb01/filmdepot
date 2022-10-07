@@ -12,7 +12,6 @@ using FilmDomain.Entities;
 using FilmCRUD.Helpers;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
-using Serilog.Events;
 
 namespace FilmCRUD
 {
