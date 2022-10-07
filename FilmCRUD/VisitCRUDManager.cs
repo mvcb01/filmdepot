@@ -94,7 +94,6 @@ namespace FilmCRUD
             int errorCount = parsingErrors.Count();
             if (errorCount > 0)
             {
-                Log.Information("Parsing errors count: {Count}", errorCount);
                 this._parsingErrorsLogger?.Information("----------------------------------");
                 this._parsingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
                 this._parsingErrorsLogger?.Information("----------------------------------");
@@ -106,7 +105,8 @@ namespace FilmCRUD
 
             Log.Information("------------ VISIT SUMMARY ------------");
             Log.Information("MovieWarehouseVisit: {VisitDate}", visitDate.ToString("MMMM dd yyyy"));
-            Log.Information("Total rip count: {TotalRipCount}", allMovieRipsInVisit.Count());
+            Log.Information("Parsing errors count: {Count}", errorCount);
+            Log.Information("Total parsed rips count: {TotalRipCount}", allMovieRipsInVisit.Count());
             Log.Information("Pre existing rips: {PreExistingRips}", oldMovieRips.Count());
             Log.Information("New rips without manual info: {NewRips}", newMovieRips.Count()); 
             Log.Information("New rips with manual info: {NewRipsManual}", newMovieRipsManual.Count());
