@@ -98,6 +98,25 @@ namespace FilmCRUD
             IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
             IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
 
+            // local func to create the logger that saves parsing errors;
+            // made static since it does not need local variables or instance state
+            static ILogger GetLoggerForParsingErrors(string visitDateString)
+            {
+                bool validDate = DateTime.TryParseExact(visitDateString, "yyyyMMdd", null, DateTimeStyles.None, out _);
+                if (!validDate)
+                {
+                    Log.Error("Should be a date with format yyyyMMdd: {VisitDateString}", visitDateString);
+                    throw new FormatException(visitDateString);
+                }
+
+                return new LoggerConfiguration()
+                    .WriteTo.File(
+                        $"logs/parsing_errors_visit{visitDateString}.txt",
+                        rollingInterval: RollingInterval.Infinite,
+                        outputTemplate: _logOutputTemplate)
+                    .CreateLogger();
+            }
+
             if (opts.ListContents)
             {
                 var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager);
@@ -116,43 +135,24 @@ namespace FilmCRUD
             else if (!string.IsNullOrEmpty(opts.PersistContents))
             {
                 string visitDateString = opts.PersistContents;
+                ILogger parsingErrorsLogger = GetLoggerForParsingErrors(visitDateString);
+
                 Log.Information("Persisting warehouse contents for date {VisitDateString}", visitDateString);
-
-                bool validDate = DateTime.TryParseExact(visitDateString, "yyyyMMdd", null, DateTimeStyles.None, out _);
-                if (!validDate)
-                {
-                    Log.Error("Invalid value for persistcontents, should be a date with format yyyyMMdd: {VisitDateString}", visitDateString);
-                    throw new FormatException(visitDateString);
-                }
-
-                // new file per visit date
-                var parsingErrorsLogger = new LoggerConfiguration()
-                    .WriteTo.File(
-                    $"logs/parsing_errors_visit{visitDateString}.txt",
-                    rollingInterval: RollingInterval.Infinite,
-                    outputTemplate: _logOutputTemplate)
-                    .CreateLogger();
                 var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager, parsingErrorsLogger);
                 visitCrudManager.ReadWarehouseContentsAndRegisterVisit(visitDateString);
             }
             else if (!string.IsNullOrEmpty(opts.ProcessManual))
             {
-                string visitDate = opts.ProcessManual;
+                string visitDateString = opts.ProcessManual;
+                ILogger parsingErrorsLogger = GetLoggerForParsingErrors(visitDateString);
 
-                // one file per application run
-                var visitErrorLogger = new LoggerConfiguration()
-                    .WriteTo.File(
-                    $"logs/parsing_errors_{visitDate}.txt",
-                    rollingInterval: RollingInterval.Infinite)
-                    .CreateLogger();
-
-                var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager, visitErrorLogger);
-                Console.WriteLine($"Processing manual movie rips for visit date {visitDate}");
-                visitCrudManager.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDate);
+                Log.Information("Processing manually configured movie files for visit date {VisitDateString}", visitDateString);
+                var visitCrudManager = new VisitCRUDManager(unitOfWork, fileSystemIOWrapper, appSettingsManager, parsingErrorsLogger);
+                visitCrudManager.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDateString);
             }
             else
             {
-                Console.WriteLine("No action requested...");
+                Log.Information("No action requested...");
             }
         }
 

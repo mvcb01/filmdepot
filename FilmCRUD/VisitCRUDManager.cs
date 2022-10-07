@@ -160,7 +160,7 @@ namespace FilmCRUD
 
         public IEnumerable<string> GetMovieRipFileNamesInVisit(string filePath)
         {
-            return _fileSystemIOWrapper.ReadAllLines(filePath)
+            return this._fileSystemIOWrapper.ReadAllLines(filePath)
                 .Select(f => f.Trim())
                 .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!this._appSettingsManager.GetFilesToIgnore().Contains(f)));
         }
@@ -170,10 +170,12 @@ namespace FilmCRUD
             DateTime visitDate = DateTime.ParseExact(visitDateString, "yyyyMMdd", null);
             if (!this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
-                string _dateStr = visitDate.ToString("MMMM dd yyyy");
-                throw new ArgumentException($"There's no MovieWarehouseVisit for date {_dateStr}");
+                var dateStr = visitDate.ToString("MMMM dd yyyy");
+                Log.Error("There's no MovieWarehouseVisit for date {VisitDate}", dateStr);
+                throw new ArgumentException(dateStr);
             }
 
+            // exact match is guaranteed
             MovieWarehouseVisit visit = this._unitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(visitDate);
 
             string filePath = GetWarehouseContentsFilePath(visitDateString);
@@ -186,11 +188,14 @@ namespace FilmCRUD
                 manualMovieRipsCfg.Where(kvp => fileNamesInVisit.Contains(kvp.Key)),
                 out List<string> manualParsingErrors);
 
-            if (manualParsingErrors.Any())
+            int errorCount = manualParsingErrors.Count();
+            if (errorCount > 0)
             {
-                string errorsFpath = Path.Combine(WarehouseContentsTextFilesDirectory, $"parsing_errors_manual_{visitDateString}.txt");
-                string toWrite = "\nparsing errors: \n" + string.Join("\n", manualParsingErrors);
-                _fileSystemIOWrapper.WriteAllText(errorsFpath, toWrite);
+                Log.Information("Parsing error count for manually configured movie files: {Count}", errorCount);
+                this._parsingErrorsLogger?.Information("----------------------------------");
+                this._parsingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._parsingErrorsLogger?.Information("----------------------------------");
+                manualParsingErrors.ToList().ForEach(e => this._parsingErrorsLogger?.Error(e));
             }
 
             IEnumerable<MovieRip> movieRipsInVisit = this._unitOfWork.MovieRips.GetAllRipsInVisit(visit);
@@ -201,12 +206,14 @@ namespace FilmCRUD
                     MovieRip existingMovieRip = movieRipsInVisit.Where(r => r.FileName == movieRip.FileName).FirstOrDefault();
                     if (existingMovieRip == null)
                     {
-                        Console.WriteLine($"Adding: {movieRip.FileName}");
+                        // not too many files are expected to be manually configured so we use Information level
+                        Log.Information("Adding: {FileName}", movieRip.FileName);
                         visit.MovieRips.Add(movieRip);
                     }
                     else
                     {
-                        Console.WriteLine($"Updating: {existingMovieRip.FileName}");
+                        // not too many files are expected to be manually configured so we use Information level
+                        Log.Information("Updating: {FileName}", existingMovieRip.FileName);
                         existingMovieRip.ParsedTitle = movieRip.ParsedTitle;
                         existingMovieRip.ParsedReleaseDate = movieRip.ParsedReleaseDate;
                         existingMovieRip.ParsedRipQuality = movieRip.ParsedRipQuality;
@@ -214,8 +221,9 @@ namespace FilmCRUD
                         existingMovieRip.ParsedRipGroup = movieRip.ParsedRipGroup;
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Log.Error(ex, ex.Message);
                     this._unitOfWork.Dispose();
                     throw;
                 }
