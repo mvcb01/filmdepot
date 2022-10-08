@@ -132,7 +132,7 @@ namespace FilmCRUD
 
             // pre existing MovieRip entities in this visit
             // just a filter on all MovieRip entities, basically a left-semi join on the filenames
-            // faster than .Where(...Contains...)
+            // faster than .Where(...Contains...) when ripFileNamesInVisit has lots of elements
             IEnumerable<MovieRip> oldMovieRips = allMovieRipsInRepo
                 .Join(
                     ripFileNamesInVisit,
