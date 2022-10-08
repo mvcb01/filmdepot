@@ -118,6 +118,7 @@ namespace FilmCRUD
                 });
             _unitOfWork.MovieRips.AddRange(newMovieRips);
             _unitOfWork.Complete();
+
         }
 
         public (
@@ -127,12 +128,20 @@ namespace FilmCRUD
             IEnumerable<string> AllParsingErrors) GetMovieRipsInVisit(IEnumerable<string> ripFileNamesInVisit)
         {
             // pre existing MovieRip entities
-            IEnumerable<MovieRip> allMovieRipsInRepo = this._unitOfWork.MovieRips.GetAll();
+            IEnumerable<MovieRip> allMovieRipsInRepo = this._unitOfWork.MovieRips.GetAll().ToList();
 
             // pre existing MovieRip entities in this visit
-            IEnumerable<MovieRip> oldMovieRips = allMovieRipsInRepo.Where(m => ripFileNamesInVisit.Contains(m.FileName));
+            // just a filter on all MovieRip entities, basically a left-semi join on the filenames
+            // faster than .Where(...Contains...) when ripFileNamesInVisit has lots of elements
+            IEnumerable<MovieRip> oldMovieRips = allMovieRipsInRepo
+                .Join(
+                    ripFileNamesInVisit,
+                    mrip => mrip.FileName,
+                    filename => filename,
+                    (mrip, f) => mrip)
+                .ToList();
 
-            IEnumerable<string> _allRipFileNamesInRepo = allMovieRipsInRepo.GetFileNames().Select(f => f.Trim());
+            IEnumerable<string> _allRipFileNamesInRepo = allMovieRipsInRepo.GetFileNames().Select(f => f.Trim()).ToList();
             IEnumerable<string> _newRipFileNames = ripFileNamesInVisit.Where(f => !_allRipFileNamesInRepo.Contains(f));
 
             Log.Information("Movie files in visit - new: {NewRipCount}", _newRipFileNames.Count());
@@ -140,8 +149,8 @@ namespace FilmCRUD
             Dictionary<string, Dictionary<string, string>> manualMovieRipsCfg = this._appSettingsManager.GetManualMovieRips();
 
             // calling .ToList to trigger loading
-            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => manualMovieRipsCfg.ContainsKey(r)).ToList();
-            IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo).ToList();
+            IEnumerable<string> newRipFileNamesWithManualInfo = _newRipFileNames.Where(r => manualMovieRipsCfg.ContainsKey(r));
+            IEnumerable<string> newRipFileNamesWithoutManualInfo = _newRipFileNames.Except(newRipFileNamesWithManualInfo);
 
             IEnumerable<MovieRip> newMovieRipsManual = GetManualMovieRipsFromDictionaries(
                 manualMovieRipsCfg.Where(kvp => newRipFileNamesWithManualInfo.Contains(kvp.Key)),
