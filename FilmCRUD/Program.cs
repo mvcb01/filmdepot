@@ -366,10 +366,14 @@ namespace FilmCRUD
                 serviceProvider.GetRequiredService<IAppSettingsManager>(),
                 serviceProvider.GetRequiredService<IMovieAPIClient>());
 
-            Console.WriteLine("-------------");
+            // easier to see the beginning of each app run in the log files
+            Log.Information("----------------------------------");
+            Log.Information("------------ FilmCRUD ------------");
+            Log.Information("----------------------------------");
+
             if (opts.Search)
             {
-                Console.WriteLine($"Linking rips to movies...");
+                Log.Information($"Linking movie rips to movies...");
                 await ripToMovieLinker.SearchAndLinkAsync();
             }
             else if (opts.FromManualExtIds)
