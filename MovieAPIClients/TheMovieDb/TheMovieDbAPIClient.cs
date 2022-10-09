@@ -19,6 +19,8 @@ namespace MovieAPIClients.TheMovieDb
 
         private const string _movieDbBaseAddress = "https://api.themoviedb.org/3/";
 
+        public string ApiBaseAddress { get => _movieDbBaseAddress; }
+
         public TheMovieDbAPIClient(string apiKey)
         {
             this._apiKey = apiKey;
