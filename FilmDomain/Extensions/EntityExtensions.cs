@@ -17,11 +17,6 @@ namespace FilmDomain.Extensions
             return movieRips.Select(r => r.FileName);
         }
 
-        public static IEnumerable<DateTime> GetVisitDates(this IEnumerable<MovieWarehouseVisit> visits)
-        {
-            return visits.Select(v => v.VisitDateTime);
-        }
-
         public static IEnumerable<string> GetStringTokensWithoutPunctuation(this string value, bool removeDiacritics = false)
         {
             if (value == null) return Enumerable.Empty<string>();

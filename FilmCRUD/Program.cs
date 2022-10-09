@@ -52,11 +52,6 @@ namespace FilmCRUD
                 // ------------------
                 // PARSING ARGS AND EXECUTING
 
-                // easier to see the beginning of each app run in the log files
-                Log.Information("----------------------------------");
-                Log.Information("------------ FilmCRUD ------------");
-                Log.Information("----------------------------------");
-
                 ParserResult<object> parsed = Parser
                     .Default
                     .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);
@@ -94,10 +89,6 @@ namespace FilmCRUD
 
         private static void HandleVisitOptions(VisitOptions opts, ServiceProvider serviceProvider)
         {
-            IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
-            IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
-            IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
-
             // local func to create the logger that saves parsing errors;
             // made static since it does not need local variables or instance state
             static ILogger GetLoggerForParsingErrors(string visitDateString)
@@ -116,6 +107,23 @@ namespace FilmCRUD
                         outputTemplate: _logOutputTemplate)
                     .CreateLogger();
             }
+
+            IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+
+            if (opts.ListVisits)
+            {
+                // no need to log
+                ListVisits(unitOfWork);
+                return;
+            }
+
+            IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
+            IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
+
+            // easier to see the beginning of each app run in the log files
+            Log.Information("----------------------------------");
+            Log.Information("------------ FilmCRUD ------------");
+            Log.Information("----------------------------------");
 
             if (opts.ListContents)
             {
@@ -156,17 +164,21 @@ namespace FilmCRUD
             }
         }
 
+        // not a persistent method and so does not log
         private static void HandleScanRipsOptions(ScanRipsOptions opts, ServiceProvider serviceProvider)
         {
-            var scanRipsManager = new ScanRipsManager(serviceProvider.GetRequiredService<IUnitOfWork>());
+            IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
 
-            Console.WriteLine("-------------");
+            Console.WriteLine("------------");
             if (opts.ListVisits)
             {
-                ListVisits(scanRipsManager);
+                ListVisits(unitOfWork);
                 return;
             }
 
+            var scanRipsManager = new ScanRipsManager(unitOfWork);
+
+            // defaults to the latest visit if opts.Visit == null
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanRipsManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
@@ -223,20 +235,22 @@ namespace FilmCRUD
             {
                 Console.WriteLine("No action requested...");
             }
-            Console.WriteLine();
+            Console.WriteLine("------------");
         }
 
         private static void HandleScanMoviesOptions(ScanMoviesOptions opts, ServiceProvider serviceProvider)
         {
-            var scanMoviesManager = new ScanMoviesManager(serviceProvider.GetRequiredService<IUnitOfWork>());
+            IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+            var scanMoviesManager = new ScanMoviesManager(unitOfWork);
 
             Console.WriteLine("-------------");
             if (opts.ListVisits)
             {
-                ListVisits(scanMoviesManager);
+                ListVisits(unitOfWork);
                 return;
             }
 
+            // defaults to the latest visit if opts.Visit == null
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanMoviesManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
@@ -494,13 +508,13 @@ namespace FilmCRUD
             PrintVisitDiff(visitDiffStrategy(visitLeft, visitRight));
         }
 
-        private static void ListVisits(GeneralScanManager scanManager)
+        private static void ListVisits(IUnitOfWork unitOfWork)
         {
             Console.WriteLine("Dates for all warehouse visits:");
-            scanManager.ListVisitDates()
+            unitOfWork.MovieWarehouseVisits.GetVisitDates()
                 .OrderByDescending(dt => dt)
                 .ToList()
-                .ForEach(dt => Console.WriteLine(dt.ToString("MMMM dd yyyy")));
+                .ForEach(dt => Console.WriteLine($"{dt.ToString("MMMM dd yyyy")} - {dt:yyyyMMdd}"));
         }
 
         private static void PrintVisitDiff(Dictionary<string, IEnumerable<string>> visitDiff)
