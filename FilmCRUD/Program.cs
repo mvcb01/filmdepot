@@ -164,6 +164,7 @@ namespace FilmCRUD
             }
         }
 
+        // not a persistent method and so does not log
         private static void HandleScanRipsOptions(ScanRipsOptions opts, ServiceProvider serviceProvider)
         {
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
