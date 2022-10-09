@@ -423,7 +423,7 @@ namespace FilmCRUD
             IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
             IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
 
-            Log.Information("------------ API Client Policies ------------");
+            Log.Information("------- API Client Policies -------");
             Log.Information(
                 "Rate limit: maximum of {ExecutionCount} every {MS} milliseconds with max burst = {MaxBurst}",
                 rateLimitConfig.NumberOfExecutions,
@@ -433,7 +433,7 @@ namespace FilmCRUD
                 "Retry: maximum of {MaxRetry} retries, wait {Sleep} milliseconds between consecutive retries",
                 retryConfig.RetryCount,
                 retryConfig.SleepDuration.TotalMilliseconds);
-            Log.Information("--------------------------------------------");
+            Log.Information("-----------------------------------");
 
             initialDelay = rateLimitConfig.PerTimeSpan;
             return Policy.WrapAsync(
