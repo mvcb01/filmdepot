@@ -434,6 +434,7 @@ namespace FilmCRUD
                 "Retry: maximum of {MaxRetry} retries, wait {Sleep} milliseconds between consecutive retries",
                 retryConfig.RetryCount,
                 retryConfig.SleepDuration.TotalMilliseconds);
+            Log.Information("--------------------------------------------");
 
             initialDelay = rateLimitConfig.PerTimeSpan;
             return Policy.WrapAsync(
