@@ -22,7 +22,7 @@ namespace MovieAPIClients.TheMovieDb
         public TheMovieDbAPIClient(string apiKey)
         {
             this._apiKey = apiKey;
-            this._httpClient = new HttpClient() { BaseAddress = new Uri(this._movieDbBaseAddress) };
+            this._httpClient = new HttpClient() { BaseAddress = new Uri(_movieDbBaseAddress) };
         }
 
         public TheMovieDbAPIClient(IAppSettingsManager appSettingsManager) : this(appSettingsManager.GetApiKey("TheMovieDb"))
