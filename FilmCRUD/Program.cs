@@ -250,6 +250,7 @@ namespace FilmCRUD
                 return;
             }
 
+            // defaults to the latest visit if opts.Visit == null
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanMoviesManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
