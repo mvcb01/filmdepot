@@ -234,7 +234,6 @@ namespace FilmCRUD
             {
                 Console.WriteLine("No action requested...");
             }
-            Console.WriteLine();
         }
 
         private static void HandleScanMoviesOptions(ScanMoviesOptions opts, ServiceProvider serviceProvider)
