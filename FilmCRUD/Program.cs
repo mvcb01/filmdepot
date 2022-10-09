@@ -177,6 +177,7 @@ namespace FilmCRUD
 
             var scanRipsManager = new ScanRipsManager(unitOfWork);
 
+            // defaults to the latest visit if opts.Visit == null
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanRipsManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
