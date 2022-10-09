@@ -31,10 +31,5 @@ namespace FilmCRUD
             return this.UnitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(visit);
         }
 
-        public IEnumerable<DateTime> ListVisitDates()
-        {
-            return this.UnitOfWork.MovieWarehouseVisits.GetVisitDates();
-        }
-
     }
 }

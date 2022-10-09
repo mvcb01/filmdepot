@@ -158,11 +158,12 @@ namespace FilmCRUD
 
         private static void HandleScanRipsOptions(ScanRipsOptions opts, ServiceProvider serviceProvider)
         {
-            var scanRipsManager = new ScanRipsManager(serviceProvider.GetRequiredService<IUnitOfWork>());
+            IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+            var scanRipsManager = new ScanRipsManager(unitOfWork);
             Console.WriteLine("------------");
             if (opts.ListVisits)
             {
-                ListVisits(scanRipsManager);
+                ListVisits(unitOfWork);
                 return;
             }
 
@@ -227,12 +228,13 @@ namespace FilmCRUD
 
         private static void HandleScanMoviesOptions(ScanMoviesOptions opts, ServiceProvider serviceProvider)
         {
-            var scanMoviesManager = new ScanMoviesManager(serviceProvider.GetRequiredService<IUnitOfWork>());
+            IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+            var scanMoviesManager = new ScanMoviesManager(unitOfWork);
 
             Console.WriteLine("-------------");
             if (opts.ListVisits)
             {
-                ListVisits(scanMoviesManager);
+                ListVisits(unitOfWork);
                 return;
             }
 
@@ -493,10 +495,10 @@ namespace FilmCRUD
             PrintVisitDiff(visitDiffStrategy(visitLeft, visitRight));
         }
 
-        private static void ListVisits(GeneralScanManager scanManager)
+        private static void ListVisits(IUnitOfWork unitOfWork)
         {
             Console.WriteLine("Dates for all warehouse visits:");
-            scanManager.ListVisitDates()
+            unitOfWork.MovieWarehouseVisits.GetVisitDates()
                 .OrderByDescending(dt => dt)
                 .ToList()
                 .ForEach(dt => Console.WriteLine($"{dt.ToString("MMMM dd yyyy")} - {dt:yyyyMMdd}"));
