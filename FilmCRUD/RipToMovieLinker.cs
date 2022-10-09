@@ -201,14 +201,14 @@ namespace FilmCRUD
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
                 catch (RateLimitRejectedException ex)
                 {
-                    Log.Debug("Rate Limit error for {FileName}", movieRip.FileName);
-                    errors.Add($"Rate Limit error for {movieRip.FileName}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                    Log.Debug("RATE LIMIT ERROR: {FileName}", movieRip.FileName);
+                    errors.Add($"RATE LIMIT ERROR: {movieRip.FileName}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
                 }
                 // exceptions thrown in FindRelatedMovieEntityInRepo; used for control flow, probably shouldn't...
                 catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError)
                 {
-                    Log.Debug("Linking error for {FileName}", movieRip.FileName);
-                    errors.Add($"Linking error for {movieRip.FileName}: {ex.Message}");
+                    Log.Debug("LINKING ERROR: {FileName}", movieRip.FileName);
+                    errors.Add($"LINKING ERROR: {movieRip.FileName}: {ex.Message}");
                 }
                 // abort for other exceptions, entity changes are not persisted
                 catch (Exception ex)
