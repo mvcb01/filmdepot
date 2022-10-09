@@ -425,7 +425,7 @@ namespace FilmCRUD
 
             Log.Information("------- API Client Policies -------");
             Log.Information(
-                "Rate limit: maximum of {ExecutionCount} every {MS} milliseconds with max burst = {MaxBurst}",
+                "Rate limit: maximum of {ExecutionCount} calls every {MS} milliseconds; max burst = {MaxBurst}",
                 rateLimitConfig.NumberOfExecutions,
                 rateLimitConfig.PerTimeSpan.TotalMilliseconds,
                 rateLimitConfig.MaxBurst);
