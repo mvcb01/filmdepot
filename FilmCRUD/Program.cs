@@ -167,13 +167,15 @@ namespace FilmCRUD
         private static void HandleScanRipsOptions(ScanRipsOptions opts, ServiceProvider serviceProvider)
         {
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
-            var scanRipsManager = new ScanRipsManager(unitOfWork);
+
             Console.WriteLine("------------");
             if (opts.ListVisits)
             {
                 ListVisits(unitOfWork);
                 return;
             }
+
+            var scanRipsManager = new ScanRipsManager(unitOfWork);
 
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanRipsManager, opts.Visit);
 
