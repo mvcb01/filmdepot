@@ -111,9 +111,7 @@ namespace FilmCRUD
         }
 
         public async Task SearchAndLinkAsync()
-        {
-            Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
-            
+        {   
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
             int totalCount = ripsToLink.Count();
 
@@ -122,30 +120,48 @@ namespace FilmCRUD
             if (totalCount == 0) return;
 
             var ripsForOnlineSearch = new List<MovieRip>();
+            int foundLocallyCount = 0;
             var errors = new List<string>();
 
+            var logStepLocalSearch = (int)Math.Ceiling((decimal)totalCount / 20.0m);
+
+            Log.Information("Finding movies to link - locally...");
             // some movie rips may already have a match in some existing Movie entity
-            foreach (var movieRip in ripsToLink)
+            foreach (var (movieRip, idx) in ripsToLink.Select((value, idx) => (value, idx + 1)))
             {
                 try
                 {
-                    Movie movie = FindRelatedMovieEntityInRepo(movieRip);
-                    if (movie != null)
+                    Movie movieToLink = FindRelatedMovieEntityInRepo(movieRip);
+                    if (movieToLink != null)
                     {
-                        movieRip.Movie = movie;
+                        Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
+                        movieRip.Movie = movieToLink;
+                        foundLocallyCount++;
                     }
                     else
                     {
+                        Log.Debug("NOT FOUND: {FileName}", movieRip.FileName);
                         ripsForOnlineSearch.Add(movieRip);
                     }
                 }
                 // exceptions thrown in FindRelatedMovieEntityInRepo
                 catch (MultipleMovieMatchesError ex)
                 {
-                    var msg = $"MultipleMovieMatchesError: {movieRip.FileName}: \n{ex.Message}";
-                    errors.Add(msg);
+                    Log.Debug("NOT FOUND, MULTIPLE MATCHES IN LOCAL REPO: {FileName}", movieRip.FileName);
+                    errors.Add(ex.Message);
+                }
+
+                if (idx % logStepLocalSearch == 0 || idx == totalCount)
+                {
+                    Log.Information("Finding movies to link - locally: {Index} out of {Total}", idx, totalCount);
                 }
             }
+
+            int onlineSearchCount = ripsForOnlineSearch.Count;
+            var logStepOnlineSearch = (int)Math.Ceiling((decimal)onlineSearchCount / 20.0m);
+
+            Log.Information("Total movies found locally: {FoundLocallyCount}", foundLocallyCount);
+            Log.Information("Count for online search: {OnlineSearchCount}", onlineSearchCount);
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
@@ -156,7 +172,9 @@ namespace FilmCRUD
             var newMovieEntities = new List<Movie>();
 
             // TODO: investigate how to properly use the limit+retry policy with Task.WhenAll...
-            foreach (var movieRip in ripsForOnlineSearch)
+            Log.Information("Finding movies to link - online...");
+            Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
+            foreach (var (movieRip, idx) in ripsForOnlineSearch.Select((value, idx) => (value, idx + 1)))
             {
                 try
                 {
@@ -164,6 +182,8 @@ namespace FilmCRUD
                         () => _movieAPIClient.SearchMovieAsync(movieRip.ParsedTitle)
                     );
                     Movie movieToLink = PickMovieFromSearchResults(searchResults, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+
+                    Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
 
                     // we may already have the "same" Movie from a previous searched
                     Movie existingMovie = newMovieEntities.Where(m => m.ExternalId == movieToLink.ExternalId).FirstOrDefault();
@@ -181,23 +201,30 @@ namespace FilmCRUD
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
                 catch (RateLimitRejectedException ex)
                 {
+                    Log.Debug("Rate Limit error for {FileName}", movieRip.FileName);
                     errors.Add($"Rate Limit error for {movieRip.FileName}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
                 }
                 // exceptions thrown in FindRelatedMovieEntityInRepo; used for control flow, probably shouldn't...
                 catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError)
                 {
+                    Log.Debug("Linking error for {FileName}", movieRip.FileName);
                     errors.Add($"Linking error for {movieRip.FileName}: {ex.Message}");
                 }
                 // abort for other exceptions, entity changes are not persisted
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Log.Fatal(ex.Message);
                     this._unitOfWork.Dispose();
                     throw;
                 }
+
+                if (idx % logStepOnlineSearch == 0 || idx == onlineSearchCount)
+                {
+                    Log.Information("Finding movies to link - online: {Index} out of {Total}", idx, onlineSearchCount);
+                }
             }
 
-            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
-            PersistErrorInfo($"linking_errors_{dtNow}.txt", errors);
+            errors.ForEach(e => this._linkingErrorsLogger?.Error(e));
 
             this._unitOfWork.Complete();
         }

@@ -360,11 +360,19 @@ namespace FilmCRUD
 
         private static async Task HandleLinkOptions(LinkOptions opts, ServiceProvider serviceProvider)
         {
+            ILogger linkingErrorsLogger = new LoggerConfiguration()
+                    .WriteTo.File(
+                        $"logs/linking_errors_.txt",
+                        rollingInterval: RollingInterval.Day,
+                        outputTemplate: _logOutputTemplate)
+                    .CreateLogger();
+
             var ripToMovieLinker = new RipToMovieLinker(
                 serviceProvider.GetRequiredService<IUnitOfWork>(),
                 serviceProvider.GetRequiredService<IFileSystemIOWrapper>(),
                 serviceProvider.GetRequiredService<IAppSettingsManager>(),
-                serviceProvider.GetRequiredService<IMovieAPIClient>());
+                serviceProvider.GetRequiredService<IMovieAPIClient>(),
+                linkingErrorsLogger);
 
             // easier to see the beginning of each app run in the log files
             Log.Information("----------------------------------");
