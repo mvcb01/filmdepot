@@ -55,7 +55,10 @@ namespace DepotTests.CRUDTests
                 .Returns(this._movieRepositoryMock.Object);
 
             this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
+            
             this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
+            this._movieAPIClientMock.SetupGet(m => m.ApiBaseAddress).Returns("https://api.dummy.org/");
+            
             this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
 
             this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
