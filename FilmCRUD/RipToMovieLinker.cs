@@ -232,7 +232,6 @@ namespace FilmCRUD
                 this._linkingErrorsLogger?.Information("----------------------------------");
                 errors.ForEach(e => this._linkingErrorsLogger?.Error(e));
             }
-            
 
             this._unitOfWork.Complete();
         }
