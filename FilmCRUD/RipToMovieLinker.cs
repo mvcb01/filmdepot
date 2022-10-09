@@ -32,6 +32,8 @@ namespace FilmCRUD
 
         private IMovieAPIClient _movieAPIClient { get; init; }
 
+        private readonly ILogger _linkingErrorsLogger;
+
         public RipToMovieLinker(
             IUnitOfWork unitOfWork,
             IFileSystemIOWrapper fileSystemIOWrapper,
@@ -43,6 +45,14 @@ namespace FilmCRUD
             this._appSettingsManager = appSettingsManager;
             this._movieAPIClient = movieAPIClient;
         }
+
+
+        public RipToMovieLinker(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient,
+            ILogger linkingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) => this._linkingErrorsLogger = linkingErrorsLogger;
 
         /// <summary>
         /// Gets MovieRips not linked to a Movie, excluding RipFilenamesToIgnore and also those with ManualExternalIds
