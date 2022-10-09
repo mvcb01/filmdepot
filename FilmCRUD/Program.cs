@@ -405,7 +405,6 @@ namespace FilmCRUD
                 Console.WriteLine("No action requested...");
             }
             Console.WriteLine();
-
         }
 
         public static async Task HandleFetchOptions(FetchOptions opts, ServiceProvider serviceProvider)
