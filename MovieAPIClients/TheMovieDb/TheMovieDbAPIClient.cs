@@ -17,12 +17,12 @@ namespace MovieAPIClients.TheMovieDb
 
         private HttpClient _httpClient { get; init; }
 
-        public const string MovieDbBaseAddress = "https://api.themoviedb.org/3/";
+        private const string _movieDbBaseAddress = "https://api.themoviedb.org/3/";
 
         public TheMovieDbAPIClient(string apiKey)
         {
             this._apiKey = apiKey;
-            this._httpClient = new HttpClient() { BaseAddress = new Uri(MovieDbBaseAddress) };
+            this._httpClient = new HttpClient() { BaseAddress = new Uri(this._movieDbBaseAddress) };
         }
 
         public TheMovieDbAPIClient(IAppSettingsManager appSettingsManager) : this(appSettingsManager.GetApiKey("TheMovieDb"))
