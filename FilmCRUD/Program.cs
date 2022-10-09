@@ -89,15 +89,6 @@ namespace FilmCRUD
 
         private static void HandleVisitOptions(VisitOptions opts, ServiceProvider serviceProvider)
         {
-            // easier to see the beginning of each app run in the log files
-            Log.Information("----------------------------------");
-            Log.Information("------------ FilmCRUD ------------");
-            Log.Information("----------------------------------");
-
-            IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
-            IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
-            IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
-
             // local func to create the logger that saves parsing errors;
             // made static since it does not need local variables or instance state
             static ILogger GetLoggerForParsingErrors(string visitDateString)
@@ -116,6 +107,23 @@ namespace FilmCRUD
                         outputTemplate: _logOutputTemplate)
                     .CreateLogger();
             }
+
+            IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+
+            if (opts.ListVisits)
+            {
+                // no need to log
+                ListVisits(unitOfWork);
+                return;
+            }
+
+            IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
+            IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
+
+            // easier to see the beginning of each app run in the log files
+            Log.Information("----------------------------------");
+            Log.Information("------------ FilmCRUD ------------");
+            Log.Information("----------------------------------");
 
             if (opts.ListContents)
             {
