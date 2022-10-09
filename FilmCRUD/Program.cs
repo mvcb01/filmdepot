@@ -499,7 +499,7 @@ namespace FilmCRUD
             scanManager.ListVisitDates()
                 .OrderByDescending(dt => dt)
                 .ToList()
-                .ForEach(dt => Console.WriteLine(dt.ToString("MMMM dd yyyy")));
+                .ForEach(dt => Console.WriteLine($"{dt.ToString("MMMM dd yyyy")} - {dt:yyyyMMdd}"));
         }
 
         private static void PrintVisitDiff(Dictionary<string, IEnumerable<string>> visitDiff)
