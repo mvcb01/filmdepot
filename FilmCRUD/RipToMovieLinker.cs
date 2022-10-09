@@ -224,7 +224,15 @@ namespace FilmCRUD
                 }
             }
 
-            errors.ForEach(e => this._linkingErrorsLogger?.Error(e));
+            if (errors.Any())
+            {
+                Log.Information("Saving linking errors in separate file...");
+                this._linkingErrorsLogger?.Information("----------------------------------");
+                this._linkingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._linkingErrorsLogger?.Information("----------------------------------");
+                errors.ForEach(e => this._linkingErrorsLogger?.Error(e));
+            }
+            
 
             this._unitOfWork.Complete();
         }
@@ -415,6 +423,17 @@ namespace FilmCRUD
             //      outermost (at left) to innermost (at right)
             IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
             IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
+
+            Log.Information("Active policies for API calls:");
+            Log.Information(
+                "Rate limit: maximum of {ExecutionCount} every {MS} milliseconds with max burst = {MaxBurst}",
+                rateLimitConfig.NumberOfExecutions,
+                rateLimitConfig.PerTimeSpan.TotalMilliseconds,
+                rateLimitConfig.MaxBurst);
+            Log.Information(
+                "Retry: maximum of {MaxRetry} retries, wait {Sleep} milliseconds between consecutive retries",
+                retryConfig.RetryCount,
+                retryConfig.SleepDuration.TotalMilliseconds);
 
             initialDelay = rateLimitConfig.PerTimeSpan;
             return Policy.WrapAsync(
