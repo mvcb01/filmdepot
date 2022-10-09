@@ -18,6 +18,7 @@ using MovieAPIClients;
 using MovieAPIClients.Interfaces;
 using System.Net.Http;
 using System.Net;
+using Serilog;
 
 namespace FilmCRUD
 {
@@ -101,9 +102,14 @@ namespace FilmCRUD
 
         public async Task SearchAndLinkAsync()
         {
+            Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
+            
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
+            int totalCount = ripsToLink.Count();
 
-            if (!ripsToLink.Any()) return;
+            Log.Information("MovieRips to link - total count: {TotalCount}", totalCount);
+
+            if (totalCount == 0) return;
 
             var ripsForOnlineSearch = new List<MovieRip>();
             var errors = new List<string>();

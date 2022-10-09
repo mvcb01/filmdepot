@@ -373,7 +373,7 @@ namespace FilmCRUD
 
             if (opts.Search)
             {
-                Log.Information($"Linking movie rips to movies...");
+                Log.Information("Linking movie rips to movies...");
                 await ripToMovieLinker.SearchAndLinkAsync();
             }
             else if (opts.FromManualExtIds)
