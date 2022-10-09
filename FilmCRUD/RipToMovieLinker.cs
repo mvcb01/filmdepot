@@ -424,7 +424,7 @@ namespace FilmCRUD
             IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
             IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
 
-            Log.Information("Active policies for API calls:");
+            Log.Information("------------ API Client Policies ------------");
             Log.Information(
                 "Rate limit: maximum of {ExecutionCount} every {MS} milliseconds with max burst = {MaxBurst}",
                 rateLimitConfig.NumberOfExecutions,
