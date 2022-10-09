@@ -33,7 +33,7 @@ namespace FilmCRUD
 
         public IEnumerable<DateTime> ListVisitDates()
         {
-            return this.UnitOfWork.MovieWarehouseVisits.GetAll().GetVisitDates();
+            return this.UnitOfWork.MovieWarehouseVisits.GetVisitDates();
         }
 
     }

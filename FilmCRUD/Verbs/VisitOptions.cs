@@ -20,5 +20,8 @@ namespace FilmCRUD.Verbs
             SetName = "ReprocessingExistingVisit",
             HelpText = "process the manuallly configured movie rips for an existing visit; a visit date is expected")]
         public string ProcessManual { get; set; }
+
+        [Option('l', "listvisits", SetName = "ListVisitsOption", HelpText = "helper; list dates for all past visits")]
+        public bool ListVisits { get; set; }
     }
 }
