@@ -159,7 +159,7 @@ namespace FilmCRUD
         private static void HandleScanRipsOptions(ScanRipsOptions opts, ServiceProvider serviceProvider)
         {
             var scanRipsManager = new ScanRipsManager(serviceProvider.GetRequiredService<IUnitOfWork>());
-            Console.WriteLine("-------------");
+            Console.WriteLine("------------");
             if (opts.ListVisits)
             {
                 ListVisits(scanRipsManager);
