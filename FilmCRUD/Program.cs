@@ -52,11 +52,6 @@ namespace FilmCRUD
                 // ------------------
                 // PARSING ARGS AND EXECUTING
 
-                // easier to see the beginning of each app run in the log files
-                Log.Information("----------------------------------");
-                Log.Information("------------ FilmCRUD ------------");
-                Log.Information("----------------------------------");
-
                 ParserResult<object> parsed = Parser
                     .Default
                     .ParseArguments<VisitOptions, ScanRipsOptions, ScanMoviesOptions, LinkOptions, FetchOptions>(args);
@@ -94,6 +89,11 @@ namespace FilmCRUD
 
         private static void HandleVisitOptions(VisitOptions opts, ServiceProvider serviceProvider)
         {
+            // easier to see the beginning of each app run in the log files
+            Log.Information("----------------------------------");
+            Log.Information("------------ FilmCRUD ------------");
+            Log.Information("----------------------------------");
+
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
             IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
             IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
