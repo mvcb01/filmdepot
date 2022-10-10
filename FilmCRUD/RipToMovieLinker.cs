@@ -238,11 +238,11 @@ namespace FilmCRUD
                 errors.ForEach(e => this._linkingErrorsLogger?.Error(e));
             }
 
-            Log.Information("------- LINK SUMMARY -------");
+            Log.Information("----------- LINK SUMMARY -----------");
             Log.Information("Movies found locally: {FoundLocallyCount}", foundLocallyCount);
             Log.Information("Movies found online: {FoundOnlineCount}", foundOnlineCount);
             Log.Information("Linking errors: {ErrorCount}", errorCount);
-            Log.Information("-----------------------------------");
+            Log.Information("------------------------------------");
 
             this._unitOfWork.Complete();
         }
@@ -251,7 +251,11 @@ namespace FilmCRUD
         {
             Dictionary<string, int> allManualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
-            if (!allManualExternalIds.Any()) return;
+            int allManualExternalIdsCount = allManualExternalIds.Count();
+
+            Log.Information("Manually configured external ids - count: {AllManualExternalIdsCount}", allManualExternalIdsCount);
+
+            if (allManualExternalIdsCount == 0) return;
 
             // filtering the manual configuration to consider only movierips whose filename exists in the repo
             IEnumerable<string> ripFileNamesInRepo = this._unitOfWork.MovieRips.GetAll().GetFileNames();
@@ -266,6 +270,11 @@ namespace FilmCRUD
                 .Distinct()
                 .Where(_id => this._unitOfWork.Movies.FindByExternalId(_id) == null);
 
+            int externalIdsForApiCallsCount = externalIdsForApiCalls.Count();
+            var logStepApiCalls = (int)Math.Ceiling((decimal)externalIdsForApiCallsCount / 20.0m);
+
+            Log.Information("External ids for API calls - count: {ExternalIdsForApiCallsCount}", externalIdsForApiCallsCount);
+
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
             // letting the token bucket fill for the current timespan...
@@ -273,54 +282,97 @@ namespace FilmCRUD
 
             var newMovies = new List<Movie>();
             var errors = new Dictionary<int, string>();
-            foreach (int externalId in externalIdsForApiCalls)
+
+            Log.Information("Finding movies from manual external ids - online...");
+            Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
+            foreach (var (externalId, idx) in externalIdsForApiCalls.Select((value, idx) => (value, idx + 1)))
             {
                 try
                 {
                     MovieSearchResult movieInfo = await policyWrap.ExecuteAsync(() => this._movieAPIClient.GetMovieInfoAsync(externalId));
+                    
                     // explicit casting is defined
-                    newMovies.Add((Movie)movieInfo);
+                    Movie movie = (Movie)movieInfo;
+                    newMovies.Add(movie);
+
+                    Log.Debug("FOUND: ExternalId = {ExternalId} -> {Movie}", externalId, movie.ToString());
                 }
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
                 catch (RateLimitRejectedException ex)
                 {
+                    Log.Debug("RATE LIMIT ERROR: ExternalId = {ExternalId}", externalId);
                     errors.Add(
                         externalId,
-                        $"Rate Limit error for external id {externalId}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                        $"RATE LIMIT ERROR: ExternalId = {externalId}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
                 }
                 // invalid external ids should not stop execution
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                 {
-                    errors.Add(externalId, $"Invalid external id: {externalId}");
+                    Log.Debug("NOT FOUND: ExternalId = {ExternalId}", externalId);
+                    errors.Add(externalId, $"NOT FOUND: ExternalId = {externalId}; {ex.Message}");
                 }
                 // abort for other exceptions, entity changes are not persisted
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Log.Fatal(ex.Message);
                     this._unitOfWork.Dispose();
                     throw;
                 }
+
+                if (idx % logStepApiCalls == 0 || idx == externalIdsForApiCallsCount)
+                {
+                    Log.Information("Finding movies from external ids - online: {Index} out of {Total}", idx, externalIdsForApiCallsCount);
+                }
             }
 
+            int manualExternalIdsCount = manualExternalIds.Count();
+            int logStep = (int)Math.Ceiling((decimal)manualExternalIdsCount / 20.0m);
+
+            Log.Information("Linking MovieRips to movies from manual external ids...");
             // links each manually configured movierip to a new Movie entity or to an existing one
-            foreach (var item in manualExternalIds)
+            foreach (var (item, idx) in manualExternalIds.Select((value, idx) => (value, idx + 1)))
             {
                 // ignore external ids that caused ratelimit or notfound errors
-                if (errors.ContainsKey(item.Value)) continue;
+                if (errors.ContainsKey(item.Value))
+                {
+                    Log.Debug("External id = {ExternalId} had an error, skipping...", item.Value);
+                    continue;
+                }
 
                 MovieRip ripToLink = this._unitOfWork.MovieRips.FindByFileName(item.Key);
 
                 if (externalIdsForApiCalls.Contains(item.Value))
                 {
+                    Log.Debug("FOUND ONLINE: linking to movie with External id = {ExternalId} - {FileName}", item.Value, item.Key);
                     ripToLink.Movie = newMovies.Where(m => m.ExternalId == item.Value).First();
                 }
                 else
                 {
+                    Log.Debug("FOUND LOCALLY: linking to movie with External id = {ExternalId} - {FileName}", item.Value, item.Key);
                     ripToLink.Movie = this._unitOfWork.Movies.FindByExternalId(item.Value);
+                }
+
+                if (idx % logStep == 0 || idx == manualExternalIdsCount)
+                {
+                    Log.Information("Linking MovieRips to movies from manual external ids: {Index} out of {Total}", idx, manualExternalIdsCount);
                 }
             }
 
-            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
-            PersistErrorInfo($"manual_linking_errors_{dtNow}.txt", errors.Values);
+            int errorCount = errors.Count();
+            if (errorCount > 0)
+            {
+                Log.Information("Saving manual external ids linking errors in separate file...");
+                this._linkingErrorsLogger?.Information("----------------------------------");
+                this._linkingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._linkingErrorsLogger?.Information("----------------------------------");
+                errors.Values.ToList().ForEach(e => this._linkingErrorsLogger?.Error(e));
+            }
+
+            Log.Information("------- MANUAL EXTERNAL IDS LINK SUMMARY -------");
+            Log.Information("Total manual external ids: {ManualExternalIdsCount}", manualExternalIdsCount);
+            Log.Information("New movies found online: {FoundOnlineCount}", newMovies.Count());
+            Log.Information("Api call errors: {ErrorCount}", errorCount);
+            Log.Information("------------------------------------------------");
 
             this._unitOfWork.Complete();
         }

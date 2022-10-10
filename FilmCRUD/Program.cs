@@ -386,7 +386,7 @@ namespace FilmCRUD
             }
             else if (opts.FromManualExtIds)
             {
-                Console.WriteLine($"Linking rips to movies - manually configured external ids...");
+                Log.Information($"Linking movie rips to movies - from manually configured external ids...");
                 await ripToMovieLinker.LinkFromManualExternalIdsAsync();
             }
             else if (opts.GetUnlinkedRips)
