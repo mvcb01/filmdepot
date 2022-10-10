@@ -160,7 +160,7 @@ namespace FilmCRUD
             int onlineSearchCount = ripsForOnlineSearch.Count;
             var logStepOnlineSearch = (int)Math.Ceiling((decimal)onlineSearchCount / 20.0m);
 
-            Log.Information("Total movies found locally: {FoundLocallyCount}", foundLocallyCount);
+            
             Log.Information("Count for online search: {OnlineSearchCount}", onlineSearchCount);
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
@@ -171,6 +171,8 @@ namespace FilmCRUD
             // to save the new Movie entities linked to some MovieRip
             var newMovieEntities = new List<Movie>();
 
+            int foundOnlineCount = 0;
+            
             // TODO: investigate how to properly use the limit+retry policy with Task.WhenAll...
             Log.Information("Finding movies to link - online...");
             Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
@@ -184,6 +186,8 @@ namespace FilmCRUD
                     Movie movieToLink = PickMovieFromSearchResults(searchResults, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
 
                     Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
+
+                    foundOnlineCount++;
 
                     // we may already have the "same" Movie from a previous searched
                     Movie existingMovie = newMovieEntities.Where(m => m.ExternalId == movieToLink.ExternalId).FirstOrDefault();
@@ -224,7 +228,8 @@ namespace FilmCRUD
                 }
             }
 
-            if (errors.Any())
+            int errorCount = errors.Count();
+            if (errorCount > 0)
             {
                 Log.Information("Saving linking errors in separate file...");
                 this._linkingErrorsLogger?.Information("----------------------------------");
@@ -232,6 +237,12 @@ namespace FilmCRUD
                 this._linkingErrorsLogger?.Information("----------------------------------");
                 errors.ForEach(e => this._linkingErrorsLogger?.Error(e));
             }
+
+            Log.Information("------- LINK SUMMARY -------");
+            Log.Information("Movies found locally: {FoundLocallyCount}", foundLocallyCount);
+            Log.Information("Movies found online: {FoundOnlineCount}", foundOnlineCount);
+            Log.Information("Linking errors: {ErrorCount}", errorCount);
+            Log.Information("-----------------------------------");
 
             this._unitOfWork.Complete();
         }
