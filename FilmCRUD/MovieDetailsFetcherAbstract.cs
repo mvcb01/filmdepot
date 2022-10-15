@@ -105,6 +105,7 @@ namespace FilmCRUD
             var logStep = (int)Math.Ceiling((decimal)moviesWithoutDetailsCount / 20.0m);
 
             Log.Information("Finding movies details for detail type {DetailType}...", DetailType);
+            Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
             // TODO: investigate how to properly use the limit+retry policy with Task.WhenAll...
             foreach (var (movie, idx) in moviesWithoutDetails.Select((value, idx) => (value, idx + 1)))
             {

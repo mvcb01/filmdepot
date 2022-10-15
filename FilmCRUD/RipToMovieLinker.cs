@@ -400,6 +400,8 @@ namespace FilmCRUD
             await Task.Delay(initialDelay);
 
             int validCount = 0;
+            Log.Information("validating manually configured external ids...");
+            Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
             foreach (var item in manualExternalIds)
             {
                 try
