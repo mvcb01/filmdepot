@@ -399,24 +399,13 @@ namespace FilmCRUD
             }
             else if (opts.ValidateManualExtIds)
             {
-                Console.WriteLine($"Validating manually configured external ids...");
-                Console.WriteLine();
-                Dictionary<string, Dictionary<string, int>> validStatus = await ripToMovieLinker.ValidateManualExternalIdsAsync();
-                foreach (var item in validStatus)
-                {
-                    Dictionary<string, int> innerDict = item.Value;
-
-                    Console.WriteLine(item.Key);
-                    IEnumerable<string> linesToPrint = innerDict.Select(kvp => $"{kvp.Key} : {kvp.Value}");
-                    Console.WriteLine(string.Join('\n', linesToPrint));
-                    Console.WriteLine();
-                }
+                Log.Information($"Validating manually configured external ids...");
+                await ripToMovieLinker.ValidateManualExternalIdsAsync();
             }
             else
             {
-                Console.WriteLine("No action requested...");
+                Log.Information("No action requested...");
             }
-            Console.WriteLine();
         }
 
         public static async Task HandleFetchOptions(FetchOptions opts, ServiceProvider serviceProvider)

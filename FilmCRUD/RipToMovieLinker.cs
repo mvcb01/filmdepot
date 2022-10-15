@@ -382,38 +382,57 @@ namespace FilmCRUD
             return this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
         }
 
-        public async Task<Dictionary<string, Dictionary<string, int>>> ValidateManualExternalIdsAsync()
+        public async Task ValidateManualExternalIdsAsync()
         {
             Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
+
+            int manualExternalIdsCount = manualExternalIds.Count();
+
+            if (manualExternalIdsCount == 0)
+            {
+                Log.Information("No manually configured external ids");
+                return;
+            }
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
             // letting the token bucket fill for the current timespan...
             await Task.Delay(initialDelay);
 
-            var validIds = new List<int>();
-            var rateLimitErrors = new List<string>();
+            int validCount = 0;
             foreach (var item in manualExternalIds)
             {
                 try
                 {
                     bool isValid = await policyWrap.ExecuteAsync(() => this._movieAPIClient.ExternalIdExistsAsync(item.Value));
-                    if (isValid) validIds.Add(item.Value);   
+                    if (isValid)
+                    {
+                        validCount++;
+                        Log.Information("VALID: {FileName} - {ExternalId}", item.Key, item.Value);
+                    }
+                    else
+                    {
+                        Log.Information("INVALID: {FileName} - {ExternalId}", item.Key, item.Value);
+                    }
                 }
-                // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run//
+                // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
+                // also no need to save them for later persistence, standard logs should suffice since not too many manual ext ids are expected
                 catch (RateLimitRejectedException ex)
                 {
-                    rateLimitErrors.Add($"Rate Limit error while validating external id {item.Value}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                    Log.Information(
+                        "Rate limit error: Rate Limit error while validating external id {FileName} - {ExternalId}; Retry after milliseconds {RetryAfter}; Message: {Msg}",
+                        item.Key,
+                        item.Value,
+                        ex.RetryAfter.TotalMilliseconds,
+                        ex.Message);
                 }
             }
 
-            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
-            PersistErrorInfo($"external_ids_validation_errors_{dtNow}.txt", rateLimitErrors);
-
-            return new Dictionary<string, Dictionary<string, int>>() {
-                ["valid"] = manualExternalIds.Where(kvp => validIds.Contains(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
-                ["invalid"] = manualExternalIds.Where(kvp => !validIds.Contains(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
-            };
+            Log.Information("------- VALIDATE MANUAL EXTERNAL IDS SUMMARY -------");
+            Log.Information("Total manual external ids: {ManualExternalIdsCount}", manualExternalIdsCount);
+            Log.Information("Valid: {ValidCount}", validCount);
+            Log.Information("Invalid: {ValidCount}", manualExternalIdsCount - validCount);
+            Log.Information("------------------------------------------------");
         }
 
         public static Movie PickMovieFromSearchResults(IEnumerable<MovieSearchResult> searchResultAll, string parsedTitle, string parsedReleaseDate = null)

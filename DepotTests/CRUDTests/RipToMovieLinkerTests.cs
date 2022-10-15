@@ -788,7 +788,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new Dictionary<string, int>());
 
             // act
-            var _ = await this._ripToMovieLinker.ValidateManualExternalIdsAsync();
+            await this._ripToMovieLinker.ValidateManualExternalIdsAsync();
 
             // assert
             this._movieAPIClientMock.Verify(m => m.ExternalIdExistsAsync(It.IsAny<int>()), Times.Never);
