@@ -335,7 +335,7 @@ namespace FilmCRUD
                 // ignore external ids that caused ratelimit or notfound errors
                 if (errors.ContainsKey(item.Value))
                 {
-                    Log.Debug("External id = {ExternalId} had an error, skipping...", item.Value);
+                    Log.Debug("Skipping External id = {ExternalId}...", item.Value);
                     continue;
                 }
 

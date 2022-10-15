@@ -99,7 +99,8 @@ namespace FilmCRUD
                     Log.Error("Should be a date with format yyyyMMdd: {VisitDateString}", visitDateString);
                     throw new FormatException(visitDateString);
                 }
-
+                
+                // default MinimumLevel is Information
                 return new LoggerConfiguration()
                     .WriteTo.File(
                         $"logs/parsing_errors_visit{visitDateString}.txt",
@@ -360,9 +361,10 @@ namespace FilmCRUD
 
         private static async Task HandleLinkOptions(LinkOptions opts, ServiceProvider serviceProvider)
         {
+            // default MinimumLevel is Information
             ILogger linkingErrorsLogger = new LoggerConfiguration()
                     .WriteTo.File(
-                        $"logs/linking_errors_.txt",
+                        "logs/linking_errors_.txt",
                         rollingInterval: RollingInterval.Day,
                         outputTemplate: _logOutputTemplate)
                     .CreateLogger();
@@ -410,18 +412,23 @@ namespace FilmCRUD
 
         public static async Task HandleFetchOptions(FetchOptions opts, ServiceProvider serviceProvider)
         {
+            // local func to create the logger for each fetcher class;
+            // made static since it does not need local variables or instance state
+            static ILogger GetLoggerForFetchingErrors(string filePath)
+            {
+                // default MinimumLevel is Information
+                return new LoggerConfiguration()
+                    .WriteTo.File(
+                        filePath,
+                        rollingInterval: RollingInterval.Day,
+                        outputTemplate: _logOutputTemplate)
+                    .CreateLogger();
+            }
 
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
             IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
             IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
             IMovieAPIClient movieAPIClient = serviceProvider.GetRequiredService<IMovieAPIClient>();
-
-            ILogger fetchingErrorsLogger = new LoggerConfiguration()
-                .WriteTo.File(
-                    $"logs/fetching_errors_.txt",
-                    rollingInterval: RollingInterval.Day,
-                    outputTemplate: _logOutputTemplate)
-                .CreateLogger();
 
             // easier to see the beginning of each app run in the log files
             Log.Information("----------------------------------");
@@ -430,18 +437,21 @@ namespace FilmCRUD
 
             if (opts.Genres)
             {
+                ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_genres_.txt");
                 var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching genres for movies...");
                 await genresFetcher.PopulateDetails();
             }
             else if (opts.Actors)
             {
+                ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_actors_.txt");
                 var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching actors for movies...");
                 await actorsFetcher.PopulateDetails();
             }
             else if (opts.Directors)
             {
+                ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_directors_.txt");
                 var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching directors for movies...");
                 await directorsFetcher.PopulateDetails();
