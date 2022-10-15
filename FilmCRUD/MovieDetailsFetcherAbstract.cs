@@ -204,6 +204,12 @@ namespace FilmCRUD
                 errors.ForEach(e => this._fetchingErrorsLogger?.Error(e));
             }
 
+            Log.Information("------- FETCH SUMMARY: {DetailType} -------", DetailType);
+            Log.Information("Searched movie count: {MovieCount}", moviesWithoutDetailsCount);
+            Log.Information("New detail entities found: {NewDetailCount}", newDetailEntities.Count());
+            Log.Information("Error count: {ErrorCount}", errorCount);
+            Log.Information("------------------------------------------------");
+
             this._unitOfWork.Complete();
         }
 
