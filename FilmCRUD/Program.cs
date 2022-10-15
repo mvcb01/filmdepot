@@ -416,22 +416,34 @@ namespace FilmCRUD
             IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
             IMovieAPIClient movieAPIClient = serviceProvider.GetRequiredService<IMovieAPIClient>();
 
+            ILogger fetchingErrorsLogger = new LoggerConfiguration()
+                .WriteTo.File(
+                    $"logs/fetching_errors_.txt",
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate: _logOutputTemplate)
+                .CreateLogger();
+
+            // easier to see the beginning of each app run in the log files
+            Log.Information("----------------------------------");
+            Log.Information("------------ FilmCRUD ------------");
+            Log.Information("----------------------------------");
+
             if (opts.Genres)
             {
-                var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
-                Console.WriteLine("fetching genres for movies...");
+                var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
+                Log.Information("Fetching genres for movies...");
                 await genresFetcher.PopulateDetails();
             }
             else if (opts.Actors)
             {
-                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
-                Console.WriteLine("fetching actors for movies...");
+                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
+                Log.Information("Fetching actors for movies...");
                 await actorsFetcher.PopulateDetails();
             }
             else if (opts.Directors)
             {
-                var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
-                Console.WriteLine("fetching directors for movies...");
+                var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
+                Log.Information("Fetching directors for movies...");
                 await directorsFetcher.PopulateDetails();
             }
             else if (opts.Keywords)
