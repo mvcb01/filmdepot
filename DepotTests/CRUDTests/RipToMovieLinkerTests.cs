@@ -780,45 +780,6 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task ValidateManualExternalIdsAsync_WithManualExternalIds_ShouldReturnCorrectResult()
-        {
-            // arrange
-            int validExternalId0 = 101;
-            int validExternalId1 = 102;
-            int invalidExternalId = 103;
-            var manualExternalIds = new Dictionary<string, int>() {
-                { "The.Twilight.Samurai.2002.1080p.BluRay.x264-CiNEFiLE[rarbg]", validExternalId0 },
-                { "Gummo.1997.DVDRip.XviD-DiSSOLVE", invalidExternalId },
-                { "Wake.In.Fright.1971.1080p.BluRay.H264.AAC-RARBG", validExternalId1 }
-            };
-            this._appSettingsManagerMock
-                .Setup(a => a.GetManualExternalIds())
-                .Returns(manualExternalIds);
-            this._movieAPIClientMock
-                .Setup(m => m.ExternalIdExistsAsync(It.Is<int>(i => i == validExternalId0 | i == validExternalId1)))
-                .ReturnsAsync(true);
-            this._movieAPIClientMock
-                .Setup(m => m.ExternalIdExistsAsync(It.Is<int>(i => i == invalidExternalId)))
-                .ReturnsAsync(false);
-
-            // act
-            Dictionary<string, Dictionary<string, int>> actual = await this._ripToMovieLinker.ValidateManualExternalIdsAsync();
-
-            // assert
-            var expected = new Dictionary<string, Dictionary<string, int>>() {
-                ["valid"] = new Dictionary<string, int>() {
-                    { "The.Twilight.Samurai.2002.1080p.BluRay.x264-CiNEFiLE[rarbg]", validExternalId0 },
-                    { "Wake.In.Fright.1971.1080p.BluRay.H264.AAC-RARBG", validExternalId1 }
-                },
-                ["invalid"] = new Dictionary<string, int>() {
-                    { "Gummo.1997.DVDRip.XviD-DiSSOLVE", invalidExternalId }
-                }
-            };
-
-            actual.Should().BeEquivalentTo(expected);
-        }
-
-        [Fact]
         public async Task ValidateManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiClient()
         {
             // arrange
