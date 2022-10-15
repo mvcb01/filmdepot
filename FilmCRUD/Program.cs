@@ -410,6 +410,7 @@ namespace FilmCRUD
 
         public static async Task HandleFetchOptions(FetchOptions opts, ServiceProvider serviceProvider)
         {
+
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
             IFileSystemIOWrapper fileSystemIOWrapper = serviceProvider.GetRequiredService<IFileSystemIOWrapper>();
             IAppSettingsManager appSettingsManager = serviceProvider.GetRequiredService<IAppSettingsManager>();
