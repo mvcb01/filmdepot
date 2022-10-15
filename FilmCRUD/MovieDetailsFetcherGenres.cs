@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Serilog;
 using ConfigUtils.Interfaces;
 using FilmCRUD.Interfaces;
 using FilmDomain.Entities;
@@ -17,6 +18,14 @@ namespace FilmCRUD
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient)
             : base(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) { }
+
+        public MovieDetailsFetcherGenres(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient,
+            ILogger fetchingErrorsLogger)
+            : base(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger) { }
 
         public override IEnumerable<Genre> GetExistingDetailEntitiesInRepo() => this._unitOfWork.Genres.GetAll();
 
