@@ -524,15 +524,6 @@ namespace FilmCRUD
             );
         }
 
-        private void PersistErrorInfo(string filename, IEnumerable<string> errors)
-        {
-            if (!errors.Any()) return;
-
-            string errorsFpath = Path.Combine(this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(), filename);
-            System.Console.WriteLine($"Linking errors, details in: {errorsFpath}");
-            this._fileSystemIOWrapper.WriteAllText(errorsFpath, string.Join("\n\n", errors));
-        }
-
     }
 
 }
