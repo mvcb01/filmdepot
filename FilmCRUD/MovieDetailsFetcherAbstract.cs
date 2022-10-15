@@ -31,7 +31,7 @@ namespace FilmCRUD
         where TAPIResult : IExternalEntity
     {
 
-        public static string DetailType {  get => typeof(TDetailEntity).Name; }
+        public static string DetailType { get => typeof(TDetailEntity).Name; }
 
         protected IUnitOfWork _unitOfWork { get; init; }
 
