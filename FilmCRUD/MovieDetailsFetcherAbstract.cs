@@ -1,19 +1,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net;
+using System.IO;
+using System;
 using Polly;
+using Polly.RateLimit;
+using Polly.Wrap;
+using Serilog;
 using ConfigUtils.Interfaces;
 using FilmCRUD.Interfaces;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients.Interfaces;
-using Polly.Wrap;
 using FilmCRUD.Helpers;
-using Polly.RateLimit;
-using System.Net.Http;
-using System.Net;
-using System.IO;
-using System;
+
 
 namespace FilmCRUD
 {
@@ -30,11 +32,13 @@ namespace FilmCRUD
     {
         protected IUnitOfWork _unitOfWork { get; init; }
 
+        protected IMovieAPIClient _movieAPIClient { get; init; }
+
+        private readonly ILogger _fetchingErrorsLogger;
+
         private IFileSystemIOWrapper _fileSystemIOWrapper { get; init; }
 
         private IAppSettingsManager _appSettingsManager { get; init; }
-
-        protected IMovieAPIClient _movieAPIClient { get; init; }
 
         public MovieDetailsFetcherAbstract(
             IUnitOfWork unitOfWork,
@@ -47,6 +51,13 @@ namespace FilmCRUD
             this._appSettingsManager = appSettingsManager;
             this._movieAPIClient = movieAPIClient;
         }
+
+        public MovieDetailsFetcherAbstract(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient,
+            ILogger fetchingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) => this._fetchingErrorsLogger = fetchingErrorsLogger;
 
         public abstract IEnumerable<Movie> GetMoviesWithoutDetails();
 
