@@ -30,6 +30,9 @@ namespace FilmCRUD
         where TDetailEntity : IExternalEntity
         where TAPIResult : IExternalEntity
     {
+
+        public static string DetailType {  get => typeof(TDetailEntity).Name; }
+
         protected IUnitOfWork _unitOfWork { get; init; }
 
         protected IMovieAPIClient _movieAPIClient { get; init; }
@@ -74,7 +77,18 @@ namespace FilmCRUD
         public async Task PopulateDetails()
         {
             IEnumerable<Movie> moviesWithoutDetails = GetMoviesWithoutDetails();
-            if (!moviesWithoutDetails.Any()) return;
+
+            int moviesWithoutDetailsCount = moviesWithoutDetails.Count();
+
+            if (moviesWithoutDetailsCount == 0)
+            {
+                Log.Information("No movies without details for detail type {DetailType}", DetailType);
+                return;
+            }
+            else
+            {
+                Log.Information("Movies without details for detail type {DetailType} - total count: {TotalCount}", DetailType, moviesWithoutDetailsCount);
+            }
 
             // notice the order of the async policies when calling Policy.WrapAsync:
             //      outermost (at left) to innermost (at right)
