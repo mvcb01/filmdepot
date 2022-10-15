@@ -360,21 +360,33 @@ namespace FilmCRUD
 
         private static async Task HandleLinkOptions(LinkOptions opts, ServiceProvider serviceProvider)
         {
+            ILogger linkingErrorsLogger = new LoggerConfiguration()
+                    .WriteTo.File(
+                        $"logs/linking_errors_.txt",
+                        rollingInterval: RollingInterval.Day,
+                        outputTemplate: _logOutputTemplate)
+                    .CreateLogger();
+
             var ripToMovieLinker = new RipToMovieLinker(
                 serviceProvider.GetRequiredService<IUnitOfWork>(),
                 serviceProvider.GetRequiredService<IFileSystemIOWrapper>(),
                 serviceProvider.GetRequiredService<IAppSettingsManager>(),
-                serviceProvider.GetRequiredService<IMovieAPIClient>());
+                serviceProvider.GetRequiredService<IMovieAPIClient>(),
+                linkingErrorsLogger);
 
-            Console.WriteLine("-------------");
+            // easier to see the beginning of each app run in the log files
+            Log.Information("----------------------------------");
+            Log.Information("------------ FilmCRUD ------------");
+            Log.Information("----------------------------------");
+
             if (opts.Search)
             {
-                Console.WriteLine($"Linking rips to movies...");
+                Log.Information("Linking movie rips to movies - searching...");
                 await ripToMovieLinker.SearchAndLinkAsync();
             }
             else if (opts.FromManualExtIds)
             {
-                Console.WriteLine($"Linking rips to movies - manually configured external ids...");
+                Log.Information($"Linking movie rips to movies - from manually configured external ids...");
                 await ripToMovieLinker.LinkFromManualExternalIdsAsync();
             }
             else if (opts.GetUnlinkedRips)
@@ -387,25 +399,13 @@ namespace FilmCRUD
             }
             else if (opts.ValidateManualExtIds)
             {
-                Console.WriteLine($"Validating manually configured external ids...");
-                Console.WriteLine();
-                Dictionary<string, Dictionary<string, int>> validStatus = await ripToMovieLinker.ValidateManualExternalIdsAsync();
-                foreach (var item in validStatus)
-                {
-                    Dictionary<string, int> innerDict = item.Value;
-
-                    Console.WriteLine(item.Key);
-                    IEnumerable<string> linesToPrint = innerDict.Select(kvp => $"{kvp.Key} : {kvp.Value}");
-                    Console.WriteLine(string.Join('\n', linesToPrint));
-                    Console.WriteLine();
-                }
+                Log.Information($"Validating manually configured external ids...");
+                await ripToMovieLinker.ValidateManualExternalIdsAsync();
             }
             else
             {
-                Console.WriteLine("No action requested...");
+                Log.Information("No action requested...");
             }
-            Console.WriteLine();
-
         }
 
         public static async Task HandleFetchOptions(FetchOptions opts, ServiceProvider serviceProvider)

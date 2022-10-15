@@ -5,6 +5,8 @@ namespace MovieAPIClients.Interfaces
 {
     public interface IMovieAPIClient
     {
+        string ApiBaseAddress { get; }
+
         Task<IEnumerable<MovieSearchResult>> SearchMovieAsync(string title);
 
         Task<bool> ExternalIdExistsAsync(int externalId);

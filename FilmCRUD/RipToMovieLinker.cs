@@ -18,6 +18,7 @@ using MovieAPIClients;
 using MovieAPIClients.Interfaces;
 using System.Net.Http;
 using System.Net;
+using Serilog;
 
 namespace FilmCRUD
 {
@@ -31,6 +32,8 @@ namespace FilmCRUD
 
         private IMovieAPIClient _movieAPIClient { get; init; }
 
+        private readonly ILogger _linkingErrorsLogger;
+
         public RipToMovieLinker(
             IUnitOfWork unitOfWork,
             IFileSystemIOWrapper fileSystemIOWrapper,
@@ -42,6 +45,14 @@ namespace FilmCRUD
             this._appSettingsManager = appSettingsManager;
             this._movieAPIClient = movieAPIClient;
         }
+
+
+        public RipToMovieLinker(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient,
+            ILogger linkingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) => this._linkingErrorsLogger = linkingErrorsLogger;
 
         /// <summary>
         /// Gets MovieRips not linked to a Movie, excluding RipFilenamesToIgnore and also those with ManualExternalIds
@@ -100,36 +111,57 @@ namespace FilmCRUD
         }
 
         public async Task SearchAndLinkAsync()
-        {
+        {   
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
+            int totalCount = ripsToLink.Count();
 
-            if (!ripsToLink.Any()) return;
+            Log.Information("MovieRips to link - total count: {TotalCount}", totalCount);
+
+            if (totalCount == 0) return;
 
             var ripsForOnlineSearch = new List<MovieRip>();
+            int foundLocallyCount = 0;
             var errors = new List<string>();
 
+            var logStepLocalSearch = (int)Math.Ceiling((decimal)totalCount / 20.0m);
+
+            Log.Information("Finding movies to link - locally...");
             // some movie rips may already have a match in some existing Movie entity
-            foreach (var movieRip in ripsToLink)
+            foreach (var (movieRip, idx) in ripsToLink.Select((value, idx) => (value, idx + 1)))
             {
                 try
                 {
-                    Movie movie = FindRelatedMovieEntityInRepo(movieRip);
-                    if (movie != null)
+                    Movie movieToLink = FindRelatedMovieEntityInRepo(movieRip);
+                    if (movieToLink != null)
                     {
-                        movieRip.Movie = movie;
+                        Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
+                        movieRip.Movie = movieToLink;
+                        foundLocallyCount++;
                     }
                     else
                     {
+                        Log.Debug("NOT FOUND: {FileName}", movieRip.FileName);
                         ripsForOnlineSearch.Add(movieRip);
                     }
                 }
                 // exceptions thrown in FindRelatedMovieEntityInRepo
                 catch (MultipleMovieMatchesError ex)
                 {
-                    var msg = $"MultipleMovieMatchesError: {movieRip.FileName}: \n{ex.Message}";
-                    errors.Add(msg);
+                    Log.Debug("NOT FOUND, MULTIPLE MATCHES IN LOCAL REPO: {FileName}", movieRip.FileName);
+                    errors.Add(ex.Message);
+                }
+
+                if (idx % logStepLocalSearch == 0 || idx == totalCount)
+                {
+                    Log.Information("Finding movies to link - locally: {Index} out of {Total}", idx, totalCount);
                 }
             }
+
+            int onlineSearchCount = ripsForOnlineSearch.Count;
+            var logStepOnlineSearch = (int)Math.Ceiling((decimal)onlineSearchCount / 20.0m);
+
+            
+            Log.Information("Count for online search: {OnlineSearchCount}", onlineSearchCount);
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
@@ -139,8 +171,12 @@ namespace FilmCRUD
             // to save the new Movie entities linked to some MovieRip
             var newMovieEntities = new List<Movie>();
 
+            int foundOnlineCount = 0;
+            
             // TODO: investigate how to properly use the limit+retry policy with Task.WhenAll...
-            foreach (var movieRip in ripsForOnlineSearch)
+            Log.Information("Finding movies to link - online...");
+            Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
+            foreach (var (movieRip, idx) in ripsForOnlineSearch.Select((value, idx) => (value, idx + 1)))
             {
                 try
                 {
@@ -148,6 +184,10 @@ namespace FilmCRUD
                         () => _movieAPIClient.SearchMovieAsync(movieRip.ParsedTitle)
                     );
                     Movie movieToLink = PickMovieFromSearchResults(searchResults, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+
+                    Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
+
+                    foundOnlineCount++;
 
                     // we may already have the "same" Movie from a previous searched
                     Movie existingMovie = newMovieEntities.Where(m => m.ExternalId == movieToLink.ExternalId).FirstOrDefault();
@@ -165,23 +205,44 @@ namespace FilmCRUD
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
                 catch (RateLimitRejectedException ex)
                 {
-                    errors.Add($"Rate Limit error for {movieRip.FileName}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                    Log.Debug("RATE LIMIT ERROR: {FileName}", movieRip.FileName);
+                    errors.Add($"RATE LIMIT ERROR: {movieRip.FileName}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
                 }
                 // exceptions thrown in FindRelatedMovieEntityInRepo; used for control flow, probably shouldn't...
                 catch (Exception ex) when (ex is NoSearchResultsError || ex is MultipleSearchResultsError)
                 {
-                    errors.Add($"Linking error for {movieRip.FileName}: {ex.Message}");
+                    Log.Debug("LINKING ERROR: {FileName}", movieRip.FileName);
+                    errors.Add($"LINKING ERROR: {movieRip.FileName}: {ex.Message}");
                 }
                 // abort for other exceptions, entity changes are not persisted
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Log.Fatal(ex.Message);
                     this._unitOfWork.Dispose();
                     throw;
                 }
+
+                if (idx % logStepOnlineSearch == 0 || idx == onlineSearchCount)
+                {
+                    Log.Information("Finding movies to link - online: {Index} out of {Total}", idx, onlineSearchCount);
+                }
             }
 
-            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
-            PersistErrorInfo($"linking_errors_{dtNow}.txt", errors);
+            int errorCount = errors.Count();
+            if (errorCount > 0)
+            {
+                Log.Information("Saving linking errors in separate file...");
+                this._linkingErrorsLogger?.Information("----------------------------------");
+                this._linkingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._linkingErrorsLogger?.Information("----------------------------------");
+                errors.ForEach(e => this._linkingErrorsLogger?.Error(e));
+            }
+
+            Log.Information("----------- LINK SUMMARY -----------");
+            Log.Information("Movies found locally: {FoundLocallyCount}", foundLocallyCount);
+            Log.Information("Movies found online: {FoundOnlineCount}", foundOnlineCount);
+            Log.Information("Linking errors: {ErrorCount}", errorCount);
+            Log.Information("------------------------------------");
 
             this._unitOfWork.Complete();
         }
@@ -190,7 +251,11 @@ namespace FilmCRUD
         {
             Dictionary<string, int> allManualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
-            if (!allManualExternalIds.Any()) return;
+            int allManualExternalIdsCount = allManualExternalIds.Count();
+
+            Log.Information("Manually configured external ids - count: {AllManualExternalIdsCount}", allManualExternalIdsCount);
+
+            if (allManualExternalIdsCount == 0) return;
 
             // filtering the manual configuration to consider only movierips whose filename exists in the repo
             IEnumerable<string> ripFileNamesInRepo = this._unitOfWork.MovieRips.GetAll().GetFileNames();
@@ -205,6 +270,11 @@ namespace FilmCRUD
                 .Distinct()
                 .Where(_id => this._unitOfWork.Movies.FindByExternalId(_id) == null);
 
+            int externalIdsForApiCallsCount = externalIdsForApiCalls.Count();
+            var logStepApiCalls = (int)Math.Ceiling((decimal)externalIdsForApiCallsCount / 20.0m);
+
+            Log.Information("External ids for API calls - count: {ExternalIdsForApiCallsCount}", externalIdsForApiCallsCount);
+
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
             // letting the token bucket fill for the current timespan...
@@ -212,54 +282,97 @@ namespace FilmCRUD
 
             var newMovies = new List<Movie>();
             var errors = new Dictionary<int, string>();
-            foreach (int externalId in externalIdsForApiCalls)
+
+            Log.Information("Finding movies from manual external ids - online...");
+            Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
+            foreach (var (externalId, idx) in externalIdsForApiCalls.Select((value, idx) => (value, idx + 1)))
             {
                 try
                 {
                     MovieSearchResult movieInfo = await policyWrap.ExecuteAsync(() => this._movieAPIClient.GetMovieInfoAsync(externalId));
+                    
                     // explicit casting is defined
-                    newMovies.Add((Movie)movieInfo);
+                    Movie movie = (Movie)movieInfo;
+                    newMovies.Add(movie);
+
+                    Log.Debug("FOUND: ExternalId = {ExternalId} -> {Movie}", externalId, movie.ToString());
                 }
                 // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
                 catch (RateLimitRejectedException ex)
                 {
+                    Log.Debug("RATE LIMIT ERROR: ExternalId = {ExternalId}", externalId);
                     errors.Add(
                         externalId,
-                        $"Rate Limit error for external id {externalId}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                        $"RATE LIMIT ERROR: ExternalId = {externalId}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
                 }
                 // invalid external ids should not stop execution
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                 {
-                    errors.Add(externalId, $"Invalid external id: {externalId}");
+                    Log.Debug("NOT FOUND: ExternalId = {ExternalId}", externalId);
+                    errors.Add(externalId, $"NOT FOUND: ExternalId = {externalId}; {ex.Message}");
                 }
                 // abort for other exceptions, entity changes are not persisted
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Log.Fatal(ex.Message);
                     this._unitOfWork.Dispose();
                     throw;
                 }
+
+                if (idx % logStepApiCalls == 0 || idx == externalIdsForApiCallsCount)
+                {
+                    Log.Information("Finding movies from external ids - online: {Index} out of {Total}", idx, externalIdsForApiCallsCount);
+                }
             }
 
+            int manualExternalIdsCount = manualExternalIds.Count();
+            int logStep = (int)Math.Ceiling((decimal)manualExternalIdsCount / 20.0m);
+
+            Log.Information("Linking MovieRips to movies from manual external ids...");
             // links each manually configured movierip to a new Movie entity or to an existing one
-            foreach (var item in manualExternalIds)
+            foreach (var (item, idx) in manualExternalIds.Select((value, idx) => (value, idx + 1)))
             {
                 // ignore external ids that caused ratelimit or notfound errors
-                if (errors.ContainsKey(item.Value)) continue;
+                if (errors.ContainsKey(item.Value))
+                {
+                    Log.Debug("External id = {ExternalId} had an error, skipping...", item.Value);
+                    continue;
+                }
 
                 MovieRip ripToLink = this._unitOfWork.MovieRips.FindByFileName(item.Key);
 
                 if (externalIdsForApiCalls.Contains(item.Value))
                 {
+                    Log.Debug("FOUND ONLINE: linking to movie with External id = {ExternalId} - {FileName}", item.Value, item.Key);
                     ripToLink.Movie = newMovies.Where(m => m.ExternalId == item.Value).First();
                 }
                 else
                 {
+                    Log.Debug("FOUND LOCALLY: linking to movie with External id = {ExternalId} - {FileName}", item.Value, item.Key);
                     ripToLink.Movie = this._unitOfWork.Movies.FindByExternalId(item.Value);
+                }
+
+                if (idx % logStep == 0 || idx == manualExternalIdsCount)
+                {
+                    Log.Information("Linking MovieRips to movies from manual external ids: {Index} out of {Total}", idx, manualExternalIdsCount);
                 }
             }
 
-            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
-            PersistErrorInfo($"manual_linking_errors_{dtNow}.txt", errors.Values);
+            int errorCount = errors.Count();
+            if (errorCount > 0)
+            {
+                Log.Information("Saving manual external ids linking errors in separate file...");
+                this._linkingErrorsLogger?.Information("----------------------------------");
+                this._linkingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._linkingErrorsLogger?.Information("----------------------------------");
+                errors.Values.ToList().ForEach(e => this._linkingErrorsLogger?.Error(e));
+            }
+
+            Log.Information("------- MANUAL EXTERNAL IDS LINK SUMMARY -------");
+            Log.Information("Total manual external ids: {ManualExternalIdsCount}", manualExternalIdsCount);
+            Log.Information("New movies found online: {FoundOnlineCount}", newMovies.Count());
+            Log.Information("Api call errors: {ErrorCount}", errorCount);
+            Log.Information("------------------------------------------------");
 
             this._unitOfWork.Complete();
         }
@@ -269,38 +382,57 @@ namespace FilmCRUD
             return this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
         }
 
-        public async Task<Dictionary<string, Dictionary<string, int>>> ValidateManualExternalIdsAsync()
+        public async Task ValidateManualExternalIdsAsync()
         {
             Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
+
+            int manualExternalIdsCount = manualExternalIds.Count();
+
+            if (manualExternalIdsCount == 0)
+            {
+                Log.Information("No manually configured external ids");
+                return;
+            }
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
             // letting the token bucket fill for the current timespan...
             await Task.Delay(initialDelay);
 
-            var validIds = new List<int>();
-            var rateLimitErrors = new List<string>();
+            int validCount = 0;
             foreach (var item in manualExternalIds)
             {
                 try
                 {
                     bool isValid = await policyWrap.ExecuteAsync(() => this._movieAPIClient.ExternalIdExistsAsync(item.Value));
-                    if (isValid) validIds.Add(item.Value);   
+                    if (isValid)
+                    {
+                        validCount++;
+                        Log.Information("VALID: {FileName} - {ExternalId}", item.Key, item.Value);
+                    }
+                    else
+                    {
+                        Log.Information("INVALID: {FileName} - {ExternalId}", item.Key, item.Value);
+                    }
                 }
-                // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run//
+                // in case we exceed IRetryPolicyConfig.RetryCount; no need to throw again, just let the others run
+                // also no need to save them for later persistence, standard logs should suffice since not too many manual ext ids are expected
                 catch (RateLimitRejectedException ex)
                 {
-                    rateLimitErrors.Add($"Rate Limit error while validating external id {item.Value}; Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                    Log.Information(
+                        "Rate limit error: Rate Limit error while validating external id {FileName} - {ExternalId}; Retry after milliseconds {RetryAfter}; Message: {Msg}",
+                        item.Key,
+                        item.Value,
+                        ex.RetryAfter.TotalMilliseconds,
+                        ex.Message);
                 }
             }
 
-            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
-            PersistErrorInfo($"external_ids_validation_errors_{dtNow}.txt", rateLimitErrors);
-
-            return new Dictionary<string, Dictionary<string, int>>() {
-                ["valid"] = manualExternalIds.Where(kvp => validIds.Contains(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
-                ["invalid"] = manualExternalIds.Where(kvp => !validIds.Contains(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
-            };
+            Log.Information("------- VALIDATE MANUAL EXTERNAL IDS SUMMARY -------");
+            Log.Information("Total manual external ids: {ManualExternalIdsCount}", manualExternalIdsCount);
+            Log.Information("Valid: {ValidCount}", validCount);
+            Log.Information("Invalid: {ValidCount}", manualExternalIdsCount - validCount);
+            Log.Information("------------------------------------------------");
         }
 
         public static Movie PickMovieFromSearchResults(IEnumerable<MovieSearchResult> searchResultAll, string parsedTitle, string parsedReleaseDate = null)
@@ -373,20 +505,23 @@ namespace FilmCRUD
             IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
             IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
 
+            Log.Information("------- API Client Policies -------");
+            Log.Information(
+                "Rate limit: maximum of {ExecutionCount} calls every {MS} milliseconds; max burst = {MaxBurst}",
+                rateLimitConfig.NumberOfExecutions,
+                rateLimitConfig.PerTimeSpan.TotalMilliseconds,
+                rateLimitConfig.MaxBurst);
+            Log.Information(
+                "Retry: maximum of {MaxRetry} retries, wait {Sleep} milliseconds between consecutive retries",
+                retryConfig.RetryCount,
+                retryConfig.SleepDuration.TotalMilliseconds);
+            Log.Information("-----------------------------------");
+
             initialDelay = rateLimitConfig.PerTimeSpan;
             return Policy.WrapAsync(
                 APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(retryConfig),
                 APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig)
             );
-        }
-
-        private void PersistErrorInfo(string filename, IEnumerable<string> errors)
-        {
-            if (!errors.Any()) return;
-
-            string errorsFpath = Path.Combine(this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(), filename);
-            System.Console.WriteLine($"Linking errors, details in: {errorsFpath}");
-            this._fileSystemIOWrapper.WriteAllText(errorsFpath, string.Join("\n\n", errors));
         }
 
     }
