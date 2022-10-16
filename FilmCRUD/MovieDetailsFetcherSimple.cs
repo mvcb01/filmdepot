@@ -53,119 +53,39 @@ namespace FilmCRUD
 
         public async Task PopulateMovieKeywords()
         {
-            IEnumerable<Movie> moviesWithoutKeywords = this._unitOfWork.Movies.GetMoviesWithoutKeywords();
+            Func<IEnumerable<Movie>> moviesWithoutDetailsGetterFunc = this._unitOfWork.Movies.GetMoviesWithoutKeywords;
 
-            var (kwds, errors) = await GetDetailsSimple<IEnumerable<string>>(moviesWithoutKeywords, this._movieAPIClient.GetMovieKeywordsAsync, "Keywords");
+            Func<int, Task<IEnumerable<string>>> detailsGetterFunc = this._movieAPIClient.GetMovieKeywordsAsync;
 
-            int moviesWithoutKeywordsCount = moviesWithoutKeywords.Count();
-            var logStep = (int)Math.Ceiling((decimal)moviesWithoutKeywordsCount / 20.0m);
+            Action<Movie, IEnumerable<string>> detailsPopulatorAction = (movie, kwds) => movie.Keywords = kwds.ToList();
 
-            Log.Information("Assigning new {DetailType} details to movie entities...", "Keywords");
-            try
-            {
-                foreach (var (movie, idx) in moviesWithoutKeywords.Select((value, idx) => (value, idx + 1)))
-                {
-                    if (!kwds.ContainsKey(movie.ExternalId))
-                    {
-                        Log.Debug("Skipping movie with ExternalId = {ExternalId}...", movie.ExternalId);
-                        continue;
-                    }
-                    movie.Keywords = kwds[movie.ExternalId].ToList();
-
-                    if (idx % logStep == 0 || idx == moviesWithoutKeywordsCount)
-                    {
-                        Log.Information("Assigning new {DetailType} details to movie entities - {Index} out of {Total}", "Keywords", idx, moviesWithoutKeywordsCount);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex.Message);
-                this._unitOfWork.Dispose();
-                throw;
-            }
-
-            int errorCount = errors.Count();
-            if (errorCount > 0)
-            {
-                Log.Information("Saving feching errors in separate file...");
-                this._fetchingErrorsLogger?.Information("----------------------------------");
-                this._fetchingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
-                this._fetchingErrorsLogger?.Information("----------------------------------");
-                errors.ForEach(e => this._fetchingErrorsLogger?.Error(e));
-            }
-
-            Log.Information("------- FETCH DETAILS SUMMARY: {DetailType} -------", "Keywords");
-            Log.Information("Searched movie count: {MovieCount}", moviesWithoutKeywordsCount);
-            Log.Information("Error count: {ErrorCount}", errorCount);
-            Log.Information("------------------------------------------------");
-
-            this._unitOfWork.Complete();
+            await PopulateDetailsSimple<IEnumerable<string>>(moviesWithoutDetailsGetterFunc, detailsGetterFunc, detailsPopulatorAction, "Keywords");
         }
 
         public async Task PopulateMovieIMDBIds()
         {
-            IEnumerable<Movie> moviesWithoutIMDBId = this._unitOfWork.Movies.GetMoviesWithoutImdbId();
+            Func<IEnumerable<Movie>> moviesWithoutDetailsGetterFunc = this._unitOfWork.Movies.GetMoviesWithoutImdbId;
 
-            var (imdbIds, errors) = await GetDetailsSimple<string>(moviesWithoutIMDBId, this._movieAPIClient.GetMovieIMDBIdAsync, "IMDBIds");
+            Func<int, Task<string>> detailsGetterFunc = this._movieAPIClient.GetMovieIMDBIdAsync;
 
-            int moviesWithoutIMDBIdCount = moviesWithoutIMDBId.Count();
-            var logStep = (int)Math.Ceiling((decimal)moviesWithoutIMDBIdCount / 20.0m);
+            Action<Movie, string> detailsPopulatorAction = (movie, imdbId) => movie.IMDBId = imdbId;
 
-            Log.Information("Assigning new {DetailType} details to movie entities...", "IMDBId");
-            try
-            {
-                foreach (var (movie, idx) in moviesWithoutIMDBId.Select((value, idx) => (value, idx + 1)))
-                {
-                    if (!imdbIds.ContainsKey(movie.ExternalId))
-                    {
-                        Log.Debug("Skipping movie with ExternalId = {ExternalId}...", movie.ExternalId);
-                        continue;
-                    }
-
-                    movie.IMDBId = imdbIds[movie.ExternalId];
-
-                    if (idx % logStep == 0 || idx == moviesWithoutIMDBIdCount)
-                    {
-                        Log.Information("Assigning new {DetailType} details to movie entities - {Index} out of {Total}", "IMDBId", idx, moviesWithoutIMDBIdCount);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex.Message);
-                this._unitOfWork.Dispose();
-                throw;
-            }
-
-            int errorCount = errors.Count();
-            if (errorCount > 0)
-            {
-                Log.Information("Saving feching errors in separate file...");
-                this._fetchingErrorsLogger?.Information("----------------------------------");
-                this._fetchingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
-                this._fetchingErrorsLogger?.Information("----------------------------------");
-                errors.ForEach(e => this._fetchingErrorsLogger?.Error(e));
-            }
-
-            Log.Information("------- FETCH DETAILS SUMMARY: {DetailType} -------", "IMDBId");
-            Log.Information("Searched movie count: {MovieCount}", moviesWithoutIMDBIdCount);
-            Log.Information("Error count: {ErrorCount}", errorCount);
-            Log.Information("------------------------------------------------");
-
-            this._unitOfWork.Complete();
+            await PopulateDetailsSimple<string>(moviesWithoutDetailsGetterFunc, detailsGetterFunc, detailsPopulatorAction, "IMDBId");
         }
 
-        private async Task<(Dictionary<int, TDetail> DetailsDict, List<string> errors)> GetDetailsSimple<TDetail>(
-            IEnumerable<Movie> movies,
+        private async Task PopulateDetailsSimple<TDetail>(
+            Func<IEnumerable<Movie>> moviesWithoutDetailsGetterFunc,
             Func<int, Task<TDetail>> detailsGetterFunc,
+            Action<Movie, TDetail> detailsPopulatorAction,
             string detailType)
         {
-            int moviesWithoutDetailsCount = movies.Count();
+            IEnumerable<Movie> moviesWithoutDetails = moviesWithoutDetailsGetterFunc();
+
+            int moviesWithoutDetailsCount = moviesWithoutDetails.Count();
 
             Log.Information("Movies without details for detail type {DetailType} - total count: {TotalCount}", detailType, moviesWithoutDetailsCount);
 
-            if (moviesWithoutDetailsCount == 0) return (new Dictionary<int, TDetail>(), new List<string>());
+            if (moviesWithoutDetailsCount == 0) return;
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
@@ -180,7 +100,7 @@ namespace FilmCRUD
 
             Log.Information("Finding movies details for detail type {DetailType}...", detailType);
             Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
-            foreach (var (movie, idx) in movies.Select((value, idx) => (value, idx + 1)))
+            foreach (var (movie, idx) in moviesWithoutDetails.Select((value, idx) => (value, idx + 1)))
             {
                 try
                 {
@@ -208,7 +128,49 @@ namespace FilmCRUD
                 }
             }
 
-            return (detailsDict, errors);
+            Log.Information("Assigning new {DetailType} details to movie entities...", detailType);
+
+            try
+            {
+                foreach (var (movie, idx) in moviesWithoutDetails.Select((value, idx) => (value, idx + 1)))
+                {
+                    if (!detailsDict.ContainsKey(movie.ExternalId))
+                    {
+                        Log.Debug("Skipping movie with ExternalId = {ExternalId}...", movie.ExternalId);
+                        continue;
+                    }
+
+                    detailsPopulatorAction(movie, detailsDict[movie.ExternalId]);
+
+                    if (idx % logStep == 0 || idx == moviesWithoutDetailsCount)
+                    {
+                        Log.Information("Assigning new {DetailType} details to movie entities - {Index} out of {Total}", detailType, idx, moviesWithoutDetailsCount);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex.Message);
+                this._unitOfWork.Dispose();
+                throw;
+            }
+
+            int errorCount = errors.Count();
+            if (errorCount > 0)
+            {
+                Log.Information("Saving feching errors in separate file...");
+                this._fetchingErrorsLogger?.Information("----------------------------------");
+                this._fetchingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._fetchingErrorsLogger?.Information("----------------------------------");
+                errors.ForEach(e => this._fetchingErrorsLogger?.Error(e));
+            }
+
+            Log.Information("------- FETCH DETAILS SUMMARY: {DetailType} -------", detailType);
+            Log.Information("Searched movie count: {MovieCount}", moviesWithoutDetailsCount);
+            Log.Information("Error count: {ErrorCount}", errorCount);
+            Log.Information("------------------------------------------------");
+
+            this._unitOfWork.Complete();
         }
 
         // TODO same as in class RipToMovieLinker, move somewhere else
