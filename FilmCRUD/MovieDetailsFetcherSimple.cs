@@ -114,26 +114,56 @@ namespace FilmCRUD
 
             var (imdbIds, errors) = await GetDetailsSimple<string>(moviesWithoutIMDBId, this._movieAPIClient.GetMovieIMDBIdAsync, "IMDBIds");
 
+            int moviesWithoutIMDBIdCount = moviesWithoutIMDBId.Count();
+            var logStep = (int)Math.Ceiling((decimal)moviesWithoutIMDBIdCount / 20.0m);
+
+            Log.Information("Assigning new {DetailType} details to movie entities...", "IMDBId");
             try
             {
-                foreach (Movie movie in moviesWithoutIMDBId)
+                foreach (var (movie, idx) in moviesWithoutIMDBId.Select((value, idx) => (value, idx + 1)))
                 {
-                    if (!imdbIds.ContainsKey(movie.ExternalId)) continue;
+                    if (!imdbIds.ContainsKey(movie.ExternalId))
+                    {
+                        Log.Debug("Skipping movie with ExternalId = {ExternalId}...", movie.ExternalId);
+                        continue;
+                    }
+
                     movie.IMDBId = imdbIds[movie.ExternalId];
+
+                    if (idx % logStep == 0 || idx == moviesWithoutIMDBIdCount)
+                    {
+                        Log.Information("Assigning new {DetailType} details to movie entities - {Index} out of {Total}", "IMDBId", idx, moviesWithoutIMDBIdCount);
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log.Fatal(ex.Message);
                 this._unitOfWork.Dispose();
                 throw;
             }
+
+            int errorCount = errors.Count();
+            if (errorCount > 0)
+            {
+                Log.Information("Saving feching errors in separate file...");
+                this._fetchingErrorsLogger?.Information("----------------------------------");
+                this._fetchingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._fetchingErrorsLogger?.Information("----------------------------------");
+                errors.ForEach(e => this._fetchingErrorsLogger?.Error(e));
+            }
+
+            Log.Information("------- FETCH DETAILS SUMMARY: {DetailType} -------", "IMDBId");
+            Log.Information("Searched movie count: {MovieCount}", moviesWithoutIMDBIdCount);
+            Log.Information("Error count: {ErrorCount}", errorCount);
+            Log.Information("------------------------------------------------");
 
             this._unitOfWork.Complete();
         }
 
         private async Task<(Dictionary<int, TDetail> DetailsDict, List<string> errors)> GetDetailsSimple<TDetail>(
             IEnumerable<Movie> movies,
-            Func<int, Task<TDetail>> detailsFunc,
+            Func<int, Task<TDetail>> detailsGetterFunc,
             string detailType)
         {
             int moviesWithoutDetailsCount = movies.Count();
@@ -159,7 +189,7 @@ namespace FilmCRUD
             {
                 try
                 {
-                    TDetail detail = await policyWrap.ExecuteAsync(() => detailsFunc(movie.ExternalId));
+                    TDetail detail = await policyWrap.ExecuteAsync(() => detailsGetterFunc(movie.ExternalId));
                     detailsDict.Add(movie.ExternalId, detail);
 
                     Log.Debug("FOUND: {Movie}", movie.ToString());
