@@ -166,7 +166,7 @@ namespace FilmCRUD
                     IEnumerable<int> movieDetailIds = movieToDetailsMapping[movie.ExternalId];
 
                     // filtering detailEntitiesInRepo and newDetailEntities for the details of this movie;
-                    // basically a left-semi join, faster than faster than .Where(...Contains...)
+                    // basically a left-semi join
                     IEnumerable<TDetailEntity> movieDetailsInRepo = detailEntitiesInRepo.Join(
                         movieDetailIds,
                         detailEntity => detailEntity.ExternalId,
