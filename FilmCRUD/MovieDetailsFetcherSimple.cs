@@ -29,8 +29,6 @@ namespace FilmCRUD
     {
         private IUnitOfWork _unitOfWork { get; init; }
 
-        private IFileSystemIOWrapper _fileSystemIOWrapper { get; init; }
-
         private IAppSettingsManager _appSettingsManager { get; init; }
 
         private IMovieAPIClient _movieAPIClient { get; init; }
@@ -39,22 +37,19 @@ namespace FilmCRUD
 
         public MovieDetailsFetcherSimple(
             IUnitOfWork unitOfWork,
-            IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient)
         {
             this._unitOfWork = unitOfWork;
-            this._fileSystemIOWrapper = fileSystemIOWrapper;
             this._appSettingsManager = appSettingsManager;
             this._movieAPIClient = movieAPIClient;
         }
 
         public MovieDetailsFetcherSimple(
             IUnitOfWork unitOfWork,
-            IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient,
-            ILogger fetchingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) => this._fetchingErrorsLogger = fetchingErrorsLogger;
+            ILogger fetchingErrorsLogger) : this(unitOfWork, appSettingsManager, movieAPIClient) => this._fetchingErrorsLogger = fetchingErrorsLogger;
 
         public async Task PopulateMovieKeywords()
         {

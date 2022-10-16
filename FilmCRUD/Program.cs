@@ -459,14 +459,14 @@ namespace FilmCRUD
             else if (opts.Keywords)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_keywords_.txt");
-                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
+                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching keywords for movies...");
                 await keywordsFetcher.PopulateMovieKeywords();
             }
             else if (opts.IMDBIds)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_imdbids_.txt");
-                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
+                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching IMDB ids for movies...");
                 await IMDBIdFetcher.PopulateMovieIMDBIds();
             }
