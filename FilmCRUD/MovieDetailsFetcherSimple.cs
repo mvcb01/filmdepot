@@ -1,21 +1,21 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-
-using FilmDomain.Entities;
-using FilmDomain.Interfaces;
-using MovieAPIClients.Interfaces;
-using ConfigUtils.Interfaces;
-using FilmCRUD.Interfaces;
-using FilmCRUD.Helpers;
 using Polly.RateLimit;
 using Polly.Wrap;
 using Polly;
 using System;
 using System.Net.Http;
 using System.Net;
-using System.Collections;
 using System.IO;
+using Serilog;
+using FilmDomain.Entities;
+using FilmDomain.Interfaces;
+using MovieAPIClients.Interfaces;
+using ConfigUtils.Interfaces;
+using FilmCRUD.Interfaces;
+using FilmCRUD.Helpers;
+using System.Data;
 
 namespace FilmCRUD
 {
@@ -35,6 +35,8 @@ namespace FilmCRUD
 
         private IMovieAPIClient _movieAPIClient { get; init; }
 
+        private readonly ILogger _fetchingErrorsLogger;
+
         public MovieDetailsFetcherSimple(
             IUnitOfWork unitOfWork,
             IFileSystemIOWrapper fileSystemIOWrapper,
@@ -47,25 +49,61 @@ namespace FilmCRUD
             this._movieAPIClient = movieAPIClient;
         }
 
+        public MovieDetailsFetcherSimple(
+            IUnitOfWork unitOfWork,
+            IFileSystemIOWrapper fileSystemIOWrapper,
+            IAppSettingsManager appSettingsManager,
+            IMovieAPIClient movieAPIClient,
+            ILogger fetchingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) => this._fetchingErrorsLogger = fetchingErrorsLogger;
+
         public async Task PopulateMovieKeywords()
         {
             IEnumerable<Movie> moviesWithoutKeywords = this._unitOfWork.Movies.GetMoviesWithoutKeywords();
 
-            Dictionary<int, IEnumerable<string>> kwds = await GetDetailsSimple<IEnumerable<string>>(moviesWithoutKeywords, this._movieAPIClient.GetMovieKeywordsAsync, "details_fetcher_errors_KeyWords");
+            var (kwds, errors) = await GetDetailsSimple<IEnumerable<string>>(moviesWithoutKeywords, this._movieAPIClient.GetMovieKeywordsAsync, "Keywords");
 
+            int moviesWithoutKeywordsCount = moviesWithoutKeywords.Count();
+            var logStep = (int)Math.Ceiling((decimal)moviesWithoutKeywordsCount / 20.0m);
+
+            Log.Information("Assigning new {DetailType} details to movie entities...", "Keywords");
             try
             {
-                foreach (Movie movie in moviesWithoutKeywords)
+                foreach (var (movie, idx) in moviesWithoutKeywords.Select((value, idx) => (value, idx + 1)))
                 {
-                    if (!kwds.ContainsKey(movie.ExternalId)) continue;
+                    if (!kwds.ContainsKey(movie.ExternalId))
+                    {
+                        Log.Debug("Skipping movie with ExternalId = {ExternalId}...", movie.ExternalId);
+                        continue;
+                    }
                     movie.Keywords = kwds[movie.ExternalId].ToList();
+
+                    if (idx % logStep == 0 || idx == moviesWithoutKeywordsCount)
+                    {
+                        Log.Information("Assigning new {DetailType} details to movie entities - {Index} out of {Total}", "Keywords", idx, moviesWithoutKeywordsCount);
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log.Fatal(ex.Message);
                 this._unitOfWork.Dispose();
                 throw;
             }
+
+            int errorCount = errors.Count();
+            if (errorCount > 0)
+            {
+                Log.Information("Saving feching errors in separate file...");
+                this._fetchingErrorsLogger?.Information("----------------------------------");
+                this._fetchingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
+                this._fetchingErrorsLogger?.Information("----------------------------------");
+                errors.ForEach(e => this._fetchingErrorsLogger?.Error(e));
+            }
+
+            Log.Information("------- FETCH DETAILS SUMMARY: {DetailType} -------", "Keywords");
+            Log.Information("Searched movie count: {MovieCount}", moviesWithoutKeywordsCount);
+            Log.Information("Error count: {ErrorCount}", errorCount);
+            Log.Information("------------------------------------------------");
 
             this._unitOfWork.Complete();
         }
@@ -74,7 +112,7 @@ namespace FilmCRUD
         {
             IEnumerable<Movie> moviesWithoutIMDBId = this._unitOfWork.Movies.GetMoviesWithoutImdbId();
 
-            Dictionary<int, string> imdbIds = await GetDetailsSimple<string>(moviesWithoutIMDBId, this._movieAPIClient.GetMovieIMDBIdAsync, "details_fetcher_errors_IMDBIds");
+            var (imdbIds, errors) = await GetDetailsSimple<string>(moviesWithoutIMDBId, this._movieAPIClient.GetMovieIMDBIdAsync, "IMDBIds");
 
             try
             {
@@ -93,57 +131,88 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
-        private async Task<Dictionary<int, TDetail>> GetDetailsSimple<TDetail>(IEnumerable<Movie> movies, Func<int, Task<TDetail>> detailsFunc, string errorsFileName)
+        private async Task<(Dictionary<int, TDetail> DetailsDict, List<string> errors)> GetDetailsSimple<TDetail>(
+            IEnumerable<Movie> movies,
+            Func<int, Task<TDetail>> detailsFunc,
+            string detailType)
         {
-            // notice the order of the async policies when calling Policy.WrapAsync:
-            //      outermost (at left) to innermost (at right)
-            IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
-            AsyncPolicyWrap policyWrap = Policy.WrapAsync(
-                APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(this._appSettingsManager.GetRetryPolicyConfig()),
-                APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig));
+            int moviesWithoutDetailsCount = movies.Count();
 
-            await Task.Delay(rateLimitConfig.PerTimeSpan);
+            Log.Information("Movies without details for detail type {DetailType} - total count: {TotalCount}", detailType, moviesWithoutDetailsCount);
+
+            if (moviesWithoutDetailsCount == 0) return (new Dictionary<int, TDetail>(), new List<string>());
+
+            AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
+
+            // letting the token bucket fill for the current timespan...
+            await Task.Delay(initialDelay);
 
             var detailsDict = new Dictionary<int, TDetail>();
 
             var errors = new List<string>();
 
-            foreach (Movie movie in movies)
+            var logStep = (int)Math.Ceiling((decimal)moviesWithoutDetailsCount / 20.0m);
+
+            Log.Information("Finding movies details for detail type {DetailType}...", detailType);
+            Log.Information("API base address: {ApiBaseAddress}", this._movieAPIClient.ApiBaseAddress);
+            foreach (var (movie, idx) in movies.Select((value, idx) => (value, idx + 1)))
             {
                 try
                 {
                     TDetail detail = await policyWrap.ExecuteAsync(() => detailsFunc(movie.ExternalId));
-                    detailsDict.Add(movie.ExternalId, detail);  
+                    detailsDict.Add(movie.ExternalId, detail);
+
+                    Log.Debug("FOUND: {Movie}", movie.ToString());
                 }
                 catch (RateLimitRejectedException ex)
                 {
-                    errors.Add($"Rate Limit error for {movie.Title} ({movie.ReleaseDate}); Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
+                    Log.Debug("RATE LIMIT ERROR: {Movie}", movie.ToString());
+                    errors.Add($"RATE LIMIT ERROR: {movie.Title} ({movie.ReleaseDate}); Retry after milliseconds: {ex.RetryAfter.TotalMilliseconds}; Message: {ex.Message}");
                 }
                 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                 {
-                    errors.Add($"Invalid external id for {movie.Title} ({movie.ReleaseDate}): {movie.ExternalId}");
+                    Log.Debug("INVALID EXTERNAL ID: {Movie} - {ExternalId}", movie.ToString(), movie.ExternalId);
+                    errors.Add($"INVALID EXTERNAL ID: {movie.Title} ({movie.ReleaseDate}): {movie.ExternalId}");
                 }
-                catch (Exception)
+
+                // let it fail in case any other exception occurrs: DbContext was not accessed so no need to dispose
+
+                if (idx % logStep == 0 || idx == moviesWithoutDetailsCount)
                 {
-                    this._unitOfWork.Dispose();
-                    throw;
+                    Log.Information("Finding movies details for detail type {DetailType} - {Index} out of {Total}", detailType, idx, moviesWithoutDetailsCount);
                 }
             }
 
-            string dtNow = DateTime.Now.ToString("yyyyMMddHHmmss");
-            PersistErrorInfo($"{errorsFileName}_{dtNow}.txt", errors);
-
-            return detailsDict;
+            return (detailsDict, errors);
         }
 
-        private void PersistErrorInfo(string filename, IEnumerable<string> errors)
+        // TODO same as in class RipToMovieLinker, move somewhere else
+        private AsyncPolicyWrap GetPolicyWrapFromConfigs(out TimeSpan initialDelay)
         {
-            if (!errors.Any()) return;
+            // notice the order of the async policies when calling Policy.WrapAsync:
+            //      outermost (at left) to innermost (at right)
+            IRateLimitPolicyConfig rateLimitConfig = this._appSettingsManager.GetRateLimitPolicyConfig();
+            IRetryPolicyConfig retryConfig = this._appSettingsManager.GetRetryPolicyConfig();
 
-            string errorsFpath = Path.Combine(this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(), filename);
-            System.Console.WriteLine($"Errors fetching details; see {errorsFpath}");
-            this._fileSystemIOWrapper.WriteAllText(errorsFpath, string.Join("\n\n", errors));
+            Log.Information("------- API Client Policies -------");
+            Log.Information(
+                "Rate limit: maximum of {ExecutionCount} calls every {MS} milliseconds; max burst = {MaxBurst}",
+                rateLimitConfig.NumberOfExecutions,
+                rateLimitConfig.PerTimeSpan.TotalMilliseconds,
+                rateLimitConfig.MaxBurst);
+            Log.Information(
+                "Retry: maximum of {MaxRetry} retries, wait {Sleep} milliseconds between consecutive retries",
+                retryConfig.RetryCount,
+                retryConfig.SleepDuration.TotalMilliseconds);
+            Log.Information("-----------------------------------");
+
+            initialDelay = rateLimitConfig.PerTimeSpan;
+            return Policy.WrapAsync(
+                APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(retryConfig),
+                APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig)
+            );
         }
+
     }
 
 }

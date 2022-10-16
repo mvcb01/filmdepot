@@ -458,21 +458,22 @@ namespace FilmCRUD
             }
             else if (opts.Keywords)
             {
-                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
-                Console.WriteLine("fetching keywords for movies...");
+                ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_keywords_.txt");
+                var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
+                Log.Information("Fetching keywords for movies...");
                 await keywordsFetcher.PopulateMovieKeywords();
             }
             else if (opts.IMDBIds)
             {
-                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient);
-                Console.WriteLine("fetching imdb ids for movies...");
+                ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_imdbids_.txt");
+                var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
+                Log.Information("Fetching IMDB ids for movies...");
                 await IMDBIdFetcher.PopulateMovieIMDBIds();
             }
             else
             {
-                Console.WriteLine("No fetch request...");
+                Log.Information("No fetch request...");
             }
-            Console.WriteLine();
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)
