@@ -27,4 +27,4 @@ jobs:
         run: dotnet build -c Release --no-restore
 
       - name: run tests
-        run: dotnet test -c Release --logger "console;verbosity=detailed" --no-build --nologo
+        run: dotnet test -c Release --logger "console;verbosity=detailed" --no-restore --no-build --nologo
