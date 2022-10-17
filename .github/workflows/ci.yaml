@@ -7,7 +7,6 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
-    if: ! "github.event.pull_request.draft"
     steps:
       - name: checkout repo
         uses: actions/checkout@v3
