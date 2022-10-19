@@ -136,7 +136,7 @@ namespace DepotTests.FilmDomainTests
             IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: false);
 
             // assert
-            searchResult.Should().BeNullOrEmpty();
+            searchResult.Should().BeEquivalentTo(new[] { firstMovie });
         }
     }
 }
