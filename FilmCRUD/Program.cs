@@ -99,7 +99,7 @@ namespace FilmCRUD
                     Log.Error("Should be a date with format yyyyMMdd: {VisitDateString}", visitDateString);
                     throw new FormatException(visitDateString);
                 }
-                
+
                 // default MinimumLevel is Information
                 return new LoggerConfiguration()
                     .WriteTo.File(
@@ -550,6 +550,5 @@ namespace FilmCRUD
                 Console.WriteLine(String.Join('\n', item.Value.OrderBy(s => s)));
             }
         }
-
     }
 }
