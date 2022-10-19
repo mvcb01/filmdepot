@@ -67,7 +67,6 @@ namespace FilmCRUD
                 await parsed.WithParsedAsync<FetchOptions>(async opts => await HandleFetchOptions(opts, serviceProvider));
 
                 parsed.WithNotParsed(HandleParseError);
-
             }
             finally
             {
