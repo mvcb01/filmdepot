@@ -72,6 +72,7 @@ namespace FilmCRUD
             {
                 // DISPOSING LOGGER
                 Log.CloseAndFlush();
+
             }
         }
 
