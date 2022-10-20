@@ -9,7 +9,6 @@ namespace FilmCRUD.Helpers
 {
     public static class FileNameParser
     {
-
         private const string TokenRegexSplitter = @"(\.|\s)";
 
         // para fazer split ao filename por "720p" ou "1080p" ou outros, por ex:
