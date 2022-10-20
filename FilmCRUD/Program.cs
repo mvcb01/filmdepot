@@ -370,7 +370,6 @@ namespace FilmCRUD
 
             var ripToMovieLinker = new RipToMovieLinker(
                 serviceProvider.GetRequiredService<IUnitOfWork>(),
-                serviceProvider.GetRequiredService<IFileSystemIOWrapper>(),
                 serviceProvider.GetRequiredService<IAppSettingsManager>(),
                 serviceProvider.GetRequiredService<IMovieAPIClient>(),
                 linkingErrorsLogger);
