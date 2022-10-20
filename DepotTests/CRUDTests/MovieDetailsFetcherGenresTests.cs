@@ -25,8 +25,6 @@ namespace DepotTests.CRUDTests
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
-        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapperMock;
-
         private readonly Mock<IRateLimitPolicyConfig> _rateLimitConfigMock;
 
         private readonly Mock<IRetryPolicyConfig> _retryConfigMock;
@@ -50,8 +48,6 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Genres)
                 .Returns(this._genreRepositoryMock.Object);
 
-            this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
-
             this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
             this._retryConfigMock = new Mock<IRetryPolicyConfig>();
 
@@ -71,7 +67,6 @@ namespace DepotTests.CRUDTests
 
             this._movieDetailsFetcherGenres = new MovieDetailsFetcherGenres(
                 this._unitOfWorkMock.Object,
-                this._fileSystemIOWrapperMock.Object,
                 this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
         }

@@ -16,7 +16,6 @@ using FilmDomain.Interfaces;
 using MovieAPIClients.Interfaces;
 using FilmCRUD.Helpers;
 
-
 namespace FilmCRUD
 {
     /// <summary>
@@ -39,28 +38,23 @@ namespace FilmCRUD
 
         private readonly ILogger _fetchingErrorsLogger;
 
-        private IFileSystemIOWrapper _fileSystemIOWrapper { get; init; }
-
         private IAppSettingsManager _appSettingsManager { get; init; }
 
         public MovieDetailsFetcherAbstract(
             IUnitOfWork unitOfWork,
-            IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient)
         {
             this._unitOfWork = unitOfWork;
-            this._fileSystemIOWrapper = fileSystemIOWrapper;
             this._appSettingsManager = appSettingsManager;
             this._movieAPIClient = movieAPIClient;
         }
 
         public MovieDetailsFetcherAbstract(
             IUnitOfWork unitOfWork,
-            IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient,
-            ILogger fetchingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) => this._fetchingErrorsLogger = fetchingErrorsLogger;
+            ILogger fetchingErrorsLogger) : this(unitOfWork, appSettingsManager, movieAPIClient) => this._fetchingErrorsLogger = fetchingErrorsLogger;
 
         public abstract IEnumerable<Movie> GetMoviesWithoutDetails();
 
