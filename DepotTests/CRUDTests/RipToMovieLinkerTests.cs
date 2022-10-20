@@ -29,8 +29,6 @@ namespace DepotTests.CRUDTests
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
-        private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapperMock;
-
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
         private readonly Mock<IRateLimitPolicyConfig> _rateLimitConfigMock;
@@ -53,8 +51,6 @@ namespace DepotTests.CRUDTests
             this._unitOfWorkMock
                 .SetupGet(u => u.Movies)
                 .Returns(this._movieRepositoryMock.Object);
-
-            this._fileSystemIOWrapperMock = new Mock<IFileSystemIOWrapper>();
             
             this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
             this._movieAPIClientMock.SetupGet(m => m.ApiBaseAddress).Returns("https://api.dummy.org/");
@@ -76,7 +72,6 @@ namespace DepotTests.CRUDTests
 
             this._ripToMovieLinker = new RipToMovieLinker(
                 this._unitOfWorkMock.Object,
-                this._fileSystemIOWrapperMock.Object,
                 this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
         }
