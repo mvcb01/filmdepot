@@ -24,8 +24,6 @@ namespace FilmCRUD
 {
     public class RipToMovieLinker
     {
-        private IFileSystemIOWrapper _fileSystemIOWrapper { get; init; }
-
         private IUnitOfWork _unitOfWork { get; init; }
 
         private IAppSettingsManager _appSettingsManager { get; init; }
@@ -36,12 +34,10 @@ namespace FilmCRUD
 
         public RipToMovieLinker(
             IUnitOfWork unitOfWork,
-            IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient)
         {
             this._unitOfWork = unitOfWork;
-            this._fileSystemIOWrapper = fileSystemIOWrapper;
             this._appSettingsManager = appSettingsManager;
             this._movieAPIClient = movieAPIClient;
         }
@@ -49,10 +45,9 @@ namespace FilmCRUD
 
         public RipToMovieLinker(
             IUnitOfWork unitOfWork,
-            IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient,
-            ILogger linkingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) => this._linkingErrorsLogger = linkingErrorsLogger;
+            ILogger linkingErrorsLogger) : this(unitOfWork, appSettingsManager, movieAPIClient) => this._linkingErrorsLogger = linkingErrorsLogger;
 
         /// <summary>
         /// Gets MovieRips not linked to a Movie, excluding RipFilenamesToIgnore and also those with ManualExternalIds
