@@ -14,18 +14,16 @@ namespace FilmCRUD
     {
         public MovieDetailsFetcherDirectors(
             IUnitOfWork unitOfWork,
-            IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient)
-            : base(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient) { }
+            : base(unitOfWork, appSettingsManager, movieAPIClient) { }
 
         public MovieDetailsFetcherDirectors(
             IUnitOfWork unitOfWork,
-            IFileSystemIOWrapper fileSystemIOWrapper,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient,
             ILogger fetchingErrorsLogger)
-            : base(unitOfWork, fileSystemIOWrapper, appSettingsManager, movieAPIClient, fetchingErrorsLogger) { }
+            : base(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger) { }
 
         public override IEnumerable<Director> GetExistingDetailEntitiesInRepo() => this._unitOfWork.Directors.GetAll();
 
