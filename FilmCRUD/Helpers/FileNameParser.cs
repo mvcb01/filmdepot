@@ -25,9 +25,6 @@ namespace FilmCRUD.Helpers
         //      "The Tragedy Of Macbeth (2021)" -> "The Tragedy Of Macbeth", "2021"
         private const string TitleAndReleaseDateSplitter_WithParenth = @"\((1|2)([0-9]{3})\)";
 
-        // qualquer palavra com letras a-z, incluindo a palavra vazia
-        private const string AnyLetterSequence = @"[a-z]*";
-
         // qualquer palavra com letras a-z, incluindo a palavra vazia, e alguns chars extra
         public static string AnyLetterSequencePlusChars { get { return $"([a-z]|-)*";}}
 
