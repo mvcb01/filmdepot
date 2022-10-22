@@ -26,7 +26,7 @@ namespace FilmCRUD.Helpers
         private const string _titleAndReleaseDateSplitter_WithParenth = @"\((1|2)([0-9]{3})\)";
 
         // qualquer palavra com letras a-z, incluindo a palavra vazia, e alguns chars extra
-        private static string _anyLetterSequencePlusChars { get { return $"([a-z]|-)*";}}
+        private const string _anyLetterSequencePlusChars = $"([a-z]|-)*";
 
         // junta as duas possibilidades de split - com e sem parenteses - permitindo uma sequência de chars alfabeticos
         // no fim, eventualmente separados pelo TokenRegexSplitter
