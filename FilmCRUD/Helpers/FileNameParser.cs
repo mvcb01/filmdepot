@@ -112,9 +112,9 @@ namespace FilmCRUD.Helpers
 
         public static MovieRip ParseFileNameIntoMovieRip(string fileName)
         {
-            List<string> splitted = Regex
+            IEnumerable<string> splitted = Regex
                 .Split(fileName, $"{_tokenRegexSplitter}{_ripQualityRegexSplitter}{_tokenRegexSplitter}", RegexOptions.IgnoreCase)
-                .ToList().Except(new List<string>() {".", " "}).ToList();
+                .Where(s => s != "." && !string.IsNullOrWhiteSpace(s));
 
             string parsedRipQuality;
             string parsedRipInfo;
@@ -130,14 +130,14 @@ namespace FilmCRUD.Helpers
             // cases like "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
             else if (splitted.Count() == 3)
             {
-                parsedRipQuality = splitted[1].Trim();
-                string parsedRipInfoAndGroup = splitted[2].Trim();
+                parsedRipQuality = splitted.Skip(1).First().Trim();
+                string parsedRipInfoAndGroup = splitted.Skip(2).First().Trim();
 
                 (parsedRipInfo, parsedRipGroup) = SplitRipInfoAndGroup(parsedRipInfoAndGroup);
             }
             else throw new FileNameParserError($"Cannot split: {fileName}");
 
-            var (title, releaseDate) = SplitTitleAndReleaseDate(splitted[0]);
+            var (title, releaseDate) = SplitTitleAndReleaseDate(splitted.First());
 
             return new MovieRip() {
                 FileName = fileName.Trim(),
