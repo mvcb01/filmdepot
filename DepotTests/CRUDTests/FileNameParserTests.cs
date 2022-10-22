@@ -1,7 +1,6 @@
 using Xunit;
 using FluentAssertions;
 using FilmDomain.Entities;
-
 using FilmCRUD.Helpers;
 using FluentAssertions.Execution;
 
