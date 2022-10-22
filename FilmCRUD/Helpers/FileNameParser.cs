@@ -37,7 +37,7 @@ namespace FilmCRUD.Helpers
             get => $"((({_titleAndReleaseDateSplitter_WithParenth})|({_titleAndReleaseDateSplitter_WithoutParenth}))({_tokenRegexSplitter}{_anyLetterSequencePlusChars})*)$";
         }
 
-        public static List<string> SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
+        public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
         {
             ParsedTitleAndReleaseDate = ParsedTitleAndReleaseDate.Trim();
 
@@ -76,7 +76,7 @@ namespace FilmCRUD.Helpers
                 if (!int.TryParse(parsedReleasedDate, out _)) throw new FileNameParserError($"Cannot find release date: {parsedReleasedDate}");
             }
 
-            return new List<string>() { parsedTitle, parsedReleasedDate };
+            return (parsedTitle, parsedReleasedDate);
         }
 
         public static List<string> SplitRipInfoAndGroup(string ripInfoAndGroup)
@@ -140,12 +140,12 @@ namespace FilmCRUD.Helpers
             }
             else throw new FileNameParserError($"Cannot split: {fileName}");
 
-            var titleAndRelaseDate = SplitTitleAndReleaseDate(splitted[0]);
+            var (title, releaseDate) = SplitTitleAndReleaseDate(splitted[0]);
 
             return new MovieRip() {
                 FileName = fileName.Trim(),
-                ParsedTitle = titleAndRelaseDate[0].Trim(),
-                ParsedReleaseDate = titleAndRelaseDate[1].Trim(),
+                ParsedTitle = title.Trim(),
+                ParsedReleaseDate = releaseDate.Trim(),
                 ParsedRipQuality = parsedRipQuality,
                 ParsedRipInfo = parsedRipInfo,
                 ParsedRipGroup = parsedRipGroup

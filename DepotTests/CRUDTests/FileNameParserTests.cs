@@ -106,10 +106,7 @@ namespace DepotTests.CRUDTests
             string expectedTitle,
             string expectedReleaseDate)
         {
-            var result = FileNameParser.SplitTitleAndReleaseDate(titleAndRelaseDate);
-
-            var actualTitle = result[0];
-            var actualReleaseDate = result[1];
+            var (actualTitle, actualReleaseDate) = FileNameParser.SplitTitleAndReleaseDate(titleAndRelaseDate);
 
             // BeEquivalentTo - ignores case and leading/trailing whitespaces
             actualTitle.Should().BeEquivalentTo(expectedTitle);
