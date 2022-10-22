@@ -121,6 +121,13 @@ namespace DepotTests.CRUDTests
             null,
             "DVDRip",
             null)]
+        [InlineData(
+            "A Prophet [2009] 720p",
+            "a prophet",
+            "2009",
+            "720p",
+            null,
+            null)]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
             string title,

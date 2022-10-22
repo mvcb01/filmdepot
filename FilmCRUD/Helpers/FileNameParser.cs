@@ -152,12 +152,12 @@ namespace FilmCRUD.Helpers
                 split = splitByQuality;
             }
             // cases like "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
-            else if (splitByQualityCount == 3)
+            else if (splitByQualityCount > 1)
             {
                 parsedRipQuality = splitByQuality.Skip(1).First().Trim();
-                string parsedRipInfoAndGroup = splitByQuality.Skip(2).First().Trim();
+                string parsedRipInfoAndGroup = splitByQuality.Skip(2).FirstOrDefault()?.Trim();
 
-                (parsedRipInfo, parsedRipGroup) = SplitRipInfoAndGroup(parsedRipInfoAndGroup);
+                (parsedRipInfo, parsedRipGroup) = parsedRipInfoAndGroup != null ? SplitRipInfoAndGroup(parsedRipInfoAndGroup) : (null, null);
 
                 split = splitByQuality;
             }
