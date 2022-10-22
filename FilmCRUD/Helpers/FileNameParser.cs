@@ -41,9 +41,8 @@ namespace FilmCRUD.Helpers
         {
             ParsedTitleAndReleaseDate = ParsedTitleAndReleaseDate.Trim();
 
-            List<Match> matches = Regex
-                .Matches(ParsedTitleAndReleaseDate.Trim(), _titleAndReleaseDateSplitter, RegexOptions.IgnoreCase)
-                .ToList();
+            MatchCollection matches = Regex
+                .Matches(ParsedTitleAndReleaseDate.Trim(), _titleAndReleaseDateSplitter, RegexOptions.IgnoreCase);
 
             if (!matches.Any()) throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
 
