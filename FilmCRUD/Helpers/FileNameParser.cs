@@ -38,7 +38,7 @@ namespace FilmCRUD.Helpers
         private const string _titleAndReleaseDateSplitter_WithBrackets = @"\[(1|2)([0-9]{3})\]";
 
         // matches any word with chars "a", ...., "z", "-"; also matches the empty word
-        private const string _anyLetterSequencePlusChars = @"([a-z]|-)*";
+        private const string _anyLetterSequencePlusChars = @"([a-z]|-|.|\s)*";
 
         // considers all release date split - parentheses, brackets... - allowing for a trailing token sequence
         private static string _titleAndReleaseDateSplitter
@@ -50,9 +50,9 @@ namespace FilmCRUD.Helpers
         {
             ParsedTitleAndReleaseDate = ParsedTitleAndReleaseDate.Trim();
 
-            MatchCollection matches = Regex
-                .Matches(ParsedTitleAndReleaseDate.Trim(), _titleAndReleaseDateSplitter, RegexOptions.IgnoreCase);
+            MatchCollection matches = Regex.Matches(ParsedTitleAndReleaseDate, _titleAndReleaseDateSplitter, RegexOptions.IgnoreCase);
 
+            // the only admissible case without matches is when there's no release date
             if (!matches.Any())
             {
                 if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-zA-Z0-9]|{_tokenRegexSplitter})*$")) throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
@@ -133,12 +133,12 @@ namespace FilmCRUD.Helpers
             IEnumerable<string> split;
 
             IEnumerable<string> splitByQuality = Regex
-                .Split(fileName, $"{_tokenRegexSplitter}{_ripQualityRegexSplitter}{_tokenRegexSplitter}", RegexOptions.IgnoreCase)
+                .Split(fileName, $"{_tokenRegexSplitter}{_ripQualityRegexSplitter}(({_tokenRegexSplitter})*)", RegexOptions.IgnoreCase)
                 .Where(s => s != "." && !string.IsNullOrWhiteSpace(s));
             int splitByQualityCount = splitByQuality.Count();
 
             IEnumerable<string> splitByReleaseType = Regex
-                .Split(fileName, $"{_tokenRegexSplitter}{_ripReleaseTypeRegexSplitter}{_tokenRegexSplitter}", RegexOptions.IgnoreCase)
+                .Split(fileName, $"{_tokenRegexSplitter}{_ripReleaseTypeRegexSplitter}(({_tokenRegexSplitter})*)", RegexOptions.IgnoreCase)
                 .Where(s => s != "." && !string.IsNullOrWhiteSpace(s));
             int splitByReleaseTypeCount = splitByReleaseType.Count();
 

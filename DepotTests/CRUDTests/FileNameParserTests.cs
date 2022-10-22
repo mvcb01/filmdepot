@@ -114,6 +114,13 @@ namespace DepotTests.CRUDTests
             "720p",
             "Bluray x264",
             "L@ZyMaN")]
+        [InlineData(
+            "Arena.[2009].João.Salaviza.DVDRip",
+            "arena",
+            "2009",
+            null,
+            "DVDRip",
+            null)]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
             string title,
@@ -140,6 +147,7 @@ namespace DepotTests.CRUDTests
         [InlineData("  Khrustalyov.My.Car.1998", "khrustalyov my car", "1998")]
         [InlineData(" Serpico    ", "Serpico", null)]
         [InlineData("The Tenant [1976]", "the tenant", "1976")]
+        [InlineData("The.Tenant[1976]", "the tenant", "1976")]
         public void SplitTitleAndReleaseDate_ShouldReturnCorrectTitleAndReleaseDate(
             string titleAndRelaseDate,
             string expectedTitle,
