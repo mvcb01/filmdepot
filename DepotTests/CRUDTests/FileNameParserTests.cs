@@ -15,72 +15,63 @@ namespace DepotTests.CRUDTests
             "1978",
             "1080p",
             "BluRay.x264.DTS-HD.MA.5.1",
-            "FGT"
-            )]
+            "FGT")]
         [InlineData(
             "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
             "khrustalyov my car",
             "1998",
             "720p",
             "BluRay.x264",
-            "GHOULS[rarbg]"
-            )]
+            "GHOULS[rarbg]")]
         [InlineData(
             "Sicario 2015 1080p BluRay x264 AC3-JYK",
             "sicario",
             "2015",
             "1080p",
             "BluRay x264 AC3",
-            "JYK"
-            )]
+            "JYK")]
         [InlineData(
             "The.Lives.of.Others.2006.GERMAN.REMASTERED.1080p.BluRay.x264.DTS-NOGRP",
             "the lives of others",
             "2006",
             "1080p",
             "BluRay.x264.DTS",
-            "NOGRP"
-            )]
+            "NOGRP")]
         [InlineData(
             "Terminator.2.Judgement.Day.1991.Extended.REMASTERED.1080p.BluRay.H264.AAC.READ.NFO-RARBG",
             "terminator 2 judgement day",
             "1991",
             "1080p",
             "BluRay.H264.AAC.READ.NFO",
-            "RARBG"
-            )]
+            "RARBG")]
         [InlineData(
             "A.Hero.2021.1080p.AMZN.WEBRip.DDP5.1.x264-TEPES",
             "A Hero",
             "2021",
             "1080p",
             "AMZN.WEBRip.DDP5.1.x264",
-            "TEPES"
-            )]
+            "TEPES")]
         [InlineData(
             "Nosferatu.The.Vampyre.1979.FESTiVAL.DVDRip.XviD-NODLABS",
             "nosferatu the vampyre",
             "1979",
             "DVDRip",
             "XviD",
-            "NODLABS"
-            )]
+            "NODLABS")]
         [InlineData(
             "Ex Drummer (2007)",
             "ex drummer",
             "2007",
             null,
             null,
-            null
-            )]
+            null)]
         [InlineData(
             "Idiocracy.2006.WEB-DL.1080p.x264.anoXmous",
             "idiocracy",
             "2006",
             "1080p",
             "x264",
-            "anoXmous"
-            )]
+            "anoXmous")]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
             string title,

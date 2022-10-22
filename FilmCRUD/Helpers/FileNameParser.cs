@@ -120,7 +120,9 @@ namespace FilmCRUD.Helpers
             string parsedRipInfo;
             string parsedRipGroup;
 
-            // cases where the filename only contains title and release date, like "Ex Drummer (2007)"
+            // some possible cases:
+            //      - the filename only contains title and release date, like "Ex Drummer (2007)"
+            //      - the filename does not contain rip quality: "The.Wicker.Man.1973.WEB - DL.XviD.MP3 - RARBG"
             if (splitted.Take(2).Count() == 1)
             {
                 parsedRipQuality = null;
