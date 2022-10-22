@@ -16,25 +16,34 @@ namespace FilmCRUD.Helpers
         // examples:
         //      "Cop Car 2015 1080p WEB-DL x264 AC3-JYK" --> "Cop Car 2015", "1080p", "WEB-DL x264 AC3-JYK"
         //      "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]" --> "Khrustalyov My Car 1998", "720p", "BluRay.x264-GHOULS[rarbg]"
-        private const string _ripQualityRegexSplitter = @"(720p|1080p|2160p|BRRip|480p|DVDRip|HDRip|BDRip|720pp|10800p|576p)";
+        // includes some typos;
+        private const string _ripQualityRegexSplitter = @"(720p|1080p|2160p|480p|720pp|10800p|576p)";
 
-        // to split by release date without parentheses
+        // to split filenames by release type
+        private const string _ripReleaseTypeRegexSplitter = @"(WEB-DL|WEBRip|WEB|BluRay|Blu-Ray|HDTV|TVRip|BRRip|BrRip|BRip|DVDRip|HDRip|BDRip|SCREENER|DVDSCR|DVDSCREENER|XviD|VODRip|R5|DVDR|DVD-Full|DVD-5|DVD-9)";
+
+        // to split by release date without parentheses/brackets/etc...
         // example:
-        //      "Cop Car 2015" -> "Cop Car", "2015"
-        private const string _titleAndReleaseDateSplitter_WithoutParenth = @"(1|2)([0-9]{3})";
+        //      "The Tenant 1976" -> "The Tenant", "1976"
+        private const string _titleAndReleaseDateSplitter_Raw = @"(1|2)([0-9]{3})";
 
         // to split by release date with parentheses
         // example:
-        //      "The Tragedy Of Macbeth (2021)" -> "The Tragedy Of Macbeth", "2021"
+        //      "The Tenant (1976)" -> "The Tenant", "1976"
         private const string _titleAndReleaseDateSplitter_WithParenth = @"\((1|2)([0-9]{3})\)";
+
+        // to split by release date with brackets
+        // example:
+        //      "The Tenant [1976]" -> "The Tenant", "1976"
+        private const string _titleAndReleaseDateSplitter_WithBrackets = @"\[(1|2)([0-9]{3})\]";
 
         // matches any word with chars "a", ...., "z", "-"; also matches the empty word
         private const string _anyLetterSequencePlusChars = @"([a-z]|-)*";
 
-        // considers both split possibilities - with and without parentheses - allowing for a trailing token sequence
+        // considers all release date split - parentheses, brackets... - allowing for a trailing token sequence
         private static string _titleAndReleaseDateSplitter
         {
-            get => $"((({_titleAndReleaseDateSplitter_WithParenth})|({_titleAndReleaseDateSplitter_WithoutParenth}))({_tokenRegexSplitter}{_anyLetterSequencePlusChars})*)$";
+            get => $"((({_titleAndReleaseDateSplitter_Raw})|({_titleAndReleaseDateSplitter_WithParenth})|({_titleAndReleaseDateSplitter_WithBrackets}))({_tokenRegexSplitter}{_anyLetterSequencePlusChars})*)$";
         }
 
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
@@ -44,25 +53,28 @@ namespace FilmCRUD.Helpers
             MatchCollection matches = Regex
                 .Matches(ParsedTitleAndReleaseDate.Trim(), _titleAndReleaseDateSplitter, RegexOptions.IgnoreCase);
 
-            if (!matches.Any()) throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
+            if (!matches.Any())
+            {
+                if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-zA-Z0-9]|{_tokenRegexSplitter})*$")) throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
+                return (ParsedTitleAndReleaseDate.Replace('.', ' ').Trim(), null);
+            }
 
             // we consider the date to be in the last match;
             // may be like "1978" or like "1978.REMASTERED"
-            Match releaseDateMatch = matches.OrderBy(m => m.Index).Last();
+            Match releaseDateRegexMatch = matches.OrderBy(m => m.Index).Last();
 
             string parsedTitle = ParsedTitleAndReleaseDate
-                .Substring(0, length: releaseDateMatch.Index)
+                .Substring(0, length: releaseDateRegexMatch.Index)
                 .Replace('.', ' ')
                 .Trim();
-            string parsedReleasedDate = ParsedTitleAndReleaseDate
-                .Substring(releaseDateMatch.Index, releaseDateMatch.Length)
+            
+            string withoutParsedTitle = ParsedTitleAndReleaseDate
+                .Substring(releaseDateRegexMatch.Index, length: releaseDateRegexMatch.Length)
                 .Replace('.', ' ')
                 .Trim();
 
-            if (parsedReleasedDate.StartsWith("(") & parsedReleasedDate.EndsWith(")"))
-            {
-                parsedReleasedDate = parsedReleasedDate.Substring(1, parsedReleasedDate.Length - 2);
-            }
+            Match lastDateMatch = Regex.Match(withoutParsedTitle, _titleAndReleaseDateSplitter_Raw);
+            string parsedReleasedDate = withoutParsedTitle.Substring(lastDateMatch.Index, length: lastDateMatch.Length);
 
             // finds the date considering both scenarios: "1978" and "1978.REMASTERED"
             bool isNumeric = int.TryParse(parsedReleasedDate, out _);
@@ -85,15 +97,17 @@ namespace FilmCRUD.Helpers
 
             if (ripInfoAndGroup.Contains('-'))
             {
-                var components = ripInfoAndGroup.Split('-', StringSplitOptions.TrimEntries).ToList();
+                IEnumerable<string> components = ripInfoAndGroup
+                    .Split('-', StringSplitOptions.TrimEntries)
+                    .Where(s => !string.IsNullOrWhiteSpace(s));
                 ripInfo = string.Join('-', components.SkipLast(1));
                 ripGroup = components.Last();
             }
             else
             {
-                List<string> splittedByTokenSplitter = Regex
-                    .Split(ripInfoAndGroup, _tokenRegexSplitter, RegexOptions.IgnoreCase)
-                    .ToList();
+                IEnumerable<string> splittedByTokenSplitter = Regex
+                    .Split(ripInfoAndGroup, _tokenRegexSplitter, RegexOptions.IgnoreCase);
+
                 if (splittedByTokenSplitter.Count() > 1)
                 {
                     ripGroup = splittedByTokenSplitter.Last();
@@ -112,39 +126,60 @@ namespace FilmCRUD.Helpers
 
         public static MovieRip ParseFileNameIntoMovieRip(string fileName)
         {
-            IEnumerable<string> splitted = Regex
-                .Split(fileName, $"{_tokenRegexSplitter}{_ripQualityRegexSplitter}{_tokenRegexSplitter}", RegexOptions.IgnoreCase)
-                .Where(s => s != "." && !string.IsNullOrWhiteSpace(s));
-
             string parsedRipQuality;
             string parsedRipInfo;
             string parsedRipGroup;
 
-            // some possible cases:
-            //      - the filename only contains title and release date, like "Ex Drummer (2007)"
-            //      - the filename does not contain rip quality: "The.Wicker.Man.1973.WEB - DL.XviD.MP3 - RARBG"
-            if (splitted.Take(2).Count() == 1)
+            IEnumerable<string> split;
+
+            IEnumerable<string> splitByQuality = Regex
+                .Split(fileName, $"{_tokenRegexSplitter}{_ripQualityRegexSplitter}{_tokenRegexSplitter}", RegexOptions.IgnoreCase)
+                .Where(s => s != "." && !string.IsNullOrWhiteSpace(s));
+            int splitByQualityCount = splitByQuality.Count();
+
+            IEnumerable<string> splitByReleaseType = Regex
+                .Split(fileName, $"{_tokenRegexSplitter}{_ripReleaseTypeRegexSplitter}{_tokenRegexSplitter}", RegexOptions.IgnoreCase)
+                .Where(s => s != "." && !string.IsNullOrWhiteSpace(s));
+            int splitByReleaseTypeCount = splitByReleaseType.Count();
+
+            // most likely this will be true when the filename only contains title and release date, like "Ex Drummer (2007)"
+            if (splitByQualityCount == 1 && splitByReleaseTypeCount == 1)
             {
                 parsedRipQuality = null;
                 parsedRipInfo = null;
                 parsedRipGroup = null;
+
+                split = splitByQuality;
             }
             // cases like "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
-            else if (splitted.Count() == 3)
+            else if (splitByQualityCount == 3)
             {
-                parsedRipQuality = splitted.Skip(1).First().Trim();
-                string parsedRipInfoAndGroup = splitted.Skip(2).First().Trim();
+                parsedRipQuality = splitByQuality.Skip(1).First().Trim();
+                string parsedRipInfoAndGroup = splitByQuality.Skip(2).First().Trim();
 
                 (parsedRipInfo, parsedRipGroup) = SplitRipInfoAndGroup(parsedRipInfoAndGroup);
-            }
-            else throw new FileNameParserError($"Cannot split into rip components: {fileName}");
 
-            var (title, releaseDate) = SplitTitleAndReleaseDate(splitted.First());
+                split = splitByQuality;
+            }
+            // when the filename does not contain rip quality but contains origin
+            // example: "The.Wicker.Man.1973.WEB - DL.XviD.MP3 - RARBG"
+            else if (splitByReleaseTypeCount > 1)
+            {
+                parsedRipQuality = null;
+                string parsedRipInfoAndGroup = string.Join(' ', splitByReleaseType.Skip(1));
+
+                (parsedRipInfo, parsedRipGroup) = SplitRipInfoAndGroup(parsedRipInfoAndGroup);
+
+                split = splitByReleaseType;
+            }
+            else throw new FileNameParserError($"Cannot split into rip components, please add components manually: {fileName}");
+
+            var (title, releaseDate) = SplitTitleAndReleaseDate(split.First());
 
             return new MovieRip() {
                 FileName = fileName.Trim(),
                 ParsedTitle = title.Trim(),
-                ParsedReleaseDate = releaseDate.Trim(),
+                ParsedReleaseDate = releaseDate?.Trim(),
                 ParsedRipQuality = parsedRipQuality,
                 ParsedRipInfo = parsedRipInfo,
                 ParsedRipGroup = parsedRipGroup

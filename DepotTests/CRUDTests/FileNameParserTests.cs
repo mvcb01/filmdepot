@@ -55,8 +55,8 @@ namespace DepotTests.CRUDTests
             "Nosferatu.The.Vampyre.1979.FESTiVAL.DVDRip.XviD-NODLABS",
             "nosferatu the vampyre",
             "1979",
-            "DVDRip",
-            "XviD",
+            null,
+            "DVDRip XviD",
             "NODLABS")]
         [InlineData(
             "Ex Drummer (2007)",
@@ -72,6 +72,48 @@ namespace DepotTests.CRUDTests
             "1080p",
             "x264",
             "anoXmous")]
+        [InlineData(
+            "The.Wicker.Man.1973.WEB - DL.XviD.MP3 - RARBG",
+            "the wicker man",
+            "1973",
+            null,
+            "WEB-DL XviD MP3",
+            "RARBG")]
+        [InlineData(
+            "Straw.Dogs.720p.BluRay.x264.KickASS",
+            "straw dogs",
+            null,
+            "720p",
+            "BluRay.x264",
+            "KickASS")]
+        [InlineData(
+            "underground",
+            "underground",
+            null,
+            null,
+            null,
+            null)]
+        [InlineData(
+            "The Omen [1976] 1080p BluRay AAC x264-ETRG",
+            "the omen",
+            "1976",
+            "1080p",
+            "BluRay AAC x264",
+            "ETRG")]
+        [InlineData(
+            "Motel Hell 1980 720p - BRRip -MRShanku Silver RG",
+            "motel hell",
+            "1980",
+            "720p",
+            "BRRip",
+            "MRShanku Silver RG")]
+        [InlineData(
+            "The Grey (2012) Ita-Eng 720p Bluray x264 -L@ZyMaN",
+            "the grey",
+            "2012",
+            "720p",
+            "Bluray x264",
+            "L@ZyMaN")]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
             string title,
@@ -96,6 +138,8 @@ namespace DepotTests.CRUDTests
         [InlineData("The Tragedy Of Macbeth (2021)", "the tragedy of macbeth", "2021")]
         [InlineData("Cop Car 2015 ", "Cop Car", "2015")]
         [InlineData("  Khrustalyov.My.Car.1998", "khrustalyov my car", "1998")]
+        [InlineData(" Serpico    ", "Serpico", null)]
+        [InlineData("The Tenant [1976]", "the tenant", "1976")]
         public void SplitTitleAndReleaseDate_ShouldReturnCorrectTitleAndReleaseDate(
             string titleAndRelaseDate,
             string expectedTitle,
