@@ -9,30 +9,30 @@ namespace FilmCRUD.Helpers
 {
     public static class FileNameParser
     {
-        private const string TokenRegexSplitter = @"(\.|\s)";
+        private const string _tokenRegexSplitter = @"(\.|\s)";
 
         // para fazer split ao filename por "720p" ou "1080p" ou outros, por ex:
         //      "Cop Car 2015 1080p WEB-DL x264 AC3-JYK" --> "Cop Car 2015", "1080p", "WEB-DL x264 AC3-JYK"
         // ou ainda
         //      "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]" --> "Khrustalyov My Car 1998", "720p", "BluRay.x264-GHOULS[rarbg]"
-        private const string RipQualityRegexSplitter = @"(720p|1080p|2160p|BRRip|480p|DVDRip|HDRip|BDRip|720pp|10800p|576p)";
+        private const string _ripQualityRegexSplitter = @"(720p|1080p|2160p|BRRip|480p|DVDRip|HDRip|BDRip|720pp|10800p|576p)";
 
         // para fazer split pela release date sem parênteses:
         //      "Cop Car 2015" -> "Cop Car", "2015"
-        private const string TitleAndReleaseDateSplitter_WithoutParenth = @"(1|2)([0-9]{3})";
+        private const string _titleAndReleaseDateSplitter_WithoutParenth = @"(1|2)([0-9]{3})";
 
         // para fazer split pela release date com parênteses:
         //      "The Tragedy Of Macbeth (2021)" -> "The Tragedy Of Macbeth", "2021"
-        private const string TitleAndReleaseDateSplitter_WithParenth = @"\((1|2)([0-9]{3})\)";
+        private const string _titleAndReleaseDateSplitter_WithParenth = @"\((1|2)([0-9]{3})\)";
 
         // qualquer palavra com letras a-z, incluindo a palavra vazia, e alguns chars extra
-        public static string AnyLetterSequencePlusChars { get { return $"([a-z]|-)*";}}
+        private static string _anyLetterSequencePlusChars { get { return $"([a-z]|-)*";}}
 
         // junta as duas possibilidades de split - com e sem parenteses - permitindo uma sequência de chars alfabeticos
         // no fim, eventualmente separados pelo TokenRegexSplitter
-        private static string TitleAndReleaseDateSplitter
+        private static string _titleAndReleaseDateSplitter
         {
-            get { return $"((({TitleAndReleaseDateSplitter_WithParenth})|({TitleAndReleaseDateSplitter_WithoutParenth}))({TokenRegexSplitter}{AnyLetterSequencePlusChars})*)$"; }
+            get { return $"((({_titleAndReleaseDateSplitter_WithParenth})|({_titleAndReleaseDateSplitter_WithoutParenth}))({_tokenRegexSplitter}{_anyLetterSequencePlusChars})*)$"; }
         }
 
         public static List<string> SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
@@ -41,7 +41,7 @@ namespace FilmCRUD.Helpers
 
             List<Match> matches = Regex.Matches(
                 ParsedTitleAndReleaseDate.Trim(),
-                TitleAndReleaseDateSplitter,
+                _titleAndReleaseDateSplitter,
                 RegexOptions.IgnoreCase
                 ).ToList();
 
@@ -72,7 +72,7 @@ namespace FilmCRUD.Helpers
             bool isNumeric = int.TryParse(parsedReleasedDate, out _);
             if (!isNumeric)
             {
-                Match firstTokenMatch = Regex.Matches(parsedReleasedDate, TokenRegexSplitter).First();
+                Match firstTokenMatch = Regex.Matches(parsedReleasedDate, _tokenRegexSplitter).First();
                 parsedReleasedDate = parsedReleasedDate.Substring(0, firstTokenMatch.Index);
 
                 // aqui já deve ser numérico
@@ -99,7 +99,7 @@ namespace FilmCRUD.Helpers
             else
             {
                 List<string> splittedByTokenSplitter = Regex
-                    .Split(ripInfoAndGroup, TokenRegexSplitter, RegexOptions.IgnoreCase)
+                    .Split(ripInfoAndGroup, _tokenRegexSplitter, RegexOptions.IgnoreCase)
                     .ToList();
                 if (splittedByTokenSplitter.Count() > 1)
                 {
@@ -120,7 +120,7 @@ namespace FilmCRUD.Helpers
         public static MovieRip ParseFileNameIntoMovieRip(string fileName)
         {
             List<string> splitted = Regex
-                .Split(fileName, $"{TokenRegexSplitter}{RipQualityRegexSplitter}{TokenRegexSplitter}", RegexOptions.IgnoreCase)
+                .Split(fileName, $"{_tokenRegexSplitter}{_ripQualityRegexSplitter}{_tokenRegexSplitter}", RegexOptions.IgnoreCase)
                 .ToList().Except(new List<string>() {".", " "}).ToList();
 
             string parsedRipQuality;
