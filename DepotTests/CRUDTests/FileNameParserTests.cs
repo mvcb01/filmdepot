@@ -127,7 +127,7 @@ namespace DepotTests.CRUDTests
             "2009",
             "720p",
             null,
-            null)] //Nil By Mouth DVDRip
+            null)]
         [InlineData(
             "Nil By Mouth DVDRip",
             "nil by mouth",
@@ -135,6 +135,20 @@ namespace DepotTests.CRUDTests
             null,
             "DVDRip",
             null)]
+        [InlineData(
+            "1922.2017.1080p.NF.WEB-DL.DD5.1.x264-NTG[EtHD]",
+            "1917",
+            "2017",
+            "1080p",
+            "NF.WEB-DL.DD5.1.x264",
+            "NTG[EtHD]")]
+        [InlineData(
+            "2001.A.Space.Odyssey.1968.1080p.BluRay.DTS.x264-HaB [PublicHD.ORG]",
+            "2001 a space odyssey",
+            "1968",
+            "1080p",
+            "BluRay.DTS.x264-HaB",
+            "HaB [PublicHD.ORG]")]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
             string title,
