@@ -127,6 +127,13 @@ namespace DepotTests.CRUDTests
             "2009",
             "720p",
             null,
+            null)] //Nil By Mouth DVDRip
+        [InlineData(
+            "Nil By Mouth DVDRip",
+            "nil by mouth",
+            null,
+            null,
+            "DVDRip",
             null)]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
