@@ -3,6 +3,7 @@ using FluentAssertions;
 using FilmDomain.Entities;
 
 using FilmCRUD.Helpers;
+using FluentAssertions.Execution;
 
 namespace DepotTests.CRUDTests
 {
@@ -90,11 +91,15 @@ namespace DepotTests.CRUDTests
             string ripGroup)
         {
             MovieRip actual = FileNameParser.ParseFileNameIntoMovieRip(fileName);
-            title.Should().BeEquivalentTo(actual.ParsedTitle);
-            releasedDate.Should().BeEquivalentTo(actual.ParsedReleaseDate);
-            ripQuality.Should().BeEquivalentTo(actual.ParsedRipQuality);
-            ripInfo.Should().BeEquivalentTo(actual.ParsedRipInfo);
-            ripGroup.Should().BeEquivalentTo(actual.ParsedRipGroup);
+
+            using (new AssertionScope())
+            {
+                title.Should().BeEquivalentTo(actual.ParsedTitle);
+                releasedDate.Should().BeEquivalentTo(actual.ParsedReleaseDate);
+                ripQuality.Should().BeEquivalentTo(actual.ParsedRipQuality);
+                ripInfo.Should().BeEquivalentTo(actual.ParsedRipInfo);
+                ripGroup.Should().BeEquivalentTo(actual.ParsedRipGroup);
+            }
         }
 
         [Theory]
@@ -108,9 +113,12 @@ namespace DepotTests.CRUDTests
         {
             var (actualTitle, actualReleaseDate) = FileNameParser.SplitTitleAndReleaseDate(titleAndRelaseDate);
 
-            // BeEquivalentTo - ignores case and leading/trailing whitespaces
-            actualTitle.Should().BeEquivalentTo(expectedTitle);
-            actualReleaseDate.Should().BeEquivalentTo(expectedReleaseDate);
+            using (new AssertionScope())
+            {
+                // BeEquivalentTo - ignores case and leading/trailing whitespaces
+                actualTitle.Should().BeEquivalentTo(expectedTitle);
+                actualReleaseDate.Should().BeEquivalentTo(expectedReleaseDate);
+            } 
         }
 
         [Theory]
@@ -130,8 +138,11 @@ namespace DepotTests.CRUDTests
         {
             var (actualRipInfo, actualRipGroup) = FileNameParser.SplitRipInfoAndGroup(ripInfoAndGroup);
 
-            actualRipInfo.Should().BeEquivalentTo(expectedRipInfo);
-            actualRipGroup.Should().BeEquivalentTo(expectedRipGroup);
+            using (new AssertionScope())
+            {
+                actualRipInfo.Should().BeEquivalentTo(expectedRipInfo);
+                actualRipGroup.Should().BeEquivalentTo(expectedRipGroup);
+            }
         }
 
     }
