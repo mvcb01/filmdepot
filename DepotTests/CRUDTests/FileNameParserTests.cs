@@ -111,7 +111,7 @@ namespace DepotTests.CRUDTests
             var actualTitle = result[0];
             var actualReleaseDate = result[1];
 
-            // BeEquivalentTo - ignora lowercase VS uppercase
+            // BeEquivalentTo - ignores case and leading/trailing whitespaces
             actualTitle.Should().BeEquivalentTo(expectedTitle);
             actualReleaseDate.Should().BeEquivalentTo(expectedReleaseDate);
         }
