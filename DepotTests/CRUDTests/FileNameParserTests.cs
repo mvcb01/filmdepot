@@ -58,9 +58,9 @@ namespace DepotTests.CRUDTests
             "TEPES"
             )]
         [InlineData(
-            "Better.Things.2008.FESTiVAL.DVDRip.XviD-NODLABS",
-            "Better things",
-            "2008",
+            "Nosferatu.The.Vampyre.1979.FESTiVAL.DVDRip.XviD-NODLABS",
+            "nosferatu the vampyre",
+            "1979",
             "DVDRip",
             "XviD",
             "NODLABS"
