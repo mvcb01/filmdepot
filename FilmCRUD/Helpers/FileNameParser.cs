@@ -79,7 +79,7 @@ namespace FilmCRUD.Helpers
             return (parsedTitle, parsedReleasedDate);
         }
 
-        public static List<string> SplitRipInfoAndGroup(string ripInfoAndGroup)
+        public static (string RipInfo, string RipGroup) SplitRipInfoAndGroup(string ripInfoAndGroup)
         {
             string ripInfo;
             string ripGroup;
@@ -108,7 +108,7 @@ namespace FilmCRUD.Helpers
                 }
             }
 
-            return new List<string>() { ripInfo, ripGroup };
+            return (ripInfo, ripGroup);
         }
 
         public static MovieRip ParseFileNameIntoMovieRip(string fileName)
@@ -134,9 +134,7 @@ namespace FilmCRUD.Helpers
                 parsedRipQuality = splitted[1].Trim();
                 string parsedRipInfoAndGroup = splitted[2].Trim();
 
-                List<string> RipInfoAndGroupSplitted = SplitRipInfoAndGroup(parsedRipInfoAndGroup);
-                parsedRipInfo = RipInfoAndGroupSplitted[0];
-                parsedRipGroup = RipInfoAndGroupSplitted[1];
+                (parsedRipInfo, parsedRipGroup) = SplitRipInfoAndGroup(parsedRipInfoAndGroup);
             }
             else throw new FileNameParserError($"Cannot split: {fileName}");
 

@@ -128,9 +128,7 @@ namespace DepotTests.CRUDTests
             string expectedRipInfo,
             string expectedRipGroup)
         {
-            var result = FileNameParser.SplitRipInfoAndGroup(ripInfoAndGroup);
-            var actualRipInfo = result[0];
-            var actualRipGroup = result[1];
+            var (actualRipInfo, actualRipGroup) = FileNameParser.SplitRipInfoAndGroup(ripInfoAndGroup);
 
             actualRipInfo.Should().BeEquivalentTo(expectedRipInfo);
             actualRipGroup.Should().BeEquivalentTo(expectedRipGroup);
