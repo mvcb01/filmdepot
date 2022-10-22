@@ -137,7 +137,7 @@ namespace FilmCRUD.Helpers
 
                 (parsedRipInfo, parsedRipGroup) = SplitRipInfoAndGroup(parsedRipInfoAndGroup);
             }
-            else throw new FileNameParserError($"Cannot split: {fileName}");
+            else throw new FileNameParserError($"Cannot split into rip components: {fileName}");
 
             var (title, releaseDate) = SplitTitleAndReleaseDate(splitted.First());
 
