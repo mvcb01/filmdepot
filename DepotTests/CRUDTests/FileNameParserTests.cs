@@ -176,6 +176,12 @@ namespace DepotTests.CRUDTests
         [InlineData(" Serpico    ", "Serpico", null)]
         [InlineData("The Tenant [1976]", "the tenant", "1976")]
         [InlineData("The.Tenant[1976]", "the tenant", "1976")]
+        [InlineData("1922[2017]", "1922", "2017")]
+        [InlineData("1922 2017", "1922", "2017")]
+        [InlineData("1922.2017", "1922", "2017")]
+        [InlineData("2001 A Space Odyssey 1968", "2001 A Space Odyssey 1968", "1968")]
+        [InlineData("2001 A Space Odyssey[1968]", "2001 A Space Odyssey 1968", "1968")]
+        [InlineData("2001.A.Space.Odyssey.1968", "2001 A Space Odyssey 1968", "1968")]
         public void SplitTitleAndReleaseDate_ShouldReturnCorrectTitleAndReleaseDate(
             string titleAndRelaseDate,
             string expectedTitle,
