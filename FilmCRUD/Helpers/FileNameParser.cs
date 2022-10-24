@@ -37,55 +37,42 @@ namespace FilmCRUD.Helpers
         //      "The Tenant [1976]" -> "The Tenant", "1976"
         private const string _titleAndReleaseDateSplitter_WithBrackets = @"\[(1|2)([0-9]{3})\]";
 
-        // matches any word with chars "a", ...., "z", "-"; also matches the empty word
-        private const string _anyLetterSequencePlusChars = @"([a-z]|-|.|\s)*";
-
-        // considers all release date split - parentheses, brackets... - allowing for a trailing token sequence
-        private static string _titleAndReleaseDateSplitter
-        {
-            get => $"(({_titleAndReleaseDateSplitter_Raw}|{_titleAndReleaseDateSplitter_WithParenth}|{_titleAndReleaseDateSplitter_WithBrackets})({_tokenRegexSplitter}{_anyLetterSequencePlusChars})*)$";
-        }
-
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
         {
             ParsedTitleAndReleaseDate = ParsedTitleAndReleaseDate.Trim();
 
-            MatchCollection matches = Regex.Matches(ParsedTitleAndReleaseDate, _titleAndReleaseDateSplitter, RegexOptions.IgnoreCase);
+            MatchCollection matches = Regex.Matches(
+                ParsedTitleAndReleaseDate,
+                $"{_titleAndReleaseDateSplitter_Raw}|{_titleAndReleaseDateSplitter_WithParenth}|{_titleAndReleaseDateSplitter_WithBrackets}");
 
             // the only admissible case without matches is when there's no release date
             if (!matches.Any())
             {
-                if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-z0-9]|{_tokenRegexSplitter})*$", RegexOptions.IgnoreCase)) throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
+                if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-z0-9]|{_tokenRegexSplitter})*$", RegexOptions.IgnoreCase))
+                {
+                    throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
+                }
+
                 return (ParsedTitleAndReleaseDate.Replace('.', ' ').Trim(), null);
             }
 
             // we consider the date to be in the last match;
-            // may be like "1978" or like "1978.REMASTERED"
             Match releaseDateRegexMatch = matches.OrderBy(m => m.Index).Last();
 
             string parsedTitle = ParsedTitleAndReleaseDate
                 .Substring(0, length: releaseDateRegexMatch.Index)
                 .Replace('.', ' ')
                 .Trim();
-            
+
             string withoutParsedTitle = ParsedTitleAndReleaseDate
                 .Substring(releaseDateRegexMatch.Index, length: releaseDateRegexMatch.Length)
                 .Replace('.', ' ')
                 .Trim();
 
-            Match lastDateMatch = Regex.Match(withoutParsedTitle, _titleAndReleaseDateSplitter_Raw);
-            string parsedReleasedDate = withoutParsedTitle.Substring(lastDateMatch.Index, length: lastDateMatch.Length);
+            string parsedReleasedDate = Regex.Match(withoutParsedTitle, _titleAndReleaseDateSplitter_Raw).Value;
 
-            // finds the date considering both scenarios: "1978" and "1978.REMASTERED"
-            bool isNumeric = int.TryParse(parsedReleasedDate, out _);
-            if (!isNumeric)
-            {
-                Match firstTokenMatch = Regex.Matches(parsedReleasedDate, _tokenRegexSplitter).First();
-                parsedReleasedDate = parsedReleasedDate.Substring(0, firstTokenMatch.Index);
-
-                // should be numeric
-                if (!int.TryParse(parsedReleasedDate, out _)) throw new FileNameParserError($"Cannot find release date: {parsedReleasedDate}");
-            }
+            // finds the date considering both scenarios: "1978" and "1978.REMASTERED
+            if (!int.TryParse(parsedReleasedDate, out _)) throw new FileNameParserError($"Cannot find release date: {parsedReleasedDate}");
 
             return (parsedTitle, parsedReleasedDate);
         }
