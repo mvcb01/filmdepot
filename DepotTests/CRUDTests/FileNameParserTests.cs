@@ -182,6 +182,10 @@ namespace DepotTests.CRUDTests
         [InlineData("2001 A Space Odyssey 1968", "2001 A Space Odyssey 1968", "1968")]
         [InlineData("2001 A Space Odyssey[1968]", "2001 A Space Odyssey 1968", "1968")]
         [InlineData("2001.A.Space.Odyssey.1968", "2001 A Space Odyssey 1968", "1968")]
+        [InlineData("Blade Runner 2049 2017", "blade runner 2049", "2017")]
+        [InlineData("Blade Runner 2049 (2017)", "blade runner 2049", "2017")]
+        [InlineData("Blade.Runner.2049.2017", "blade runner 2049", "2017")]
+        [InlineData("Blade Runner 2049[2017]", "blade runner 2049", "2017")]
         public void SplitTitleAndReleaseDate_ShouldReturnCorrectTitleAndReleaseDate(
             string titleAndRelaseDate,
             string expectedTitle,
