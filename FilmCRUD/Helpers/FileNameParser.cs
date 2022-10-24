@@ -55,7 +55,7 @@ namespace FilmCRUD.Helpers
             // the only admissible case without matches is when there's no release date
             if (!matches.Any())
             {
-                if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-zA-Z0-9]|{_tokenRegexSplitter})*$")) throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
+                if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-z0-9]|{_tokenRegexSplitter})*$", RegexOptions.IgnoreCase)) throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
                 return (ParsedTitleAndReleaseDate.Replace('.', ' ').Trim(), null);
             }
 
