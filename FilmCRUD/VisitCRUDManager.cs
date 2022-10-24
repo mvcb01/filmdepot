@@ -27,7 +27,7 @@ namespace FilmCRUD
         private DirectoryFileLister _directoryFileLister { get; init; }
 
         // to match filenames like "movies_20220321.txt"
-        private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[1-9][0-3][0-9].txt$";
+        private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[0-9][0-3][0-9].txt$";
 
         private readonly ILogger _parsingErrorsLogger;
 
@@ -323,12 +323,12 @@ namespace FilmCRUD
 
             if (!filesWithDate.Any())
             {
-                Log.Error("No warehouse contents files with suffix _{FileDateString}.txt", fileDateString);
+                Log.Error("No warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
                 throw new FileNotFoundException(fileDateString);
             }
             else if (filesWithDate.Count > 1)
             {
-                Log.Error("Several warehouse contents files with suffix _{FileDateString}.txt", fileDateString);
+                Log.Error("Several warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
                 throw new FileNotFoundException(fileDateString);
             }
 
