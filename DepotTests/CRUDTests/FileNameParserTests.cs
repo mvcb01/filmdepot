@@ -137,7 +137,7 @@ namespace DepotTests.CRUDTests
             null)]
         [InlineData(
             "1922.2017.1080p.NF.WEB-DL.DD5.1.x264-NTG[EtHD]",
-            "1917",
+            "1922",
             "2017",
             "1080p",
             "NF.WEB-DL.DD5.1.x264",
@@ -147,7 +147,7 @@ namespace DepotTests.CRUDTests
             "2001 a space odyssey",
             "1968",
             "1080p",
-            "BluRay.DTS.x264-HaB",
+            "BluRay.DTS.x264",
             "HaB [PublicHD.ORG]")]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
@@ -179,9 +179,9 @@ namespace DepotTests.CRUDTests
         [InlineData("1922[2017]", "1922", "2017")]
         [InlineData("1922 2017", "1922", "2017")]
         [InlineData("1922.2017", "1922", "2017")]
-        [InlineData("2001 A Space Odyssey 1968", "2001 A Space Odyssey 1968", "1968")]
-        [InlineData("2001 A Space Odyssey[1968]", "2001 A Space Odyssey 1968", "1968")]
-        [InlineData("2001.A.Space.Odyssey.1968", "2001 A Space Odyssey 1968", "1968")]
+        [InlineData("2001 A Space Odyssey 1968", "2001 a space odyssey", "1968")]
+        [InlineData("2001 A Space Odyssey[1968]", "2001 a space odyssey", "1968")]
+        [InlineData("2001.A.Space.Odyssey.1968", "2001 a space odyssey", "1968")]
         [InlineData("Blade Runner 2049 2017", "blade runner 2049", "2017")]
         [InlineData("Blade Runner 2049 (2017)", "blade runner 2049", "2017")]
         [InlineData("Blade.Runner.2049.2017", "blade runner 2049", "2017")]
