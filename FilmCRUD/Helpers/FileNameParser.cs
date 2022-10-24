@@ -43,7 +43,7 @@ namespace FilmCRUD.Helpers
         // considers all release date split - parentheses, brackets... - allowing for a trailing token sequence
         private static string _titleAndReleaseDateSplitter
         {
-            get => $"((({_titleAndReleaseDateSplitter_Raw})|({_titleAndReleaseDateSplitter_WithParenth})|({_titleAndReleaseDateSplitter_WithBrackets}))({_tokenRegexSplitter}{_anyLetterSequencePlusChars})*)$";
+            get => $"(({_titleAndReleaseDateSplitter_Raw}|{_titleAndReleaseDateSplitter_WithParenth}|{_titleAndReleaseDateSplitter_WithBrackets})({_tokenRegexSplitter}{_anyLetterSequencePlusChars})*)$";
         }
 
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
