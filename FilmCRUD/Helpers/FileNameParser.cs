@@ -25,17 +25,11 @@ namespace FilmCRUD.Helpers
         // to split by release date without parentheses/brackets/etc...
         // example:
         //      "The Tenant 1976" -> "The Tenant", "1976"
-        private const string _titleAndReleaseDateSplitter_Raw = @"(1|2)([0-9]{3})";
+        private const string _releaseDateSplitter = @"(1|2)([0-9]{3})";
 
-        // to split by release date with parentheses
-        // example:
-        //      "The Tenant (1976)" -> "The Tenant", "1976"
-        private const string _titleAndReleaseDateSplitter_WithParenth = @"\((1|2)([0-9]{3})\)";
+        private const string _parenthesesOrBrackets_Left = @"\(|\[";
 
-        // to split by release date with brackets
-        // example:
-        //      "The Tenant [1976]" -> "The Tenant", "1976"
-        private const string _titleAndReleaseDateSplitter_WithBrackets = @"\[(1|2)([0-9]{3})\]";
+        private const string _parenthesesOrBrackets_Right = @"\)|\]";
 
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
         {
@@ -43,7 +37,7 @@ namespace FilmCRUD.Helpers
 
             MatchCollection matches = Regex.Matches(
                 ParsedTitleAndReleaseDate,
-                $"{_titleAndReleaseDateSplitter_Raw}|{_titleAndReleaseDateSplitter_WithParenth}|{_titleAndReleaseDateSplitter_WithBrackets}");
+                $"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
 
             // the only admissible case without matches is when there's no release date
             if (!matches.Any())
@@ -69,7 +63,7 @@ namespace FilmCRUD.Helpers
                 .Replace('.', ' ')
                 .Trim();
 
-            string parsedReleasedDate = Regex.Match(withoutParsedTitle, _titleAndReleaseDateSplitter_Raw).Value;
+            string parsedReleasedDate = Regex.Match(withoutParsedTitle, _releaseDateSplitter).Value;
 
             // finds the date considering both scenarios: "1978" and "1978.REMASTERED
             if (!int.TryParse(parsedReleasedDate, out _)) throw new FileNameParserError($"Cannot find release date: {parsedReleasedDate}");
