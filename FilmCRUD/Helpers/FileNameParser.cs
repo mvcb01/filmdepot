@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using System.Text.RegularExpressions;
 using FilmDomain.Entities;
+using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
-using System;
+
 
 namespace FilmCRUD.Helpers
 {
@@ -56,17 +58,18 @@ namespace FilmCRUD.Helpers
 
             string parsedTitle = ParsedTitleAndReleaseDate
                 .Substring(0, length: releaseDateRegexMatch.Index)
-                .Replace('.', ' ')
                 .Trim();
 
             string withoutParsedTitle = ParsedTitleAndReleaseDate
                 .Substring(releaseDateRegexMatch.Index, length: releaseDateRegexMatch.Length)
-                .Replace('.', ' ')
                 .Trim();
 
             string parsedReleasedDate = Regex.Match(withoutParsedTitle, _releaseDateRegexSplitter).Value;
 
-            return (parsedTitle, parsedReleasedDate);
+            return (
+                string.Join(' ', parsedTitle.GetStringTokensWithoutPunctuation(removeDiacritics: false)),
+                string.Join(' ', parsedReleasedDate.GetStringTokensWithoutPunctuation(removeDiacritics: false))
+                );
         }
 
         public static (string RipInfo, string RipGroup) SplitRipInfoAndGroup(string ripInfoAndGroup)
