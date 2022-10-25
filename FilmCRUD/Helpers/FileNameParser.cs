@@ -66,9 +66,6 @@ namespace FilmCRUD.Helpers
 
             string parsedReleasedDate = Regex.Match(withoutParsedTitle, _releaseDateRegexSplitter).Value;
 
-            // finds the date considering both scenarios: "1978" and "1978.REMASTERED
-            if (!int.TryParse(parsedReleasedDate, out _)) throw new FileNameParserError($"Cannot find release date: {parsedReleasedDate}");
-
             return (parsedTitle, parsedReleasedDate);
         }
 
