@@ -149,6 +149,41 @@ namespace DepotTests.CRUDTests
             "1080p",
             "BluRay.DTS.x264",
             "HaB [PublicHD.ORG]")]
+        [InlineData(
+            "Die Hard (1988) [1080p] {5.1}",
+            "die hard",
+            "1988",
+            "1080p",
+            "{5.1}",
+            null)]
+        [InlineData(
+            "Die Hard 2 (1990) [1080p] {5.1}",
+            "die hard 2",
+            "1990",
+            "1080p",
+            "{5.1}",
+            null)]
+        [InlineData(
+            "The Endless (2017) [1080p] [YTS.ME]",
+            "the endless",
+            "2017",
+            "1080p",
+            "[YTS.ME]",
+            null)]
+        [InlineData(
+            "The Pirate Bay Away From Keyboard (2013) [1080p]",
+            "the pirate bay away from keyboard",
+            "2013",
+            "1080p",
+            null,
+            null)]
+        [InlineData(
+            "The Jacket (2005) [DvdRip] [Xvid] {1337x}-Noir",
+            "the jacket",
+            "2005",
+            null,
+            "DvdRip Xvid 1337x",
+            "Noir")]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
             string title,
