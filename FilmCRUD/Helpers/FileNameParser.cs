@@ -22,7 +22,7 @@ namespace FilmCRUD.Helpers
         private const string _ripQualityRegexSplitter = @"(720p|1080p|2160p|480p|720pp|10800p|576p)";
 
         // to split filenames by release type
-        private const string _ripReleaseTypeRegexSplitter = @"(WEB-DL|WEBRip|WEB|BluRay|Blu-Ray|HDTV|TVRip|BRRip|BrRip|BRip|DVDRip|HDRip|BDRip|SCREENER|DVDSCR|DVDSCREENER|XviD|VODRip|R5|DVDR|DVD-Full|DVD-5|DVD-9)";
+        private const string _ripReleaseTypeRegexSplitter = @"(WEB-DL|WEBRip|WEB|BluRay|Blu-Ray|HDTV|TVRip|BRRip|BRip|DVDRip|HDRip|BDRip|SCREENER|DVDSCR|DVDSCREENER|XviD|VODRip|R5|DVDR|DVD-Full|DVD-5|DVD-9)";
 
         // to split by release date without parentheses/brackets/etc...
         // example:
@@ -107,6 +107,68 @@ namespace FilmCRUD.Helpers
         }
 
         public static MovieRip ParseFileNameIntoMovieRip(string fileName)
+        {
+            string parsedTitleAndReleaseDate;
+            string parsedRipInfoAndGroup;
+            string parsedRipQuality;
+            string parsedRipInfo;
+            string parsedRipGroup;
+
+            Match ripQualityMatch = Regex.Match(
+                fileName,
+                $"(({_parenthesesOrBrackets_Left})*){_ripQualityRegexSplitter}(({_parenthesesOrBrackets_Right})*)",
+                RegexOptions.IgnoreCase);
+
+            Match releaseTypeMatch = Regex.Match(
+                fileName,
+                $"(({_parenthesesOrBrackets_Left})*){_ripReleaseTypeRegexSplitter}(({_parenthesesOrBrackets_Right})*)",
+                RegexOptions.IgnoreCase);
+
+            // in this case we assume that param fileName has the format "some movie (1999)" or just the movie title, details
+            // are handled by method SplitTitleAndReleaseDate
+            if (!ripQualityMatch.Success && !releaseTypeMatch.Success)
+            {
+                parsedTitleAndReleaseDate = fileName;
+                parsedRipQuality = parsedRipInfoAndGroup = null;
+            }
+            // cases with rip quality like "Some.Movie.1998.720p.BluRay.x264-GHOULS[rarbg]"
+            else if (ripQualityMatch.Success)
+            {
+                parsedTitleAndReleaseDate = fileName.Substring(0, length: ripQualityMatch.Index).Trim();
+                parsedRipQuality = ripQualityMatch.Value;
+                
+                //int _idx = Math.Min(ripQualityMatch.Index + ripQualityMatch.Length + 1, fileName.Length);
+                //parsedRipInfoAndGroup = fileName.Substring(_idx).Trim();
+
+                parsedRipInfoAndGroup = Regex.Split(fileName, ripQualityMatch.Value).Skip(1).First();
+
+            }
+            // cases where the filename does not contain rip quality but contains release type
+            // example: "The.Wicker.Man.1973.WEB - DL.XviD.MP3 - RARBG"
+            else
+            {
+                parsedTitleAndReleaseDate = fileName.Substring(0, length: releaseTypeMatch.Index).Trim();
+                parsedRipQuality = null;
+
+                //int _idx = Math.Min(releaseTypeMatch.Index + releaseTypeMatch.Length + 1, fileName.Length);
+                //parsedRipInfoAndGroup = fileName.Substring(_idx).Trim();
+
+                parsedRipInfoAndGroup = Regex.Split(fileName, releaseTypeMatch.Value).Skip(1).First();
+            }
+
+            var (parsedTitle, parsedReleaseDate) = SplitTitleAndReleaseDate(parsedTitleAndReleaseDate);
+            (parsedRipInfo, parsedRipGroup) =  string.IsNullOrEmpty(parsedRipInfoAndGroup) ? (null, null) : SplitRipInfoAndGroup(parsedRipInfoAndGroup);
+            return new MovieRip() {
+                FileName = fileName.Trim(),
+                ParsedTitle = parsedTitle.Trim(),
+                ParsedReleaseDate = parsedReleaseDate?.Trim(),
+                ParsedRipQuality = parsedRipQuality,
+                ParsedRipInfo = parsedRipInfo,
+                ParsedRipGroup = parsedRipGroup
+            };
+        }
+
+        public static MovieRip ParseFileNameIntoMovieRip_OLD(string fileName)
         {
             string parsedRipQuality;
             string parsedRipInfo;
