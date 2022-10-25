@@ -25,7 +25,7 @@ namespace FilmCRUD.Helpers
         // to split by release date without parentheses/brackets/etc...
         // example:
         //      "The Tenant 1976" -> "The Tenant", "1976"
-        private const string _releaseDateSplitter = @"(1|2)([0-9]{3})";
+        private const string _releaseDateRegexSplitter = @"(1|2)([0-9]{3})";
 
         private const string _parenthesesOrBrackets_Left = @"\(|\[";
 
@@ -37,7 +37,7 @@ namespace FilmCRUD.Helpers
 
             MatchCollection matches = Regex.Matches(
                 ParsedTitleAndReleaseDate,
-                $"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
+                $"(({_parenthesesOrBrackets_Left})*){_releaseDateRegexSplitter}(({_parenthesesOrBrackets_Right})*)");
 
             // the only admissible case without matches is when there's no release date
             if (!matches.Any())
@@ -63,7 +63,7 @@ namespace FilmCRUD.Helpers
                 .Replace('.', ' ')
                 .Trim();
 
-            string parsedReleasedDate = Regex.Match(withoutParsedTitle, _releaseDateSplitter).Value;
+            string parsedReleasedDate = Regex.Match(withoutParsedTitle, _releaseDateRegexSplitter).Value;
 
             // finds the date considering both scenarios: "1978" and "1978.REMASTERED
             if (!int.TryParse(parsedReleasedDate, out _)) throw new FileNameParserError($"Cannot find release date: {parsedReleasedDate}");
