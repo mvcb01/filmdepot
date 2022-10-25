@@ -25,7 +25,8 @@ namespace FilmCRUD.Helpers
         // to split by release date without parentheses/brackets/etc...
         // example:
         //      "The Tenant 1976" -> "The Tenant", "1976"
-        private const string _releaseDateRegexSplitter = @"(1|2)([0-9]{3})";
+        // second digit only allowed to be one of {8, 9, 0} for obvious reasons
+        private const string _releaseDateRegexSplitter = @"(1|2)(8|9|0)([0-9]{2})";
 
         private const string _parenthesesOrBrackets_Left = @"\(|\[";
 
