@@ -184,6 +184,13 @@ namespace DepotTests.CRUDTests
             null,
             "[DvdRip] [Xvid] {1337x}",
             "Noir")]
+        [InlineData(
+            "Rambo First Blood (1982) [1920x1080] [Phr0stY]",
+            "rambo first blood",
+            "1982",
+            null,
+            "[1920x1080]",
+            "[Phr0stY]")]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
             string title,
