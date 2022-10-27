@@ -182,7 +182,7 @@ namespace DepotTests.CRUDTests
             "the jacket",
             "2005",
             null,
-            "DvdRip Xvid 1337x",
+            "[DvdRip] [Xvid] {1337x}",
             "Noir")]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
