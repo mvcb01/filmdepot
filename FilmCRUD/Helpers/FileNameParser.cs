@@ -136,11 +136,8 @@ namespace FilmCRUD.Helpers
             {
                 parsedTitleAndReleaseDate = fileName.Substring(0, length: ripQualityMatch.Index).Trim();
                 parsedRipQuality = ripQualityMatch.Value;
-                
-                //int _idx = Math.Min(ripQualityMatch.Index + ripQualityMatch.Length + 1, fileName.Length);
-                //parsedRipInfoAndGroup = fileName.Substring(_idx).Trim();
 
-                parsedRipInfoAndGroup = Regex.Split(fileName, ripQualityMatch.Value).Skip(1).First();
+                parsedRipInfoAndGroup = Regex.Split(fileName, ripQualityMatch.Value).Skip(1).First().Trim('.', ' ');
 
             }
             // cases where the filename does not contain rip quality but contains release type
@@ -150,10 +147,7 @@ namespace FilmCRUD.Helpers
                 parsedTitleAndReleaseDate = fileName.Substring(0, length: releaseTypeMatch.Index).Trim();
                 parsedRipQuality = null;
 
-                //int _idx = Math.Min(releaseTypeMatch.Index + releaseTypeMatch.Length + 1, fileName.Length);
-                //parsedRipInfoAndGroup = fileName.Substring(_idx).Trim();
-
-                parsedRipInfoAndGroup = Regex.Split(fileName, releaseTypeMatch.Value).Skip(1).First();
+                parsedRipInfoAndGroup = Regex.Split(fileName, releaseTypeMatch.Value).Skip(1).First().Trim('.', ' ');
             }
 
             var (parsedTitle, parsedReleaseDate) = SplitTitleAndReleaseDate(parsedTitleAndReleaseDate);
