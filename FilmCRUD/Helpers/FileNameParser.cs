@@ -135,9 +135,15 @@ namespace FilmCRUD.Helpers
             else if (ripQualityMatch.Success)
             {
                 parsedTitleAndReleaseDate = fileName.Substring(0, length: ripQualityMatch.Index).Trim();
-                parsedRipQuality = ripQualityMatch.Value;
+                parsedRipQuality = Regex.Replace(
+                    Regex.Replace(
+                        ripQualityMatch.Value,
+                        _parenthesesOrBrackets_Left,
+                        string.Empty),
+                    _parenthesesOrBrackets_Right,
+                    string.Empty);
 
-                parsedRipInfoAndGroup = Regex.Split(fileName, ripQualityMatch.Value).Skip(1).First().Trim('.', ' ');
+                parsedRipInfoAndGroup = fileName.Substring(ripQualityMatch.Index + ripQualityMatch.Length).Trim('.', ' ');
             }
             // cases where the filename does not contain rip quality but contains release type
             // example: "The.Wicker.Man.1973.WEB - DL.XviD.MP3 - RARBG"
@@ -146,7 +152,7 @@ namespace FilmCRUD.Helpers
                 parsedTitleAndReleaseDate = fileName.Substring(0, length: releaseTypeMatch.Index).Trim();
                 parsedRipQuality = null;
 
-                parsedRipInfoAndGroup = Regex.Split(fileName, releaseTypeMatch.Value).Skip(1).First().Trim('.', ' ');
+                parsedRipInfoAndGroup = fileName.Substring(releaseTypeMatch.Index).Trim('.', ' ');
             }
 
             var (parsedTitle, parsedReleaseDate) = SplitTitleAndReleaseDate(parsedTitleAndReleaseDate);
