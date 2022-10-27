@@ -103,13 +103,8 @@ namespace FilmCRUD.Helpers
                 {
                     ripGroup = splittedByTokenSplitter.Last();
                     ripInfo = ripInfoAndGroup.Substring(0, ripInfoAndGroup.Length - ripGroup.Length - 1);
-
                 }
-                else
-                {
-                    ripInfo = ripInfoAndGroup;
-                    ripGroup = null;
-                }
+                else return(ripInfoAndGroup, null);
             }
 
             return (ripInfo, ripGroup);
