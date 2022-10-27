@@ -77,7 +77,7 @@ namespace DepotTests.CRUDTests
             "the wicker man",
             "1973",
             null,
-            "WEB - DL.XviD.MP3",
+            "WEB-DL.XviD.MP3",
             "RARBG")]
         [InlineData(
             "Straw.Dogs.720p.BluRay.x264.KickASS",
