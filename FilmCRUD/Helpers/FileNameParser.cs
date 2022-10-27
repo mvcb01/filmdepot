@@ -19,7 +19,7 @@ namespace FilmCRUD.Helpers
         //      "Cop Car 2015 1080p WEB-DL x264 AC3-JYK" --> "Cop Car 2015", "1080p", "WEB-DL x264 AC3-JYK"
         //      "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]" --> "Khrustalyov My Car 1998", "720p", "BluRay.x264-GHOULS[rarbg]"
         // includes some typos;
-        private const string _ripQualityRegexSplitter = @"(720p|1080p|2160p|480p|720pp|10800p|576p)";
+        private const string _ripQualityRegexSplitter = @"(720p|1080p|2160p|480p|720pp|10800p|576p|1920x1080)";
 
         // to split filenames by release type
         private const string _ripReleaseTypeRegexSplitter = @"(WEB-DL|WEBRip|WEB|BluRay|Blu-Ray|HDTV|TVRip|BRRip|BRip|DVDRip|HDRip|BDRip|SCREENER|DVDSCR|DVDSCREENER|XviD|VODRip|R5|DVDR|DVD-Full|DVD-5|DVD-9)";

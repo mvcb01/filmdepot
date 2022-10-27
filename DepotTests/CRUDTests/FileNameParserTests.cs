@@ -188,9 +188,9 @@ namespace DepotTests.CRUDTests
             "Rambo First Blood (1982) [1920x1080] [Phr0stY]",
             "rambo first blood",
             "1982",
-            null,
-            "[1920x1080]",
-            "[Phr0stY]")]
+            "1920x1080",
+            "[Phr0stY]",
+            null)]
         public void ParseFileNameIntoMovieRip_ShouldReturnCorrectComponents(
             string fileName,
             string title,
