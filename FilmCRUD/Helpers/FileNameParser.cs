@@ -87,6 +87,15 @@ namespace FilmCRUD.Helpers
             }
             else
             {
+                // cases like {5.1} or [5.1] or (5.1)
+                string bracesLeft = @"\{";
+                string bracesRight = @"\}";
+                bool isSurrounded = Regex.IsMatch(
+                    ripInfoAndGroup,
+                    $"^({_parenthesesOrBrackets_Left}|{bracesLeft})(.*?)({_parenthesesOrBrackets_Right}|{bracesRight})$",
+                    RegexOptions.IgnoreCase);
+                if (isSurrounded) return (ripInfoAndGroup, null);
+
                 IEnumerable<string> splittedByTokenSplitter = Regex
                     .Split(ripInfoAndGroup, _tokenRegexSplitter, RegexOptions.IgnoreCase);
 
