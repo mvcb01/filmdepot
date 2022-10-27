@@ -138,7 +138,6 @@ namespace FilmCRUD.Helpers
                 parsedRipQuality = ripQualityMatch.Value;
 
                 parsedRipInfoAndGroup = Regex.Split(fileName, ripQualityMatch.Value).Skip(1).First().Trim('.', ' ');
-
             }
             // cases where the filename does not contain rip quality but contains release type
             // example: "The.Wicker.Man.1973.WEB - DL.XviD.MP3 - RARBG"
