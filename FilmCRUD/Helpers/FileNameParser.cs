@@ -74,8 +74,7 @@ namespace FilmCRUD.Helpers
 
         public static (string RipInfo, string RipGroup) SplitRipInfoAndGroup(string ripInfoAndGroup)
         {
-            string ripInfo;
-            string ripGroup;
+            string ripInfo, ripGroup;
 
             if (ripInfoAndGroup.Contains('-'))
             {
@@ -112,11 +111,7 @@ namespace FilmCRUD.Helpers
 
         public static MovieRip ParseFileNameIntoMovieRip(string fileName)
         {
-            string parsedTitleAndReleaseDate;
-            string parsedRipInfoAndGroup;
-            string parsedRipQuality;
-            string parsedRipInfo;
-            string parsedRipGroup;
+            string parsedTitleAndReleaseDate, parsedRipInfoAndGroup, parsedRipQuality, parsedRipInfo, parsedRipGroup;
 
             Match ripQualityMatch = Regex.Match(
                 fileName,
