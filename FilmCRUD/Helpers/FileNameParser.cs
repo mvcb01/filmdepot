@@ -12,23 +12,23 @@ namespace FilmCRUD.Helpers
     public static class FileNameParser
     {
         // filename tokens will be either separated by "." or by whitespace
-        private const string _tokenRegexSplitter = @"(\.|\s)";
+        private const string _tokenSplitter = @"(\.|\s)";
 
         // to split filenames by "720p", "1080p", etc...;
         // examples:
         //      "Cop Car 2015 1080p WEB-DL x264 AC3-JYK" --> "Cop Car 2015", "1080p", "WEB-DL x264 AC3-JYK"
         //      "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]" --> "Khrustalyov My Car 1998", "720p", "BluRay.x264-GHOULS[rarbg]"
         // includes some typos;
-        private const string _ripQualityRegexSplitter = @"(720p|1080p|2160p|480p|720pp|10800p|576p|1920x1080)";
+        private const string _ripQualitySplitter = @"(720p|1080p|2160p|480p|720pp|10800p|576p|1920x1080)";
 
         // to split filenames by release type
-        private const string _ripReleaseTypeRegexSplitter = @"(WEB-DL|WEBRip|WEB|BluRay|Blu-Ray|HDTV|TVRip|BRRip|BRip|DVDRip|HDRip|BDRip|SCREENER|DVDSCR|DVDSCREENER|XviD|VODRip|R5|DVDR|DVD-Full|DVD-5|DVD-9)";
+        private const string _ripReleaseTypeSplitter = @"(WEB-DL|WEBRip|WEB|BluRay|Blu-Ray|HDTV|TVRip|BRRip|BRip|DVDRip|HDRip|BDRip|SCREENER|DVDSCR|DVDSCREENER|XviD|VODRip|R5|DVDR|DVD-Full|DVD-5|DVD-9)";
 
         // to split by release date without parentheses/brackets/etc...
         // example:
         //      "The Tenant 1976" -> "The Tenant", "1976"
         // second digit only allowed to be one of {8, 9, 0} for obvious reasons
-        private const string _releaseDateRegexSplitter = @"(1|2)(8|9|0)([0-9]{2})";
+        private const string _releaseDateSplitter = @"(1|2)(8|9|0)([0-9]{2})";
 
         private const string _parenthesesOrBrackets_Left = @"\(|\[";
 
@@ -40,12 +40,12 @@ namespace FilmCRUD.Helpers
 
             MatchCollection matches = Regex.Matches(
                 ParsedTitleAndReleaseDate,
-                $"(({_parenthesesOrBrackets_Left})*){_releaseDateRegexSplitter}(({_parenthesesOrBrackets_Right})*)");
+                $"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
 
             // the only admissible case without matches is when there's no release date
             if (!matches.Any())
             {
-                if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-z0-9]|{_tokenRegexSplitter})*$", RegexOptions.IgnoreCase))
+                if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-z0-9]|{_tokenSplitter})*$", RegexOptions.IgnoreCase))
                 {
                     throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
                 }
@@ -64,7 +64,7 @@ namespace FilmCRUD.Helpers
                 .Substring(releaseDateRegexMatch.Index, length: releaseDateRegexMatch.Length)
                 .Trim();
 
-            string parsedReleasedDate = Regex.Match(withoutParsedTitle, _releaseDateRegexSplitter).Value;
+            string parsedReleasedDate = Regex.Match(withoutParsedTitle, _releaseDateSplitter).Value;
 
             return (
                 string.Join(' ', parsedTitle.GetStringTokensWithoutPunctuation(removeDiacritics: false)),
@@ -97,7 +97,7 @@ namespace FilmCRUD.Helpers
                 if (isSurrounded) return (ripInfoAndGroup, null);
 
                 IEnumerable<string> splittedByTokenSplitter = Regex
-                    .Split(ripInfoAndGroup, _tokenRegexSplitter, RegexOptions.IgnoreCase);
+                    .Split(ripInfoAndGroup, _tokenSplitter, RegexOptions.IgnoreCase);
 
                 if (splittedByTokenSplitter.Count() > 1)
                 {
@@ -120,12 +120,12 @@ namespace FilmCRUD.Helpers
 
             Match ripQualityMatch = Regex.Match(
                 fileName,
-                $"(({_parenthesesOrBrackets_Left})*){_ripQualityRegexSplitter}(({_parenthesesOrBrackets_Right})*)",
+                $"(({_parenthesesOrBrackets_Left})*){_ripQualitySplitter}(({_parenthesesOrBrackets_Right})*)",
                 RegexOptions.IgnoreCase);
 
             Match releaseTypeMatch = Regex.Match(
                 fileName,
-                $"(({_parenthesesOrBrackets_Left})*){_ripReleaseTypeRegexSplitter}(({_parenthesesOrBrackets_Right})*)",
+                $"(({_parenthesesOrBrackets_Left})*){_ripReleaseTypeSplitter}(({_parenthesesOrBrackets_Right})*)",
                 RegexOptions.IgnoreCase);
 
             // in this case we assume that param fileName has the format "some movie (1999)" or just the movie title, details
