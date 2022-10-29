@@ -253,8 +253,6 @@ namespace DepotTests.CRUDTests
         [InlineData("BDRip.XviD-Larceny", "BDRip.XviD", "Larceny")]
         [InlineData("[DvdRip] [Xvid] {1337x}-Noir", "[DvdRip] [Xvid] {1337x}", "Noir")]
         [InlineData("BluRay 5.1 Ch x265 HEVC SUJAIDR", "BluRay 5.1 Ch x265 HEVC", "SUJAIDR")]
-        [InlineData("BRRip H.264 AC3-frapper(HDScene-Release)", "BRRip H.264 AC3", "frapper(HDScene-Release)")]
-        [InlineData("BDRip H264 AAC-SecretMyth (Kingdom-Release)", "BDRip H264 AAC", "Kingdom-Release")]
         public void SplitRipInfoAndGroup_ShouldReturnCorrectInfoAndGroup(
             string ripInfoAndGroup,
             string expectedRipInfo,
