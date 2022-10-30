@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using FluentAssertions.Execution;
 using System.Linq;
-
+using System.Text.Json;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
@@ -14,7 +14,6 @@ using FilmCRUD.Interfaces;
 using ConfigUtils.Interfaces;
 using FilmCRUD;
 using FilmCRUD.CustomExceptions;
-
 
 namespace DepotTests.CRUDTests
 {
@@ -36,7 +35,7 @@ namespace DepotTests.CRUDTests
         public VisitCRUDManagerTests()
         {
             this._movieWarehouseVisitRepositoryMock = new Mock<IMovieWarehouseVisitRepository>(MockBehavior.Strict);
-            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>();
+            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>(MockBehavior.Strict);
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
             this._unitOfWorkMock
@@ -256,7 +255,6 @@ namespace DepotTests.CRUDTests
                 .Setup(v => v.GetVisitDates())
                 .Returns(Enumerable.Empty<DateTime>());
 
-
             // act
             // nothing to do...
 
@@ -300,6 +298,90 @@ namespace DepotTests.CRUDTests
                 .Invoking(v => v.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDateString))
                 .Should()
                 .Throw<FileNotFoundException>();
+        }
+
+
+        [Fact]
+        public void ProcessManuallyProvidedMovieRipsForExistingVisit_WithExistingMovieRipInOtherVisit_ShouldNotAddNewMovieRipEntityButUpdateTheExistingOneInstead()
+        {
+            // arrange
+            string firstVisitDateString = "20220915";
+            string secondVisitDateString = "20221015";
+
+            var preExistingRip = new MovieRip() { 
+                FileName = "The.Deer.Hunter.1080p.BluRay.DTS.x264-CtrlHD",
+                ParsedTitle = "the deer hunter",
+                ParsedReleaseDate = null,
+                ParsedRipQuality = null,
+                ParsedRipInfo = null,
+                ParsedRipGroup = null
+            };
+
+            var firstVisit = new MovieWarehouseVisit() {
+                VisitDateTime = DateTime.ParseExact(firstVisitDateString, "yyyyMMdd", null),
+                MovieRips = new List<MovieRip> { preExistingRip }
+            };
+
+            var secondVisit = new MovieWarehouseVisit() {
+                VisitDateTime = DateTime.ParseExact(secondVisitDateString, "yyyyMMdd", null),
+                MovieRips = Enumerable.Empty<MovieRip>().ToList()
+            };
+
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetVisitDates())
+                .Returns(new DateTime[] { firstVisit.VisitDateTime, secondVisit.VisitDateTime });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetClosestMovieWarehouseVisit(secondVisit.VisitDateTime))
+                .Returns(secondVisit);
+
+            // will always return true in bool methods
+            this._fileSystemIOWrapperMock.SetReturnsDefault<bool>(true);
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.GetFiles(It.IsAny<string>()))
+                .Returns(new string[] { $"movies_{secondVisitDateString}.txt" });
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.ReadAllLines($"movies_{secondVisitDateString}.txt"))
+                .Returns(new string[] { preExistingRip.FileName });
+
+            this._movieRipRepositoryMock
+                .Setup(m => m.GetAllRipsInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == firstVisit.VisitDateTime)))
+                .Returns(firstVisit.MovieRips);
+            
+            this._movieRipRepositoryMock
+                .Setup(m => m.GetAllRipsInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == secondVisit.VisitDateTime)))
+                .Returns(secondVisit.MovieRips);
+
+            var _manualMovieRipsCfg = new Dictionary<string, Dictionary<string, string>>()
+            {
+                [preExistingRip.FileName] = new Dictionary<string, string>()
+                {
+                    ["FileName"] = preExistingRip.FileName,
+                    ["ParsedTitle"] = "the deer hunter",
+                    ["ParsedReleaseDate"] = "1978",
+                    ["ParsedRipQuality"] = "1080p",
+                    ["ParsedRipInfo"] = "BluRay.DTS.x264",
+                    ["ParsedRipGroup"] = "CtrlHD"
+                }
+            };
+            this._appSettingsManagerMock.Setup(a => a.GetManualMovieRips()).Returns(_manualMovieRipsCfg);
+
+            // act
+            this._visitCRUDManager.ProcessManuallyProvidedMovieRipsForExistingVisit(secondVisitDateString);
+
+            // assert
+            MovieRip expectedRip = JsonSerializer.Deserialize<MovieRip>(JsonSerializer.Serialize(_manualMovieRipsCfg[preExistingRip.FileName]));
+            using (new AssertionScope())
+            {
+                firstVisit.MovieRips.Should().HaveCount(1);
+                secondVisit.MovieRips.Should().HaveCount(1);
+
+                MovieRip ripInFirstVisit = firstVisit.MovieRips.FirstOrDefault();
+                MovieRip ripInSecondVisit = secondVisit.MovieRips.FirstOrDefault();
+
+                ripInFirstVisit.Should().BeSameAs(ripInSecondVisit);
+                ripInFirstVisit.Should().BeEquivalentTo(expectedRip);
+                ripInSecondVisit.Should().BeEquivalentTo(expectedRip);
+            }
         }
 
     }

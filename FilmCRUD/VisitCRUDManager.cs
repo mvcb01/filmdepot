@@ -174,7 +174,6 @@ namespace FilmCRUD
 
         public void ProcessManuallyProvidedMovieRipsForExistingVisit(string visitDateString)
         {
-
             DateTime visitDate = DateTime.ParseExact(visitDateString, "yyyyMMdd", null);
             if (!this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
