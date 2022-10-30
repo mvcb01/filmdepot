@@ -11,6 +11,7 @@ namespace FilmCRUD.Helpers
 {
     public static class FileNameParser
     {
+
         // filename tokens will be either separated by "." or by whitespace
         private const string _tokenSplitter = @"(\.|\s)";
 
