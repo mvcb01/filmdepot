@@ -366,13 +366,13 @@ namespace DepotTests.CRUDTests
 
             // assert
             MovieRip expectedRip = JsonSerializer.Deserialize<MovieRip>(JsonSerializer.Serialize(_manualMovieRipsCfg[preExistingRip.FileName]));
+            MovieRip ripInFirstVisit = firstVisit.MovieRips.FirstOrDefault();
+            MovieRip ripInSecondVisit = secondVisit.MovieRips.FirstOrDefault();
+
             using (new AssertionScope())
             {
                 firstVisit.MovieRips.Should().HaveCount(1);
                 secondVisit.MovieRips.Should().HaveCount(1);
-
-                MovieRip ripInFirstVisit = firstVisit.MovieRips.FirstOrDefault();
-                MovieRip ripInSecondVisit = secondVisit.MovieRips.FirstOrDefault();
 
                 // both visits should point to the same MovieRip instance
                 ripInFirstVisit.Should().BeSameAs(ripInSecondVisit);
