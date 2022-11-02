@@ -378,7 +378,9 @@ namespace DepotTests.CRUDTests
                 MovieRip ripInFirstVisit = firstVisit.MovieRips.FirstOrDefault();
                 MovieRip ripInSecondVisit = secondVisit.MovieRips.FirstOrDefault();
 
+                // both visits should point to the same MovieRip instance
                 ripInFirstVisit.Should().BeSameAs(ripInSecondVisit);
+
                 ripInFirstVisit.Should().BeEquivalentTo(expectedRip);
                 ripInSecondVisit.Should().BeEquivalentTo(expectedRip);
             }
