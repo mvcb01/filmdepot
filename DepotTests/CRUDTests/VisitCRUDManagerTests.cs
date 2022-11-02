@@ -347,6 +347,10 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.GetAllRipsInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == secondVisit.VisitDateTime)))
                 .Returns(secondVisit.MovieRips);
 
+            this._movieRipRepositoryMock
+                .Setup(m => m.GetAll())
+                .Returns(firstVisit.MovieRips.Concat(secondVisit.MovieRips));
+
             var _manualMovieRipsCfg = new Dictionary<string, Dictionary<string, string>>()
             {
                 [preExistingRip.FileName] = new Dictionary<string, string>()
