@@ -68,7 +68,7 @@ namespace FilmCRUD
                 Log.Error(ex, ex.Message);
                 throw;
             }
-            
+
         }
 
 
@@ -108,7 +108,7 @@ namespace FilmCRUD
             Log.Information("Parsing errors count: {Count}", errorCount);
             Log.Information("Total parsed rips count: {TotalRipCount}", allMovieRipsInVisit.Count());
             Log.Information("Pre existing rips: {PreExistingRips}", oldMovieRips.Count());
-            Log.Information("New rips without manual info: {NewRips}", newMovieRips.Count()); 
+            Log.Information("New rips without manual info: {NewRips}", newMovieRips.Count());
             Log.Information("New rips with manual info: {NewRipsManual}", newMovieRipsManual.Count());
 
             // persisting changes
@@ -237,12 +237,13 @@ namespace FilmCRUD
             }
 
             this._unitOfWork.Complete();
+
             }
 
         private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
             IEnumerable<KeyValuePair<string, Dictionary<string, string>>> manualMovieRipDictionaries,
             out List<string> manualParsingErrors)
-        {   
+        {
             var manualMovieRips = new List<MovieRip>();
             manualParsingErrors = new List<string>();
 
