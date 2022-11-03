@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using FluentAssertions.Execution;
 using System.Linq;
-
+using System.Text.Json;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
@@ -14,7 +14,6 @@ using FilmCRUD.Interfaces;
 using ConfigUtils.Interfaces;
 using FilmCRUD;
 using FilmCRUD.CustomExceptions;
-
 
 namespace DepotTests.CRUDTests
 {
@@ -36,7 +35,7 @@ namespace DepotTests.CRUDTests
         public VisitCRUDManagerTests()
         {
             this._movieWarehouseVisitRepositoryMock = new Mock<IMovieWarehouseVisitRepository>(MockBehavior.Strict);
-            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>();
+            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>(MockBehavior.Strict);
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
             this._unitOfWorkMock
@@ -88,7 +87,7 @@ namespace DepotTests.CRUDTests
             // nothing to do...
 
             // assert
-            _visitCRUDManager
+            this._visitCRUDManager
                 .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit("20220101"))
                 .Should()
                 .Throw<DirectoryNotFoundException>();
@@ -135,15 +134,15 @@ namespace DepotTests.CRUDTests
                 "      ",
                 "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
             };
-            _appSettingsManagerMock
+            this._appSettingsManagerMock
                 .Setup(a => a.GetFilesToIgnore())
                 .Returns(filesToIgnore);
-            _fileSystemIOWrapperMock
+            this._fileSystemIOWrapperMock
                 .Setup(f => f.ReadAllLines(It.IsAny<string>()))
                 .Returns(textFileLines);
 
             // act
-            var fileNamesInVisit = _visitCRUDManager.GetMovieRipFileNamesInVisit("F:\\filepath\\does\\not\\matter.txt");
+            var fileNamesInVisit = this._visitCRUDManager.GetMovieRipFileNamesInVisit("F:\\filepath\\does\\not\\matter.txt");
 
             // assert
             string[] expected = {
@@ -167,10 +166,10 @@ namespace DepotTests.CRUDTests
                 new MovieRip() { FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]" },
                 new MovieRip() { FileName = "My.Cousin.Vinny.1992.1080p.BluRay.H264.AAC-RARBG" },
             };
-            _movieRipRepositoryMock.Setup(m => m.GetAll()).Returns(movieRipsInRepo);
-            
+            this._movieRipRepositoryMock.Setup(m => m.GetAll()).Returns(movieRipsInRepo);
+
             // no manual info
-            _appSettingsManagerMock
+            this._appSettingsManagerMock
                 .Setup(a => a.GetManualMovieRips())
                 .Returns(new Dictionary<string, Dictionary<string, string>>());
 
@@ -179,7 +178,7 @@ namespace DepotTests.CRUDTests
                 oldMovieRips,
                 newMovieRips,
                 newMovieRipsManual,
-                allParsingErrors) = _visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
+                allParsingErrors) = this._visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
 
             // assert
             using (new AssertionScope())
@@ -216,10 +215,10 @@ namespace DepotTests.CRUDTests
                     ["ParsedTitle"] = "some movie name"
                 }
             };
-            _movieRipRepositoryMock
+            this._movieRipRepositoryMock
                 .Setup(m => m.GetAll())
                 .Returns(movieRipsInRepo);
-            _appSettingsManagerMock
+            this._appSettingsManagerMock
                 .Setup(a => a.GetManualMovieRips())
                 .Returns(manualMovieRips);
 
@@ -228,7 +227,7 @@ namespace DepotTests.CRUDTests
                 oldMovieRips,
                 newMovieRips,
                 newMovieRipsManual,
-                allParsingErrors) = _visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
+                allParsingErrors) = this._visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
 
             // assert
             using (new AssertionScope())
@@ -255,7 +254,6 @@ namespace DepotTests.CRUDTests
             this._movieWarehouseVisitRepositoryMock
                 .Setup(v => v.GetVisitDates())
                 .Returns(Enumerable.Empty<DateTime>());
-
 
             // act
             // nothing to do...
@@ -300,6 +298,92 @@ namespace DepotTests.CRUDTests
                 .Invoking(v => v.ProcessManuallyProvidedMovieRipsForExistingVisit(visitDateString))
                 .Should()
                 .Throw<FileNotFoundException>();
+        }
+
+
+        [Fact]
+        public void ProcessManuallyProvidedMovieRipsForExistingVisit_WithExistingMovieRipInOtherVisit_ShouldNotAddNewMovieRipEntityButUpdateTheExistingOneInstead()
+        {
+            // arrange
+            string firstVisitDateString = "20220915";
+            string secondVisitDateString = "20221015";
+
+            var preExistingRip = new MovieRip() { 
+                FileName = "The.Deer.Hunter.1080p.BluRay.DTS.x264-CtrlHD",
+                ParsedTitle = "the deer hunter",
+                ParsedReleaseDate = null,
+                ParsedRipQuality = null,
+                ParsedRipInfo = null,
+                ParsedRipGroup = null
+            };
+
+            var firstVisit = new MovieWarehouseVisit() {
+                VisitDateTime = DateTime.ParseExact(firstVisitDateString, "yyyyMMdd", null),
+                MovieRips = new List<MovieRip> { preExistingRip }
+            };
+
+            var secondVisit = new MovieWarehouseVisit() {
+                VisitDateTime = DateTime.ParseExact(secondVisitDateString, "yyyyMMdd", null),
+                MovieRips = Enumerable.Empty<MovieRip>().ToList()
+            };
+
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetVisitDates())
+                .Returns(new DateTime[] { firstVisit.VisitDateTime, secondVisit.VisitDateTime });
+            this._movieWarehouseVisitRepositoryMock
+                .Setup(m => m.GetClosestMovieWarehouseVisit(secondVisit.VisitDateTime))
+                .Returns(secondVisit);
+
+            // will always return true in bool methods
+            this._fileSystemIOWrapperMock.SetReturnsDefault<bool>(true);
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.GetFiles(It.IsAny<string>()))
+                .Returns(new string[] { $"movies_{secondVisitDateString}.txt" });
+            this._fileSystemIOWrapperMock
+                .Setup(f => f.ReadAllLines($"movies_{secondVisitDateString}.txt"))
+                .Returns(new string[] { preExistingRip.FileName });
+
+            this._movieRipRepositoryMock
+                .Setup(m => m.GetAllRipsInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == secondVisit.VisitDateTime)))
+                .Returns(secondVisit.MovieRips);
+
+            this._movieRipRepositoryMock
+                .Setup(m => m.GetAll())
+                .Returns(firstVisit.MovieRips.Concat(secondVisit.MovieRips));
+
+            var _manualMovieRipsCfg = new Dictionary<string, Dictionary<string, string>>()
+            {
+                [preExistingRip.FileName] = new Dictionary<string, string>()
+                {
+                    ["FileName"] = preExistingRip.FileName,
+                    ["ParsedTitle"] = "the deer hunter",
+                    ["ParsedReleaseDate"] = "1978",
+                    ["ParsedRipQuality"] = "1080p",
+                    ["ParsedRipInfo"] = "BluRay.DTS.x264",
+                    ["ParsedRipGroup"] = "CtrlHD"
+                }
+            };
+            this._appSettingsManagerMock.Setup(a => a.GetManualMovieRips()).Returns(_manualMovieRipsCfg);
+
+            // act
+            this._visitCRUDManager.ProcessManuallyProvidedMovieRipsForExistingVisit(secondVisitDateString);
+
+            // assert
+            MovieRip expectedRip = JsonSerializer.Deserialize<MovieRip>(JsonSerializer.Serialize(_manualMovieRipsCfg[preExistingRip.FileName]));
+            MovieRip ripInFirstVisit = firstVisit.MovieRips.FirstOrDefault();
+            MovieRip ripInSecondVisit = secondVisit.MovieRips.FirstOrDefault();
+
+            using (new AssertionScope())
+            {
+                firstVisit.MovieRips.Should().HaveCount(1);
+                secondVisit.MovieRips.Should().HaveCount(1);
+
+                // both visits should point to the same MovieRip instance
+                ripInFirstVisit.Should().BeSameAs(ripInSecondVisit);
+
+                ripInFirstVisit.Should().BeEquivalentTo(expectedRip);
+                ripInSecondVisit.Should().BeEquivalentTo(expectedRip);
+            }
         }
 
     }
