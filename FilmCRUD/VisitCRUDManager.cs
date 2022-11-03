@@ -205,27 +205,47 @@ namespace FilmCRUD
                 manualParsingErrors.ToList().ForEach(e => this._parsingErrorsLogger?.Error(e));
             }
 
-            IEnumerable<MovieRip> movieRipsInVisit = this._unitOfWork.MovieRips.GetAllRipsInVisit(visit);
+            IEnumerable<MovieRip> allMovieRips = this._unitOfWork.MovieRips.GetAll();
+
+            // caching the filenames
+            IEnumerable<string> filenamesForMovieRipsInVisit = this._unitOfWork.MovieRips
+                .GetAllRipsInVisit(visit)
+                .Select(mr => mr.FileName)
+                .ToArray();
+
             foreach (var movieRip in manualMovieRips)
             {
                 try
                 {
-                    MovieRip existingMovieRip = movieRipsInVisit.Where(r => r.FileName == movieRip.FileName).FirstOrDefault();
-                    if (existingMovieRip == null)
+                    // updates the MovieRip entity if it already exists in the repo, otherwise points to the instance
+                    // created from the manual configs
+                    MovieRip targetMovieRip = allMovieRips.Where(r => r.FileName == movieRip.FileName).FirstOrDefault();
+                    if (targetMovieRip != null)
                     {
                         // not too many files are expected to be manually configured so we use Information level
-                        Log.Information("Adding: {FileName}", movieRip.FileName);
-                        visit.MovieRips.Add(movieRip);
+                        Log.Information("Updating movie rip: {FileName}", targetMovieRip.FileName);
+                        targetMovieRip.ParsedTitle = movieRip.ParsedTitle;
+                        targetMovieRip.ParsedReleaseDate = movieRip.ParsedReleaseDate;
+                        targetMovieRip.ParsedRipQuality = movieRip.ParsedRipQuality;
+                        targetMovieRip.ParsedRipInfo = movieRip.ParsedRipInfo;
+                        targetMovieRip.ParsedRipGroup = movieRip.ParsedRipGroup;
                     }
                     else
                     {
-                        // not too many files are expected to be manually configured so we use Information level
-                        Log.Information("Updating: {FileName}", existingMovieRip.FileName);
-                        existingMovieRip.ParsedTitle = movieRip.ParsedTitle;
-                        existingMovieRip.ParsedReleaseDate = movieRip.ParsedReleaseDate;
-                        existingMovieRip.ParsedRipQuality = movieRip.ParsedRipQuality;
-                        existingMovieRip.ParsedRipInfo = movieRip.ParsedRipInfo;
-                        existingMovieRip.ParsedRipGroup = movieRip.ParsedRipGroup;
+                        targetMovieRip = movieRip;
+                    }
+
+                    // if the target MovieRip entity wasn't already part of the existing visit then it needs to be added;
+                    // not too many files are expected to be manually configured so we use the log Information level
+                    if (!filenamesForMovieRipsInVisit.Contains(targetMovieRip.FileName))
+                    {
+
+                        Log.Information("Adding movie rip to visit {VisitDateString}: {FileName}", visitDateString, targetMovieRip.FileName);
+                        visit.MovieRips.Add(targetMovieRip);
+                    }
+                    else
+                    {
+                        Log.Information("Movie rip was already in visit {VisitDateString}: {FileName}", visitDateString, targetMovieRip.FileName);
                     }
                 }
                 catch (Exception ex)
