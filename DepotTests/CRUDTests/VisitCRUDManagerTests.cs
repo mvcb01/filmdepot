@@ -87,7 +87,7 @@ namespace DepotTests.CRUDTests
             // nothing to do...
 
             // assert
-            _visitCRUDManager
+            this._visitCRUDManager
                 .Invoking(v => v.ReadWarehouseContentsAndRegisterVisit("20220101"))
                 .Should()
                 .Throw<DirectoryNotFoundException>();
@@ -134,15 +134,15 @@ namespace DepotTests.CRUDTests
                 "      ",
                 "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]"
             };
-            _appSettingsManagerMock
+            this._appSettingsManagerMock
                 .Setup(a => a.GetFilesToIgnore())
                 .Returns(filesToIgnore);
-            _fileSystemIOWrapperMock
+            this._fileSystemIOWrapperMock
                 .Setup(f => f.ReadAllLines(It.IsAny<string>()))
                 .Returns(textFileLines);
 
             // act
-            var fileNamesInVisit = _visitCRUDManager.GetMovieRipFileNamesInVisit("F:\\filepath\\does\\not\\matter.txt");
+            var fileNamesInVisit = this._visitCRUDManager.GetMovieRipFileNamesInVisit("F:\\filepath\\does\\not\\matter.txt");
 
             // assert
             string[] expected = {
@@ -166,10 +166,10 @@ namespace DepotTests.CRUDTests
                 new MovieRip() { FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]" },
                 new MovieRip() { FileName = "My.Cousin.Vinny.1992.1080p.BluRay.H264.AAC-RARBG" },
             };
-            _movieRipRepositoryMock.Setup(m => m.GetAll()).Returns(movieRipsInRepo);
-            
+            this._movieRipRepositoryMock.Setup(m => m.GetAll()).Returns(movieRipsInRepo);
+
             // no manual info
-            _appSettingsManagerMock
+            this._appSettingsManagerMock
                 .Setup(a => a.GetManualMovieRips())
                 .Returns(new Dictionary<string, Dictionary<string, string>>());
 
@@ -178,7 +178,7 @@ namespace DepotTests.CRUDTests
                 oldMovieRips,
                 newMovieRips,
                 newMovieRipsManual,
-                allParsingErrors) = _visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
+                allParsingErrors) = this._visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
 
             // assert
             using (new AssertionScope())
@@ -215,10 +215,10 @@ namespace DepotTests.CRUDTests
                     ["ParsedTitle"] = "some movie name"
                 }
             };
-            _movieRipRepositoryMock
+            this._movieRipRepositoryMock
                 .Setup(m => m.GetAll())
                 .Returns(movieRipsInRepo);
-            _appSettingsManagerMock
+            this._appSettingsManagerMock
                 .Setup(a => a.GetManualMovieRips())
                 .Returns(manualMovieRips);
 
@@ -227,7 +227,7 @@ namespace DepotTests.CRUDTests
                 oldMovieRips,
                 newMovieRips,
                 newMovieRipsManual,
-                allParsingErrors) = _visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
+                allParsingErrors) = this._visitCRUDManager.GetMovieRipsInVisit(ripFileNamesInVisit);
 
             // assert
             using (new AssertionScope())
