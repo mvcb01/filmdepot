@@ -56,6 +56,7 @@ namespace ConfigUtils
         public string GetWarehouseContentsTextFilesDirectory()
         {
             return ConfigRoot.GetSection("WarehouseContentsTextFilesDirectory").Value;
+
         }
 
         public IEnumerable<string> GetFilesToIgnore()
