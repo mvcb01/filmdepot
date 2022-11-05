@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using FilmDomain.Entities;
 using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
-
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FilmCRUD.Helpers
 {
@@ -43,6 +43,8 @@ namespace FilmCRUD.Helpers
 
         public static readonly Regex ParenthesesOrBrackets_RightRegex;
 
+        public static readonly Regex ReleaseDateSplitterRegex;
+
         // initializing Regex properties
         static FileNameParser()
         {
@@ -57,15 +59,15 @@ namespace FilmCRUD.Helpers
             ParenthesesOrBrackets_LeftRegex = new Regex(_parenthesesOrBrackets_Left);
 
             ParenthesesOrBrackets_RightRegex = new Regex(_parenthesesOrBrackets_Right);
+
+            ReleaseDateSplitterRegex = new Regex($"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
         }
 
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
         {
             ParsedTitleAndReleaseDate = ParsedTitleAndReleaseDate.Trim();
 
-            MatchCollection matches = Regex.Matches(
-                ParsedTitleAndReleaseDate,
-                $"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
+            MatchCollection matches = ReleaseDateSplitterRegex.Matches(ParsedTitleAndReleaseDate);
 
             // the only admissible case without matches is when there's no release date
             if (!matches.Any())
