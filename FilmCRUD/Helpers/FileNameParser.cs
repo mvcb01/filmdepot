@@ -6,6 +6,7 @@ using FilmDomain.Entities;
 using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
 using Microsoft.EntityFrameworkCore.Metadata;
+using System.Diagnostics;
 
 namespace FilmCRUD.Helpers
 {
@@ -45,6 +46,8 @@ namespace FilmCRUD.Helpers
 
         public static readonly Regex ReleaseDateSplitterRegex;
 
+        public static readonly Regex AbsentReleaseDateRegex;
+
         // initializing Regex properties
         static FileNameParser()
         {
@@ -61,6 +64,8 @@ namespace FilmCRUD.Helpers
             ParenthesesOrBrackets_RightRegex = new Regex(_parenthesesOrBrackets_Right);
 
             ReleaseDateSplitterRegex = new Regex($"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
+
+            AbsentReleaseDateRegex = new Regex($"^([a-z0-9]|{_tokenSplitter})*$", RegexOptions.IgnoreCase);
         }
 
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
@@ -72,7 +77,7 @@ namespace FilmCRUD.Helpers
             // the only admissible case without matches is when there's no release date
             if (!matches.Any())
             {
-                if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-z0-9]|{_tokenSplitter})*$", RegexOptions.IgnoreCase))
+                if (!AbsentReleaseDateRegex.IsMatch(ParsedTitleAndReleaseDate))
                 {
                     throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
                 }
