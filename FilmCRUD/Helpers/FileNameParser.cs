@@ -5,12 +5,14 @@ using System.Text.RegularExpressions;
 using FilmDomain.Entities;
 using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
-
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.Diagnostics;
 
 namespace FilmCRUD.Helpers
 {
     public static class FileNameParser
     {
+
         // filename tokens will be either separated by "." or by whitespace
         private const string _tokenSplitter = @"(\.|\s)";
 
@@ -34,18 +36,60 @@ namespace FilmCRUD.Helpers
 
         private const string _parenthesesOrBrackets_Right = @"\)|\]";
 
+        public static readonly Regex RipQualityRegex;
+
+        public static readonly Regex ReleaseTypeRegex;
+
+        public static readonly Regex ParenthesesOrBrackets_LeftRegex;
+
+        public static readonly Regex ParenthesesOrBrackets_RightRegex;
+
+        public static readonly Regex ReleaseDateSplitterRegex;
+
+        public static readonly Regex AbsentReleaseDateRegex;
+
+        public static readonly Regex IsSurroundedRegex;
+
+        public static readonly Regex TokenSplitterRegex;
+
+        // initializing Regex properties
+        static FileNameParser()
+        {
+            RipQualityRegex = new Regex(
+                $"(({_parenthesesOrBrackets_Left})*){_ripQualitySplitter}(({_parenthesesOrBrackets_Right})*)",
+                RegexOptions.IgnoreCase);
+
+            ReleaseTypeRegex = new Regex(
+                $"(({_parenthesesOrBrackets_Left})*){_ripReleaseTypeSplitter}(({_parenthesesOrBrackets_Right})*)",
+                RegexOptions.IgnoreCase);
+
+            ParenthesesOrBrackets_LeftRegex = new Regex(_parenthesesOrBrackets_Left);
+
+            ParenthesesOrBrackets_RightRegex = new Regex(_parenthesesOrBrackets_Right);
+
+            ReleaseDateSplitterRegex = new Regex($"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
+
+            AbsentReleaseDateRegex = new Regex($"^([a-z0-9]|{_tokenSplitter})*$", RegexOptions.IgnoreCase);
+
+            string _bracesLeft = @"\{";
+            string _bracesRight = @"\}";
+            IsSurroundedRegex = new Regex(
+                $"^({_parenthesesOrBrackets_Left}|{_bracesLeft})(.*?)({_parenthesesOrBrackets_Right}|{_bracesRight})$",
+                RegexOptions.IgnoreCase);
+
+            TokenSplitterRegex = new Regex(_tokenSplitter, RegexOptions.IgnoreCase);
+        }
+
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
         {
             ParsedTitleAndReleaseDate = ParsedTitleAndReleaseDate.Trim();
 
-            MatchCollection matches = Regex.Matches(
-                ParsedTitleAndReleaseDate,
-                $"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
+            MatchCollection matches = ReleaseDateSplitterRegex.Matches(ParsedTitleAndReleaseDate);
 
             // the only admissible case without matches is when there's no release date
             if (!matches.Any())
             {
-                if (!Regex.IsMatch(ParsedTitleAndReleaseDate, $"^([a-z0-9]|{_tokenSplitter})*$", RegexOptions.IgnoreCase))
+                if (!AbsentReleaseDateRegex.IsMatch(ParsedTitleAndReleaseDate))
                 {
                     throw new FileNameParserError($"Cannot split into film title and release date: {ParsedTitleAndReleaseDate}");
                 }
@@ -87,16 +131,9 @@ namespace FilmCRUD.Helpers
             else
             {
                 // cases like {5.1} or [5.1] or (5.1)
-                string bracesLeft = @"\{";
-                string bracesRight = @"\}";
-                bool isSurrounded = Regex.IsMatch(
-                    ripInfoAndGroup,
-                    $"^({_parenthesesOrBrackets_Left}|{bracesLeft})(.*?)({_parenthesesOrBrackets_Right}|{bracesRight})$",
-                    RegexOptions.IgnoreCase);
-                if (isSurrounded) return (ripInfoAndGroup, null);
+                if (IsSurroundedRegex.IsMatch(ripInfoAndGroup)) return (ripInfoAndGroup, null);
 
-                IEnumerable<string> splittedByTokenSplitter = Regex
-                    .Split(ripInfoAndGroup, _tokenSplitter, RegexOptions.IgnoreCase);
+                IEnumerable<string> splittedByTokenSplitter = TokenSplitterRegex.Split(ripInfoAndGroup);
 
                 if (splittedByTokenSplitter.Count() > 1)
                 {
@@ -113,15 +150,9 @@ namespace FilmCRUD.Helpers
         {
             string parsedTitleAndReleaseDate, parsedRipInfoAndGroup, parsedRipQuality, parsedRipInfo, parsedRipGroup;
 
-            Match ripQualityMatch = Regex.Match(
-                fileName,
-                $"(({_parenthesesOrBrackets_Left})*){_ripQualitySplitter}(({_parenthesesOrBrackets_Right})*)",
-                RegexOptions.IgnoreCase);
+            Match ripQualityMatch = RipQualityRegex.Match(fileName);
 
-            Match releaseTypeMatch = Regex.Match(
-                fileName,
-                $"(({_parenthesesOrBrackets_Left})*){_ripReleaseTypeSplitter}(({_parenthesesOrBrackets_Right})*)",
-                RegexOptions.IgnoreCase);
+            Match releaseTypeMatch = ReleaseTypeRegex.Match(fileName);
 
             // in this case we assume that param fileName has the format "some movie (1999)" or just the movie title, details
             // are handled by method SplitTitleAndReleaseDate
@@ -134,12 +165,10 @@ namespace FilmCRUD.Helpers
             else if (ripQualityMatch.Success)
             {
                 parsedTitleAndReleaseDate = fileName.Substring(0, length: ripQualityMatch.Index).Trim();
-                parsedRipQuality = Regex.Replace(
-                    Regex.Replace(
+                parsedRipQuality = ParenthesesOrBrackets_LeftRegex.Replace(
+                    ParenthesesOrBrackets_RightRegex.Replace(
                         ripQualityMatch.Value,
-                        _parenthesesOrBrackets_Left,
                         string.Empty),
-                    _parenthesesOrBrackets_Right,
                     string.Empty);
 
                 parsedRipInfoAndGroup = fileName.Substring(ripQualityMatch.Index + ripQualityMatch.Length).Trim('.', ' ');
