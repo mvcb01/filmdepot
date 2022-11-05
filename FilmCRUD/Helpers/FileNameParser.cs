@@ -39,6 +39,10 @@ namespace FilmCRUD.Helpers
 
         public static readonly Regex ReleaseTypeRegex;
 
+        public static readonly Regex ParenthesesOrBrackets_LeftRegex;
+
+        public static readonly Regex ParenthesesOrBrackets_RightRegex;
+
         // initializing Regex properties
         static FileNameParser()
         {
@@ -49,6 +53,10 @@ namespace FilmCRUD.Helpers
             ReleaseTypeRegex = new Regex(
                 $"(({_parenthesesOrBrackets_Left})*){_ripReleaseTypeSplitter}(({_parenthesesOrBrackets_Right})*)",
                 RegexOptions.IgnoreCase);
+
+            ParenthesesOrBrackets_LeftRegex = new Regex(_parenthesesOrBrackets_Left);
+
+            ParenthesesOrBrackets_RightRegex = new Regex(_parenthesesOrBrackets_Right);
         }
 
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
@@ -145,12 +153,10 @@ namespace FilmCRUD.Helpers
             else if (ripQualityMatch.Success)
             {
                 parsedTitleAndReleaseDate = fileName.Substring(0, length: ripQualityMatch.Index).Trim();
-                parsedRipQuality = Regex.Replace(
-                    Regex.Replace(
+                parsedRipQuality = ParenthesesOrBrackets_LeftRegex.Replace(
+                    ParenthesesOrBrackets_RightRegex.Replace(
                         ripQualityMatch.Value,
-                        _parenthesesOrBrackets_Left,
                         string.Empty),
-                    _parenthesesOrBrackets_Right,
                     string.Empty);
 
                 parsedRipInfoAndGroup = fileName.Substring(ripQualityMatch.Index + ripQualityMatch.Length).Trim('.', ' ');
