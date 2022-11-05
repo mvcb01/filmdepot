@@ -50,6 +50,8 @@ namespace FilmCRUD.Helpers
 
         public static readonly Regex IsSurroundedRegex;
 
+        public static readonly Regex TokenSplitterRegex;
+
         // initializing Regex properties
         static FileNameParser()
         {
@@ -74,6 +76,8 @@ namespace FilmCRUD.Helpers
             IsSurroundedRegex = new Regex(
                 $"^({_parenthesesOrBrackets_Left}|{_bracesLeft})(.*?)({_parenthesesOrBrackets_Right}|{_bracesRight})$",
                 RegexOptions.IgnoreCase);
+
+            TokenSplitterRegex = new Regex(_tokenSplitter, RegexOptions.IgnoreCase);
         }
 
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
@@ -129,8 +133,7 @@ namespace FilmCRUD.Helpers
                 // cases like {5.1} or [5.1] or (5.1)
                 if (IsSurroundedRegex.IsMatch(ripInfoAndGroup)) return (ripInfoAndGroup, null);
 
-                IEnumerable<string> splittedByTokenSplitter = Regex
-                    .Split(ripInfoAndGroup, _tokenSplitter, RegexOptions.IgnoreCase);
+                IEnumerable<string> splittedByTokenSplitter = TokenSplitterRegex.Split(ripInfoAndGroup);
 
                 if (splittedByTokenSplitter.Count() > 1)
                 {
