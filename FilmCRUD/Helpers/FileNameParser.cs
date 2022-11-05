@@ -48,6 +48,8 @@ namespace FilmCRUD.Helpers
 
         public static readonly Regex AbsentReleaseDateRegex;
 
+        public static readonly Regex IsSurroundedRegex;
+
         // initializing Regex properties
         static FileNameParser()
         {
@@ -66,6 +68,12 @@ namespace FilmCRUD.Helpers
             ReleaseDateSplitterRegex = new Regex($"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
 
             AbsentReleaseDateRegex = new Regex($"^([a-z0-9]|{_tokenSplitter})*$", RegexOptions.IgnoreCase);
+
+            string _bracesLeft = @"\{";
+            string _bracesRight = @"\}";
+            IsSurroundedRegex = new Regex(
+                $"^({_parenthesesOrBrackets_Left}|{_bracesLeft})(.*?)({_parenthesesOrBrackets_Right}|{_bracesRight})$",
+                RegexOptions.IgnoreCase);
         }
 
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
@@ -119,13 +127,7 @@ namespace FilmCRUD.Helpers
             else
             {
                 // cases like {5.1} or [5.1] or (5.1)
-                string bracesLeft = @"\{";
-                string bracesRight = @"\}";
-                bool isSurrounded = Regex.IsMatch(
-                    ripInfoAndGroup,
-                    $"^({_parenthesesOrBrackets_Left}|{bracesLeft})(.*?)({_parenthesesOrBrackets_Right}|{bracesRight})$",
-                    RegexOptions.IgnoreCase);
-                if (isSurrounded) return (ripInfoAndGroup, null);
+                if (IsSurroundedRegex.IsMatch(ripInfoAndGroup)) return (ripInfoAndGroup, null);
 
                 IEnumerable<string> splittedByTokenSplitter = Regex
                     .Split(ripInfoAndGroup, _tokenSplitter, RegexOptions.IgnoreCase);
