@@ -35,12 +35,20 @@ namespace FilmCRUD.Helpers
 
         private const string _parenthesesOrBrackets_Right = @"\)|\]";
 
-        public static readonly Regex RipQualityMatchRegex;
+        public static readonly Regex RipQualityRegex;
+
+        public static readonly Regex ReleaseTypeRegex;
 
         // initializing Regex properties
         static FileNameParser()
         {
-            RipQualityMatchRegex = new Regex($"(({_parenthesesOrBrackets_Left})*){_ripQualitySplitter}(({_parenthesesOrBrackets_Right})*)", RegexOptions.IgnoreCase);
+            RipQualityRegex = new Regex(
+                $"(({_parenthesesOrBrackets_Left})*){_ripQualitySplitter}(({_parenthesesOrBrackets_Right})*)",
+                RegexOptions.IgnoreCase);
+
+            ReleaseTypeRegex = new Regex(
+                $"(({_parenthesesOrBrackets_Left})*){_ripReleaseTypeSplitter}(({_parenthesesOrBrackets_Right})*)",
+                RegexOptions.IgnoreCase);
         }
 
         public static (string Title, string ReleaseDate) SplitTitleAndReleaseDate(string ParsedTitleAndReleaseDate)
@@ -122,12 +130,9 @@ namespace FilmCRUD.Helpers
         {
             string parsedTitleAndReleaseDate, parsedRipInfoAndGroup, parsedRipQuality, parsedRipInfo, parsedRipGroup;
 
-            Match ripQualityMatch = RipQualityMatchRegex.Match(fileName);
+            Match ripQualityMatch = RipQualityRegex.Match(fileName);
 
-            Match releaseTypeMatch = Regex.Match(
-                fileName,
-                $"(({_parenthesesOrBrackets_Left})*){_ripReleaseTypeSplitter}(({_parenthesesOrBrackets_Right})*)",
-                RegexOptions.IgnoreCase);
+            Match releaseTypeMatch = ReleaseTypeRegex.Match(fileName);
 
             // in this case we assume that param fileName has the format "some movie (1999)" or just the movie title, details
             // are handled by method SplitTitleAndReleaseDate
