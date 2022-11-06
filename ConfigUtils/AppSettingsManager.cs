@@ -59,7 +59,6 @@ namespace ConfigUtils
             // in other cases this config should be null
             string dirPath = ConfigRoot.GetSection("WarehouseContentsTextFilesDirectory").Value;
             return string.IsNullOrWhiteSpace(dirPath) ? "/whcontents" : dirPath;
-
         }
 
         public IEnumerable<string> GetFilesToIgnore()
