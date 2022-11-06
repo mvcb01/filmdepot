@@ -17,5 +17,7 @@ namespace FilmCRUD.Interfaces
         IEnumerable<string> ReadAllLines(string fPath);
 
         void WriteAllText(string fPath, string text);
+
+        void CreateDirectory(string dirPath);
     }
 }
