@@ -20,4 +20,9 @@ echo " "
 
 cd $solutionRoot
 dotnet publish .\entertainmentdepot.sln -o $deploymentDir -c Release
+
+# creates the warehouse contents dir if not exists
+$migrationsDir = Join-Path -Path $deploymentDir -ChildPath 'whcontents'
+[System.IO.Directory]::CreateDirectory($migrationsDir) | out-null
+
 cd $cwd
