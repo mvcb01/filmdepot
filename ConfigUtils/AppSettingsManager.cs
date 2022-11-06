@@ -56,9 +56,10 @@ namespace ConfigUtils
         public string GetWarehouseContentsTextFilesDirectory()
         {
             // allows a fixed path to be used in dev, outside the bin\\Debug directory;
-            // in other cases this config should be null
-            string dirPath = ConfigRoot.GetSection("WarehouseContentsTextFilesDirectory").Value;
-            return string.IsNullOrWhiteSpace(dirPath) ? "/whcontents" : dirPath;
+            // in other cases this config should be null and we'll use the default
+            string dirPathCfg = ConfigRoot.GetSection("WarehouseContentsTextFilesDirectory").Value;
+            string dirPathDefault = Path.Combine(Directory.GetCurrentDirectory(), "whcontents");
+            return string.IsNullOrWhiteSpace(dirPathCfg) ? dirPathDefault : dirPathCfg;
         }
 
         public IEnumerable<string> GetFilesToIgnore()
