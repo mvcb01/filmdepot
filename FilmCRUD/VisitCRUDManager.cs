@@ -57,7 +57,7 @@ namespace FilmCRUD
         {
             string filename = $"movies_{DateTime.Now:yyyyMMdd}.txt";
 
-            Log.Information("Writing the warehouse contents to {DirPath}: {FileName}", WarehouseContentsTextFilesDirectory, filename);
+            Log.Information("Writing the warehouse contents to {fpath}", Path.Combine(WarehouseContentsTextFilesDirectory, filename));
 
             try
             {

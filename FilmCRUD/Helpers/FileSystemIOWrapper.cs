@@ -6,6 +6,11 @@ namespace FilmCRUD.Helpers
 {
     public class FileSystemIOWrapper : IFileSystemIOWrapper
     {
+        public void CreateDirectory(string dirPath)
+        {
+            Directory.CreateDirectory(dirPath);
+        }
+
         public bool DirectoryExists(string dirPath)
         {
             return Directory.Exists(dirPath);

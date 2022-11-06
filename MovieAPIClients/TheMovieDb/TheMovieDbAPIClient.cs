@@ -34,15 +34,14 @@ namespace MovieAPIClients.TheMovieDb
         {
             var movieTitle = title.Trim().ToLower();
 
-            // exemplo: converte "where, art thou!" para o array ["where", "art", "thou"]
+            // example: converts "where, art thou!" to the array ["where", "art", "thou"]
             char[] punctuation = title.Where(Char.IsPunctuation).Distinct().ToArray();
             string[] titleWords = movieTitle.Split().Select(s => s.Trim(punctuation)).ToArray();
 
-            // para o search da query string, por exemplo
-            //      query=where+art+thou
+            // query string search params: where+art+thou
             string searchQuery = string.Join('+', titleWords);
 
-            // por enquanto fica martelada a primeira página no fim da query string
+            // currently only using the first page of search results
             string resultString = await _httpClient.GetStringAsync($"search/movie?api_key={_apiKey}&query={searchQuery}&page=1");
 
             var searchResultTMDB = JsonSerializer.Deserialize<SearchResultTMDB>(resultString);
