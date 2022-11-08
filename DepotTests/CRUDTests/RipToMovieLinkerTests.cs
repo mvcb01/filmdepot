@@ -354,8 +354,10 @@ namespace DepotTests.CRUDTests
         }
 
 
-        [Fact]
-        public async Task SearchAndLinkAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit()
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task SearchAndLinkAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
         {
             // arrange
             var firstMovieRipToLink = new MovieRip() {
@@ -390,10 +392,10 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(new MovieSearchResult[] { dummySearchResult });
 
             // act
-            await this._ripToMovieLinker.SearchAndLinkAsync(maxApiCalls: 2);
+            await this._ripToMovieLinker.SearchAndLinkAsync(maxApiCalls);
 
             // assert
-            this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.AtMost(2));
+            this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Exactly(maxApiCalls));
         }
 
 
