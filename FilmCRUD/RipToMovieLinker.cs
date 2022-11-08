@@ -105,7 +105,7 @@ namespace FilmCRUD
             return relatedMovie;
         }
 
-        public async Task SearchAndLinkAsync(int? maxApiCalls = null)
+        public async Task SearchAndLinkAsync(int maxApiCalls = -1)
         {   
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
             int totalCount = ripsToLink.Count();
