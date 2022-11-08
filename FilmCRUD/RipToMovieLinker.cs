@@ -153,10 +153,17 @@ namespace FilmCRUD
             }
 
             int onlineSearchCount = ripsForOnlineSearch.Count;
+            Log.Information("Total count for online search: {OnlineSearchCount}", onlineSearchCount);
+
+            if (0 < maxApiCalls && maxApiCalls < onlineSearchCount)
+            {
+                Log.Information("Limiting number of rips for online search to {CallLimit}", maxApiCalls);
+                ripsForOnlineSearch = ripsForOnlineSearch.Take(maxApiCalls).ToList();
+                onlineSearchCount = maxApiCalls;
+            }
+
             var logStepOnlineSearch = (int)Math.Ceiling((decimal)onlineSearchCount / 20.0m);
             
-            Log.Information("Count for online search: {OnlineSearchCount}", onlineSearchCount);
-
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
             // letting the token bucket fill for the current timespan...
