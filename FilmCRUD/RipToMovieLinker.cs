@@ -248,7 +248,7 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
-        public async Task LinkFromManualExternalIdsAsync()
+        public async Task LinkFromManualExternalIdsAsync(int maxApiCalls = -1)
         {
             Dictionary<string, int> allManualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 

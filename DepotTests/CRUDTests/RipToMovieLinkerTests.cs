@@ -628,7 +628,7 @@ namespace DepotTests.CRUDTests
                         Title = correctMovieInfo.Title,
                         OriginalTitle = correctMovieInfo.OriginalTitle,
                         ReleaseDate = correctMovieInfo.ReleaseDate,
-                        ExternalId = newExternalId });
+                        ExternalId = newExternalId } );
         }
 
         [Fact]
@@ -754,7 +754,7 @@ namespace DepotTests.CRUDTests
 
 
         [Fact]
-        public async void LinkFromManualExternalIdsAsync_WithInvalidIdsAndValidIds_ShouldHandleInvalidIdsAndProcessTheValidIds()
+        public async Task LinkFromManualExternalIdsAsync_WithInvalidIdsAndValidIds_ShouldHandleInvalidIdsAndProcessTheValidIds()
         {
             // arrange
             int validExternalId = 101;
@@ -818,6 +818,66 @@ namespace DepotTests.CRUDTests
                 
                 secondMovieRipToLinkManually.Movie.Should().BeNull();
             }
+        }
+
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task LinkFromManualExternalIdsAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        {
+            // arrange
+            var firstMovieRipToLinkManually = new MovieRip()
+            {
+                FileName = "Witchfinder.General.1968.1080p.BluRay.x264-CiNEFiLE",
+                ParsedTitle = "witchfinder general",
+                ParsedReleaseDate = "1968"
+            };
+
+            var secondMovieRipToLinkManually = new MovieRip()
+            {
+                FileName = "Men.and.Chicken.2015.LIMITED.1080p.BluRay.x264-USURY[rarbg]",
+                ParsedTitle = "men and chicken",
+                ParsedReleaseDate = "2015"
+            };
+
+            var thirdMovieRipToLinkManually = new MovieRip()
+            {
+                FileName = "Into.the.Wild.2007.1080p.BluRay.x264.DTS-FGT",
+                ParsedTitle = "into the wild",
+                ParsedReleaseDate = "2007"
+            };
+
+            var movieRipsToLinkManually = new MovieRip[] { firstMovieRipToLinkManually, secondMovieRipToLinkManually, thirdMovieRipToLinkManually };
+            this._movieRipRepositoryMock
+                .Setup(m => m.GetAll())
+                .Returns(movieRipsToLinkManually);
+            this._movieRipRepositoryMock
+                .Setup(m => m.FindByFileName(It.Is<string>(s => movieRipsToLinkManually.Select(r => r.FileName).Contains(s))))
+                .Returns((string filename) => movieRipsToLinkManually.Where(r => r.FileName == filename).First());
+
+            var manualExternalIds = new Dictionary<string, int>() {
+                { "Witchfinder.General.1968.1080p.BluRay.x264-CiNEFiLE", 101 },
+                { "Men.and.Chicken.2015.LIMITED.1080p.BluRay.x264-USURY[rarbg]", 102 },
+                { "Into.the.Wild.2007.1080p.BluRay.x264.DTS-FGT", 103 }
+            };
+            this._appSettingsManagerMock
+                .Setup(a => a.GetManualExternalIds())
+                .Returns(manualExternalIds);
+
+            this._movieRepositoryMock
+                .Setup(m => m.FindByExternalId(It.IsAny<int>()))
+                .Returns((Movie)null);
+
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieInfoAsync(It.IsAny<int>()))
+                .ReturnsAsync((int extId) => new MovieSearchResult() { ExternalId = extId });
+
+            // act
+            await this._ripToMovieLinker.LinkFromManualExternalIdsAsync(maxApiCalls);
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieInfoAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
         }
 
         [Fact]
