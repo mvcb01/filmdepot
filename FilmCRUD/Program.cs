@@ -547,7 +547,6 @@ namespace FilmCRUD
                 Console.WriteLine(String.Join('\n', item.Value.OrderBy(s => s)));
             }
         }
-
     }
 
 }
