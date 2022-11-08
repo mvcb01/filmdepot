@@ -105,7 +105,7 @@ namespace FilmCRUD
             return relatedMovie;
         }
 
-        public async Task SearchAndLinkAsync()
+        public async Task SearchAndLinkAsync(int? maxApiCalls = null)
         {   
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
             int totalCount = ripsToLink.Count();
@@ -154,7 +154,6 @@ namespace FilmCRUD
 
             int onlineSearchCount = ripsForOnlineSearch.Count;
             var logStepOnlineSearch = (int)Math.Ceiling((decimal)onlineSearchCount / 20.0m);
-
             
             Log.Information("Count for online search: {OnlineSearchCount}", onlineSearchCount);
 

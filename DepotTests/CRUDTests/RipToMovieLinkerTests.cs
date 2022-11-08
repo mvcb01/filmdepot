@@ -312,7 +312,7 @@ namespace DepotTests.CRUDTests
         public async Task SearchAndLinkAsync_WithoutMatchesInRepo_WithSameOnlineMatchForSeveralRips_ShouldLinkToSameMovieObject()
         {
             // arrange
-            int manualExternalId = 101;
+            int externalId = 101;
             var firstMovieRipToLink = new MovieRip() {
                 FileName = "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous",
                 ParsedTitle = "Blue Velvet",
@@ -325,11 +325,11 @@ namespace DepotTests.CRUDTests
             };
             MovieRip[] allMovieRipsInRepo = { firstMovieRipToLink, secondMovieRipToLink };
             var manualExternalIds = new Dictionary<string, int>() {
-                { "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous", manualExternalId },
-                { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", manualExternalId }
+                { "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous", externalId },
+                { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", externalId }
             };
             var movieInfo = new MovieSearchResult() {
-                ExternalId = manualExternalId,
+                ExternalId = externalId,
                 Title = "Blue Velvet",
                 OriginalTitle = "Blue Velvet",
                 ReleaseDate = 1986
@@ -352,6 +352,50 @@ namespace DepotTests.CRUDTests
                 .Should()
                 .BeSameAs(secondMovieRipToLink.Movie, because: "only one Movie object should be created for both movie rips");
         }
+
+
+        [Fact]
+        public async Task SearchAndLinkAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit()
+        {
+            // arrange
+            var firstMovieRipToLink = new MovieRip() {
+                FileName = "Witchfinder.General.1968.1080p.BluRay.x264-CiNEFiLE",
+                ParsedTitle = "witchfinder general",
+                ParsedReleaseDate = "1968"
+            };
+            var secondMovieRipToLink = new MovieRip() {
+                FileName = "Men.and.Chicken.2015.LIMITED.1080p.BluRay.x264-USURY[rarbg]",
+                ParsedTitle = "men and chicken",
+                ParsedReleaseDate = "2015"
+            };
+
+            var thirdMovieRipToLink = new MovieRip() {
+                FileName = "Into.the.Wild.2007.1080p.BluRay.x264.DTS-FGT",
+                ParsedTitle = "into the wild",
+                ParsedReleaseDate = "2007"
+            };
+
+            MovieRip[] allMovieRipsInRepo = { firstMovieRipToLink, secondMovieRipToLink, thirdMovieRipToLink };          
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
+                .Returns(allMovieRipsInRepo);
+
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
+                .Returns(Enumerable.Empty<Movie>());
+
+            var dummySearchResult = new MovieSearchResult();
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.IsAny<string>()))
+                .ReturnsAsync(new MovieSearchResult[] { dummySearchResult });
+
+            // act
+            await this._ripToMovieLinker.SearchAndLinkAsync(maxApiCalls: 2);
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.AtMost(2));
+        }
+
 
         [Fact]
         public async Task LinkFromManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiMethod()
