@@ -916,7 +916,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(false);
 
             // act
-            await this._ripToMovieLinker.ValidateManualExternalIdsAsync();
+            await this._ripToMovieLinker.ValidateManualExternalIdsAsync(maxApiCalls);
 
             // assert
             this._movieAPIClientMock.Verify(m => m.ExternalIdExistsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));

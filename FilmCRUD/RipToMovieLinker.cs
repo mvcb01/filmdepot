@@ -387,7 +387,7 @@ namespace FilmCRUD
 
         public IEnumerable<string> GetAllUnlinkedMovieRips() => this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
 
-        public async Task ValidateManualExternalIdsAsync()
+        public async Task ValidateManualExternalIdsAsync(int maxApiCalls = -1)
         {
             Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
@@ -397,6 +397,13 @@ namespace FilmCRUD
             {
                 Log.Information("No manually configured external ids");
                 return;
+            }
+
+            if (0 < maxApiCalls && maxApiCalls < manualExternalIdsCount)
+            {
+                Log.Information("Limiting number of API calls to {CallLimit}", maxApiCalls);
+                manualExternalIds = manualExternalIds.Take(maxApiCalls).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                manualExternalIdsCount = maxApiCalls;
             }
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
