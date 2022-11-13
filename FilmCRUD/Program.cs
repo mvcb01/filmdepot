@@ -382,12 +382,12 @@ namespace FilmCRUD
             if (opts.Search)
             {
                 Log.Information("Linking movie rips to movies - searching...");
-                await ripToMovieLinker.SearchAndLinkAsync();
+                await ripToMovieLinker.SearchAndLinkAsync(opts.MaxCalls ?? -1);
             }
             else if (opts.FromManualExtIds)
             {
                 Log.Information($"Linking movie rips to movies - from manually configured external ids...");
-                await ripToMovieLinker.LinkFromManualExternalIdsAsync();
+                await ripToMovieLinker.LinkFromManualExternalIdsAsync(opts.MaxCalls ?? -1);
             }
             else if (opts.GetUnlinkedRips)
             {
@@ -395,12 +395,11 @@ namespace FilmCRUD
                 Console.WriteLine($"Unlinked MovieRips:");
                 Console.WriteLine();
                 unlinked.ToList().ForEach(s => Console.WriteLine(s));
-
             }
             else if (opts.ValidateManualExtIds)
             {
                 Log.Information($"Validating manually configured external ids...");
-                await ripToMovieLinker.ValidateManualExternalIdsAsync();
+                await ripToMovieLinker.ValidateManualExternalIdsAsync(opts.MaxCalls ?? -1);
             }
             else
             {

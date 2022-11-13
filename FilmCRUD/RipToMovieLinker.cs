@@ -105,7 +105,7 @@ namespace FilmCRUD
             return relatedMovie;
         }
 
-        public async Task SearchAndLinkAsync()
+        public async Task SearchAndLinkAsync(int maxApiCalls = -1)
         {   
             IEnumerable<MovieRip> ripsToLink = GetMovieRipsToLink();
             int totalCount = ripsToLink.Count();
@@ -153,11 +153,17 @@ namespace FilmCRUD
             }
 
             int onlineSearchCount = ripsForOnlineSearch.Count;
+            Log.Information("Total count for online search: {OnlineSearchCount}", onlineSearchCount);
+
+            if (0 < maxApiCalls && maxApiCalls < onlineSearchCount)
+            {
+                Log.Information("Limiting number of rips for online search to {CallLimit}", maxApiCalls);
+                ripsForOnlineSearch = ripsForOnlineSearch.Take(maxApiCalls).ToList();
+                onlineSearchCount = maxApiCalls;
+            }
+
             var logStepOnlineSearch = (int)Math.Ceiling((decimal)onlineSearchCount / 20.0m);
-
             
-            Log.Information("Count for online search: {OnlineSearchCount}", onlineSearchCount);
-
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
             // letting the token bucket fill for the current timespan...
@@ -242,7 +248,7 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
-        public async Task LinkFromManualExternalIdsAsync()
+        public async Task LinkFromManualExternalIdsAsync(int maxApiCalls = -1)
         {
             Dictionary<string, int> allManualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
@@ -269,6 +275,13 @@ namespace FilmCRUD
             var logStepApiCalls = (int)Math.Ceiling((decimal)externalIdsForApiCallsCount / 20.0m);
 
             Log.Information("External ids for API calls - count: {ExternalIdsForApiCallsCount}", externalIdsForApiCallsCount);
+
+            if (0 < maxApiCalls && maxApiCalls < externalIdsForApiCallsCount)
+            {
+                Log.Information("Limiting number of rips for online search to {CallLimit}", maxApiCalls);
+                externalIdsForApiCalls = externalIdsForApiCalls.Take(maxApiCalls).ToList();
+                externalIdsForApiCallsCount = maxApiCalls;
+            }
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
@@ -372,12 +385,9 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
-        public IEnumerable<string> GetAllUnlinkedMovieRips()
-        {
-            return this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
-        }
+        public IEnumerable<string> GetAllUnlinkedMovieRips() => this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
 
-        public async Task ValidateManualExternalIdsAsync()
+        public async Task ValidateManualExternalIdsAsync(int maxApiCalls = -1)
         {
             Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
 
@@ -387,6 +397,13 @@ namespace FilmCRUD
             {
                 Log.Information("No manually configured external ids");
                 return;
+            }
+
+            if (0 < maxApiCalls && maxApiCalls < manualExternalIdsCount)
+            {
+                Log.Information("Limiting number of API calls to {CallLimit}", maxApiCalls);
+                manualExternalIds = manualExternalIds.Take(maxApiCalls).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                manualExternalIdsCount = maxApiCalls;
             }
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
