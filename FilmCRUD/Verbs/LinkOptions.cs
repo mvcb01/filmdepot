@@ -19,6 +19,6 @@ namespace FilmCRUD.Verbs
         public bool ValidateManualExtIds { get; set; }
 
         [Option('m', "maxcalls", HelpText = "optional integer to limit the number of API calls")]
-        public int MaxCalls { get; set; }
+        public int? MaxCalls { get; set; }
     }
 }
