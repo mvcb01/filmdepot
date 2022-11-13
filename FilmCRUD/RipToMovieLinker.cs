@@ -385,10 +385,7 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
-        public IEnumerable<string> GetAllUnlinkedMovieRips()
-        {
-            return this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
-        }
+        public IEnumerable<string> GetAllUnlinkedMovieRips() => this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
 
         public async Task ValidateManualExternalIdsAsync()
         {
