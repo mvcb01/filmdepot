@@ -276,6 +276,13 @@ namespace FilmCRUD
 
             Log.Information("External ids for API calls - count: {ExternalIdsForApiCallsCount}", externalIdsForApiCallsCount);
 
+            if (0 < maxApiCalls && maxApiCalls < externalIdsForApiCallsCount)
+            {
+                Log.Information("Limiting number of rips for online search to {CallLimit}", maxApiCalls);
+                externalIdsForApiCalls = externalIdsForApiCalls.Take(maxApiCalls).ToList();
+                externalIdsForApiCallsCount = maxApiCalls;
+            }
+
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
             // letting the token bucket fill for the current timespan...
