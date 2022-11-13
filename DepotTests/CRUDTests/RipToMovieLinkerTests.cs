@@ -894,5 +894,32 @@ namespace DepotTests.CRUDTests
             // assert
             this._movieAPIClientMock.Verify(m => m.ExternalIdExistsAsync(It.IsAny<int>()), Times.Never);
         }
+
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task ValidateManualExternalIdsAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        {
+            // arrange
+            var manualExternalIds = new Dictionary<string, int>() {
+                { "Witchfinder.General.1968.1080p.BluRay.x264-CiNEFiLE", 101 },
+                { "Men.and.Chicken.2015.LIMITED.1080p.BluRay.x264-USURY[rarbg]", 102 },
+                { "Into.the.Wild.2007.1080p.BluRay.x264.DTS-FGT", 103 }
+            };
+            this._appSettingsManagerMock
+                .Setup(a => a.GetManualExternalIds())
+                .Returns(manualExternalIds);
+
+            this._movieAPIClientMock
+                .Setup(m => m.ExternalIdExistsAsync(It.IsAny<int>()))
+                .ReturnsAsync(false);
+
+            // act
+            await this._ripToMovieLinker.ValidateManualExternalIdsAsync();
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.ExternalIdExistsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
+        }
     }
 }
