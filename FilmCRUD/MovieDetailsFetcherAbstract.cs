@@ -76,6 +76,13 @@ namespace FilmCRUD
 
             if (moviesWithoutDetailsCount == 0) return;
 
+            if (0 < maxApiCalls && maxApiCalls < moviesWithoutDetailsCount)
+            {
+                Log.Information("Limiting number of API calls to {CallLimit}", maxApiCalls);
+                moviesWithoutDetails = moviesWithoutDetails.Take(maxApiCalls).ToList();
+                moviesWithoutDetailsCount = maxApiCalls;
+            }
+
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
             // letting the token bucket fill for the current timespan...

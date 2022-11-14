@@ -262,7 +262,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(new MovieDirectorResult[] { new MovieDirectorResult() });
 
             // act
-            await this._movieDetailsFetcherDirectors.PopulateDetails();
+            await this._movieDetailsFetcherDirectors.PopulateDetails(maxApiCalls);
 
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieDirectorsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
