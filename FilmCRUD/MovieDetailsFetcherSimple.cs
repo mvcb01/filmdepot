@@ -51,7 +51,7 @@ namespace FilmCRUD
             IMovieAPIClient movieAPIClient,
             ILogger fetchingErrorsLogger) : this(unitOfWork, appSettingsManager, movieAPIClient) => this._fetchingErrorsLogger = fetchingErrorsLogger;
 
-        public async Task PopulateMovieKeywords()
+        public async Task PopulateMovieKeywords(int maxApiCalls = -1)
         {
             Func<IEnumerable<Movie>> moviesWithoutDetailsGetterFunc = this._unitOfWork.Movies.GetMoviesWithoutKeywords;
 
