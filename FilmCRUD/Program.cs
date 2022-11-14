@@ -464,7 +464,7 @@ namespace FilmCRUD
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_imdbids_.txt");
                 var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching IMDB ids for movies...");
-                await IMDBIdFetcher.PopulateMovieIMDBIds();
+                await IMDBIdFetcher.PopulateMovieIMDBIdsAsync();
             }
             else
             {

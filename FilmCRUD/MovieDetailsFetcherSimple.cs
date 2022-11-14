@@ -62,7 +62,7 @@ namespace FilmCRUD
             await PopulateDetailsSimpleAsync<IEnumerable<string>>(moviesWithoutDetailsGetterFunc, detailsGetterFunc, detailsPopulatorAction, "Keywords");
         }
 
-        public async Task PopulateMovieIMDBIds()
+        public async Task PopulateMovieIMDBIdsAsync()
         {
             Func<IEnumerable<Movie>> moviesWithoutDetailsGetterFunc = this._unitOfWork.Movies.GetMoviesWithoutImdbId;
 

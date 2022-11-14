@@ -141,7 +141,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task PopulateMovieIMDBIds_WithoutMoviesMissingIMDBIds_ShouldNotCallApiClient()
+        public async Task PopulateMovieIMDBIdsAsync_WithoutMoviesMissingIMDBIds_ShouldNotCallApiClient()
         {
             // arrange
             this._movieRepositoryMock
@@ -149,14 +149,14 @@ namespace DepotTests.CRUDTests
                 .Returns(Enumerable.Empty<Movie>());
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync();
 
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieIMDBIdAsync(It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
-        public async Task PopulateMovieIMDBIds_WithMoviesMissingIMDBIds_ShouldCallApiClient()
+        public async Task PopulateMovieIMDBIdsAsync_WithMoviesMissingIMDBIds_ShouldCallApiClient()
         {
             // arrange
             int firstExternalId = 101;
@@ -168,7 +168,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { firstMovie, secondMovie });
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync();
 
             // assert
             this._movieAPIClientMock.Verify(
@@ -177,7 +177,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task PopulateMovieIMDBIds_WithMoviesMissingIMDBIds_ShouldPopulateIMDBIdsCorrectly()
+        public async Task PopulateMovieIMDBIdsAsync_WithMoviesMissingIMDBIds_ShouldPopulateIMDBIdsCorrectly()
         {
             // arrange
             int firstExternalId = 101;
@@ -204,7 +204,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(secondMovieImdbId);
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync();
 
             // assert
             using (new AssertionScope())
@@ -244,7 +244,7 @@ namespace DepotTests.CRUDTests
         [Theory]
         [InlineData(2)]
         [InlineData(3)]
-        public async Task PopulateMovieIMDBIds_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        public async Task PopulateMovieIMDBIdsAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
         {
             // arrange
             var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101 };
@@ -260,7 +260,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync("tt00112233");
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync();
 
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieIMDBIdAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
