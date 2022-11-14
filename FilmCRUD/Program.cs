@@ -436,21 +436,21 @@ namespace FilmCRUD
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_genres_.txt");
                 var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching genres for movies...");
-                await genresFetcher.PopulateDetails();
+                await genresFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
             else if (opts.Actors)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_actors_.txt");
                 var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching actors for movies...");
-                await actorsFetcher.PopulateDetails();
+                await actorsFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
             else if (opts.Directors)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_directors_.txt");
                 var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching directors for movies...");
-                await directorsFetcher.PopulateDetails();
+                await directorsFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
             else if (opts.Keywords)
             {
