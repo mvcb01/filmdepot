@@ -457,7 +457,7 @@ namespace FilmCRUD
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_keywords_.txt");
                 var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching keywords for movies...");
-                await keywordsFetcher.PopulateMovieKeywords();
+                await keywordsFetcher.PopulateMovieKeywordsAsync();
             }
             else if (opts.IMDBIds)
             {
