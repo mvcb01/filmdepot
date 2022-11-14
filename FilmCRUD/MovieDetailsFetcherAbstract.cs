@@ -3,14 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
-using System.IO;
 using System;
 using Polly;
 using Polly.RateLimit;
 using Polly.Wrap;
 using Serilog;
 using ConfigUtils.Interfaces;
-using FilmCRUD.Interfaces;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients.Interfaces;
@@ -29,7 +27,6 @@ namespace FilmCRUD
         where TDetailEntity : IExternalEntity
         where TAPIResult : IExternalEntity
     {
-
         public static string DetailType { get => typeof(TDetailEntity).Name; }
 
         protected IUnitOfWork _unitOfWork { get; init; }
@@ -236,5 +233,4 @@ namespace FilmCRUD
         }
 
     }
-
 }
