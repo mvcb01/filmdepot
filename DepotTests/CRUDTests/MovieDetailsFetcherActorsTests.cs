@@ -261,9 +261,9 @@ namespace DepotTests.CRUDTests
         public async Task PopulateDetails_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
         {
             // arrange
-            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101, Genres = new List<Genre>() };
-            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102, Genres = new List<Genre>() };
-            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103, Genres = new List<Genre>() };
+            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101, Actors = new List<Actor>() };
+            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102, Actors = new List<Actor>() };
+            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103, Actors = new List<Actor>() };
 
             this._movieRepositoryMock
                 .Setup(m => m.GetMoviesWithoutActors())
