@@ -239,5 +239,31 @@ namespace DepotTests.CRUDTests
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieKeywordsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
         }
+
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task PopulateMovieIMDBIds_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101 };
+            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102 };
+            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103 };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutImdbId())
+                .Returns(new[] { firstMovie, secondMovie, thirdMovie });
+
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieIMDBIdAsync(It.IsAny<int>()))
+                .ReturnsAsync("tt00112233");
+
+            // act
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieIMDBIdAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
+        }
     }
 }
