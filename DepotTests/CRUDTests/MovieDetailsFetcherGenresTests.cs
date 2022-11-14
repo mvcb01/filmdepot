@@ -189,7 +189,6 @@ namespace DepotTests.CRUDTests
             }
         }
 
-
         [Fact]
         public async Task PopulateDetails_WithMoviesMissingGenres_WithoutSuchGenresInRepo_WithSameGenreForAllMovies_ShouldBePopulatedWithTheSameGenreEntity()
         {
@@ -236,7 +235,6 @@ namespace DepotTests.CRUDTests
                 .Should()
                 .BeSameAs(secondMovieWithoutGenres.Genres.First(g => g.ExternalId == dramaGenreResult.ExternalId));
         }
-
 
         [Theory]
         [InlineData(2)]
