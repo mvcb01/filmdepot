@@ -57,7 +57,8 @@ namespace FilmCRUD
 
         public abstract IEnumerable<TDetailEntity> GetExistingDetailEntitiesInRepo();
 
-        // should be asynchronous and call one of the methods of IMovieAPIClient
+        // should be asynchronous and call one of the methods of IMovieAPIClient;
+        // each concrete subclass should invoke the relevant method, e.g., GetMovieActorsAsync, GetMovieGenresAsync etc...
         public abstract Task<IEnumerable<TAPIResult>> GetMovieDetailsFromApiAsync(int externalId);
 
         // TAPIResult to TDetailEntity conversion
@@ -65,7 +66,7 @@ namespace FilmCRUD
 
         public abstract void AddDetailsToMovieEntity(Movie movie, IEnumerable<TDetailEntity> details);
 
-        public async Task PopulateDetails()
+        public async Task PopulateDetails(int maxApiCalls = -1)
         {
             IEnumerable<Movie> moviesWithoutDetails = GetMoviesWithoutDetails();
 
