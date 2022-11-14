@@ -239,5 +239,33 @@ namespace DepotTests.CRUDTests
                 .Should()
                 .BeSameAs(secondMovieWithoutDirectors.Directors.First(d => d.ExternalId == directorResult.ExternalId));
         }
+
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task PopulateDetails_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101, Directors = new List<Director>() };
+            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102, Directors = new List<Director>() };
+            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103, Directors = new List<Director>() };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutDirectors())
+                .Returns(new[] { firstMovie, secondMovie,thirdMovie });
+
+            this._directorRepositoryMock.Setup(d => d.GetAll()).Returns(Enumerable.Empty<Director>());
+
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieDirectorsAsync(It.IsAny<int>()))
+                .ReturnsAsync(new MovieDirectorResult[] { new MovieDirectorResult() });
+
+            // act
+            await this._movieDetailsFetcherDirectors.PopulateDetails(maxApiCalls);
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieDirectorsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
+        }
     }
 }

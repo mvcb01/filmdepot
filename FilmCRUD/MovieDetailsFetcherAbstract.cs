@@ -3,14 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
-using System.IO;
 using System;
 using Polly;
 using Polly.RateLimit;
 using Polly.Wrap;
 using Serilog;
 using ConfigUtils.Interfaces;
-using FilmCRUD.Interfaces;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients.Interfaces;
@@ -29,7 +27,6 @@ namespace FilmCRUD
         where TDetailEntity : IExternalEntity
         where TAPIResult : IExternalEntity
     {
-
         public static string DetailType { get => typeof(TDetailEntity).Name; }
 
         protected IUnitOfWork _unitOfWork { get; init; }
@@ -60,7 +57,8 @@ namespace FilmCRUD
 
         public abstract IEnumerable<TDetailEntity> GetExistingDetailEntitiesInRepo();
 
-        // should be asynchronous and call one of the methods of IMovieAPIClient
+        // should be asynchronous and call one of the methods of IMovieAPIClient;
+        // each concrete subclass should invoke the relevant method, e.g., GetMovieActorsAsync, GetMovieGenresAsync etc...
         public abstract Task<IEnumerable<TAPIResult>> GetMovieDetailsFromApiAsync(int externalId);
 
         // TAPIResult to TDetailEntity conversion
@@ -68,7 +66,7 @@ namespace FilmCRUD
 
         public abstract void AddDetailsToMovieEntity(Movie movie, IEnumerable<TDetailEntity> details);
 
-        public async Task PopulateDetails()
+        public async Task PopulateDetails(int maxApiCalls = -1)
         {
             IEnumerable<Movie> moviesWithoutDetails = GetMoviesWithoutDetails();
 
@@ -77,6 +75,13 @@ namespace FilmCRUD
             Log.Information("Movies without details for detail type {DetailType} - total count: {TotalCount}", DetailType, moviesWithoutDetailsCount);
 
             if (moviesWithoutDetailsCount == 0) return;
+
+            if (0 < maxApiCalls && maxApiCalls < moviesWithoutDetailsCount)
+            {
+                Log.Information("Limiting number of API calls to {CallLimit}", maxApiCalls);
+                moviesWithoutDetails = moviesWithoutDetails.Take(maxApiCalls).ToList();
+                moviesWithoutDetailsCount = maxApiCalls;
+            }
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
@@ -236,5 +241,4 @@ namespace FilmCRUD
         }
 
     }
-
 }
