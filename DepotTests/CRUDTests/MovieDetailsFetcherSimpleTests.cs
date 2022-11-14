@@ -140,6 +140,31 @@ namespace DepotTests.CRUDTests
             }
         }
 
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task PopulateMovieKeywordsAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101, Keywords = new List<string>() };
+            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102, Keywords = new List<string>() };
+            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103, Keywords = new List<string>() };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutKeywords())
+                .Returns(new[] { firstMovie, secondMovie, thirdMovie });
+
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieKeywordsAsync(It.IsAny<int>()))
+                .ReturnsAsync(new string[] { "dummy keyword" });
+
+            // act
+            await this._movieDetailsFetcherSimple.PopulateMovieKeywordsAsync(maxApiCalls);
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieKeywordsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
+        }
+
         [Fact]
         public async Task PopulateMovieIMDBIdsAsync_WithoutMoviesMissingIMDBIds_ShouldNotCallApiClient()
         {
@@ -213,33 +238,6 @@ namespace DepotTests.CRUDTests
                 secondMovieWithoutIMDBId.IMDBId.Should().Be(secondMovieImdbId);
             }
         }
-
-
-        [Theory]
-        [InlineData(2)]
-        [InlineData(3)]
-        public async Task PopulateMovieKeywordsAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
-        {
-            // arrange
-            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101, Keywords = new List<string>() };
-            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102, Keywords = new List<string>() };
-            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103, Keywords = new List<string>() };
-
-            this._movieRepositoryMock
-                .Setup(m => m.GetMoviesWithoutKeywords())
-                .Returns(new[] { firstMovie, secondMovie, thirdMovie });
-
-            this._movieAPIClientMock
-                .Setup(m => m.GetMovieKeywordsAsync(It.IsAny<int>()))
-                .ReturnsAsync(new string[] { "dummy keyword" });
-
-            // act
-            await this._movieDetailsFetcherSimple.PopulateMovieKeywordsAsync(maxApiCalls);
-
-            // assert
-            this._movieAPIClientMock.Verify(m => m.GetMovieKeywordsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
-        }
-
 
         [Theory]
         [InlineData(2)]
