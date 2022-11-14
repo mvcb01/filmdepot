@@ -258,7 +258,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync("tt00112233");
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync();
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync(maxApiCalls);
 
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieIMDBIdAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
