@@ -255,6 +255,33 @@ namespace DepotTests.CRUDTests
                 .BeSameAs(secondMovieWithoutActors.Actors.First(a => a.ExternalId == firstActorResult.ExternalId));
         }
 
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task PopulateDetails_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101, Actors = new List<Actor>() };
+            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102, Actors = new List<Actor>() };
+            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103, Actors = new List<Actor>() };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutActors())
+                .Returns(new[] { firstMovie, secondMovie, thirdMovie });
+
+            this._actorRepositoryMock.Setup(d => d.GetAll()).Returns(Enumerable.Empty<Actor>());
+
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieActorsAsync(It.IsAny<int>()))
+                .ReturnsAsync(new MovieActorResult[] { new MovieActorResult() });
+
+            // act
+            await this._movieDetailsFetcherActors.PopulateDetails(maxApiCalls);
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieActorsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
+        }
+
     }
 
 }
