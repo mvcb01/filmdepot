@@ -59,7 +59,7 @@ namespace FilmCRUD
 
             Action<Movie, IEnumerable<string>> detailsPopulatorAction = (movie, kwds) => movie.Keywords = kwds.ToList();
 
-            await PopulateDetailsSimple<IEnumerable<string>>(moviesWithoutDetailsGetterFunc, detailsGetterFunc, detailsPopulatorAction, "Keywords");
+            await PopulateDetailsSimpleAsync<IEnumerable<string>>(moviesWithoutDetailsGetterFunc, detailsGetterFunc, detailsPopulatorAction, "Keywords");
         }
 
         public async Task PopulateMovieIMDBIds()
@@ -70,10 +70,10 @@ namespace FilmCRUD
 
             Action<Movie, string> detailsPopulatorAction = (movie, imdbId) => movie.IMDBId = imdbId;
 
-            await PopulateDetailsSimple<string>(moviesWithoutDetailsGetterFunc, detailsGetterFunc, detailsPopulatorAction, "IMDBId");
+            await PopulateDetailsSimpleAsync<string>(moviesWithoutDetailsGetterFunc, detailsGetterFunc, detailsPopulatorAction, "IMDBId");
         }
 
-        private async Task PopulateDetailsSimple<TDetail>(
+        private async Task PopulateDetailsSimpleAsync<TDetail>(
             Func<IEnumerable<Movie>> moviesWithoutDetailsGetterFunc,
             Func<int, Task<TDetail>> detailsGetterFunc,
             Action<Movie, TDetail> detailsPopulatorAction,
