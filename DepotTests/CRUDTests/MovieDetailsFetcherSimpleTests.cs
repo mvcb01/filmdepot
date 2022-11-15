@@ -12,6 +12,8 @@ using MovieAPIClients.Interfaces;
 using FilmCRUD.Interfaces;
 using ConfigUtils.Interfaces;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace DepotTests.CRUDTests
 {
@@ -64,7 +66,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task PopulateMovieKeywords_WithoutMoviesMissingKeywords_ShouldNotCallApiClient()
+        public async Task PopulateMovieKeywordsAsync_WithoutMoviesMissingKeywords_ShouldNotCallApiClient()
         {
             // arrange
             this._movieRepositoryMock
@@ -72,14 +74,14 @@ namespace DepotTests.CRUDTests
                 .Returns(Enumerable.Empty<Movie>());
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieKeywords();
+            await this._movieDetailsFetcherSimple.PopulateMovieKeywordsAsync();
 
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieKeywordsAsync(It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
-        public async Task PopulateMovieKeywords_WithMoviesMissingKeywords_ShouldCallApiClient()
+        public async Task PopulateMovieKeywordsAsync_WithMoviesMissingKeywords_ShouldCallApiClient()
         {
             // arrange
             int firstExternalId = 101;
@@ -91,7 +93,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { firstMovie, secondMovie });
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieKeywords();
+            await this._movieDetailsFetcherSimple.PopulateMovieKeywordsAsync();
 
             // assert
             this._movieAPIClientMock.Verify(
@@ -100,7 +102,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task PopulateMovieKeywords_WithMoviesMissingKeywords_ShouldPopulateKeywordsCorrectly()
+        public async Task PopulateMovieKeywordsAsync_WithMoviesMissingKeywords_ShouldPopulateKeywordsCorrectly()
         {
             // arrange
             int firstExternalId = 101;
@@ -128,7 +130,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(secondMovieKeywords);
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieKeywords();
+            await this._movieDetailsFetcherSimple.PopulateMovieKeywordsAsync();
 
             // assert
             using (new AssertionScope())
@@ -138,8 +140,33 @@ namespace DepotTests.CRUDTests
             }
         }
 
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task PopulateMovieKeywordsAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101, Keywords = new List<string>() };
+            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102, Keywords = new List<string>() };
+            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103, Keywords = new List<string>() };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutKeywords())
+                .Returns(new[] { firstMovie, secondMovie, thirdMovie });
+
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieKeywordsAsync(It.IsAny<int>()))
+                .ReturnsAsync(new string[] { "dummy keyword" });
+
+            // act
+            await this._movieDetailsFetcherSimple.PopulateMovieKeywordsAsync(maxApiCalls);
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieKeywordsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
+        }
+
         [Fact]
-        public async Task PopulateMovieIMDBIds_WithoutMoviesMissingIMDBIds_ShouldNotCallApiClient()
+        public async Task PopulateMovieIMDBIdsAsync_WithoutMoviesMissingIMDBIds_ShouldNotCallApiClient()
         {
             // arrange
             this._movieRepositoryMock
@@ -147,14 +174,14 @@ namespace DepotTests.CRUDTests
                 .Returns(Enumerable.Empty<Movie>());
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync();
 
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieIMDBIdAsync(It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
-        public async Task PopulateMovieIMDBIds_WithMoviesMissingIMDBIds_ShouldCallApiClient()
+        public async Task PopulateMovieIMDBIdsAsync_WithMoviesMissingIMDBIds_ShouldCallApiClient()
         {
             // arrange
             int firstExternalId = 101;
@@ -166,7 +193,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { firstMovie, secondMovie });
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync();
 
             // assert
             this._movieAPIClientMock.Verify(
@@ -175,7 +202,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task PopulateMovieIMDBIds_WithMoviesMissingIMDBIds_ShouldPopulateIMDBIdsCorrectly()
+        public async Task PopulateMovieIMDBIdsAsync_WithMoviesMissingIMDBIds_ShouldPopulateIMDBIdsCorrectly()
         {
             // arrange
             int firstExternalId = 101;
@@ -202,7 +229,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(secondMovieImdbId);
 
             // act
-            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIds();
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync();
 
             // assert
             using (new AssertionScope())
@@ -210,6 +237,31 @@ namespace DepotTests.CRUDTests
                 firstMovieWithoutIMDBId.IMDBId.Should().Be(firstMovieImdbId);
                 secondMovieWithoutIMDBId.IMDBId.Should().Be(secondMovieImdbId);
             }
+        }
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task PopulateMovieIMDBIdsAsync_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101 };
+            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102 };
+            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103 };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutImdbId())
+                .Returns(new[] { firstMovie, secondMovie, thirdMovie });
+
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieIMDBIdAsync(It.IsAny<int>()))
+                .ReturnsAsync("tt00112233");
+
+            // act
+            await this._movieDetailsFetcherSimple.PopulateMovieIMDBIdsAsync(maxApiCalls);
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieIMDBIdAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
         }
     }
 }

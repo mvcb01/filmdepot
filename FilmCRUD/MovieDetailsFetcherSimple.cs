@@ -51,7 +51,7 @@ namespace FilmCRUD
             IMovieAPIClient movieAPIClient,
             ILogger fetchingErrorsLogger) : this(unitOfWork, appSettingsManager, movieAPIClient) => this._fetchingErrorsLogger = fetchingErrorsLogger;
 
-        public async Task PopulateMovieKeywords()
+        public async Task PopulateMovieKeywordsAsync(int maxApiCalls = -1)
         {
             Func<IEnumerable<Movie>> moviesWithoutDetailsGetterFunc = this._unitOfWork.Movies.GetMoviesWithoutKeywords;
 
@@ -59,10 +59,15 @@ namespace FilmCRUD
 
             Action<Movie, IEnumerable<string>> detailsPopulatorAction = (movie, kwds) => movie.Keywords = kwds.ToList();
 
-            await PopulateDetailsSimple<IEnumerable<string>>(moviesWithoutDetailsGetterFunc, detailsGetterFunc, detailsPopulatorAction, "Keywords");
+            await PopulateDetailsSimpleAsync<IEnumerable<string>>(
+                moviesWithoutDetailsGetterFunc,
+                detailsGetterFunc,
+                detailsPopulatorAction,
+                "Keywords",
+                maxApiCalls);
         }
 
-        public async Task PopulateMovieIMDBIds()
+        public async Task PopulateMovieIMDBIdsAsync(int maxApiCalls = -1)
         {
             Func<IEnumerable<Movie>> moviesWithoutDetailsGetterFunc = this._unitOfWork.Movies.GetMoviesWithoutImdbId;
 
@@ -70,14 +75,20 @@ namespace FilmCRUD
 
             Action<Movie, string> detailsPopulatorAction = (movie, imdbId) => movie.IMDBId = imdbId;
 
-            await PopulateDetailsSimple<string>(moviesWithoutDetailsGetterFunc, detailsGetterFunc, detailsPopulatorAction, "IMDBId");
+            await PopulateDetailsSimpleAsync<string>(
+                moviesWithoutDetailsGetterFunc,
+                detailsGetterFunc,
+                detailsPopulatorAction,
+                "IMDBId",
+                maxApiCalls);
         }
 
-        private async Task PopulateDetailsSimple<TDetail>(
+        private async Task PopulateDetailsSimpleAsync<TDetail>(
             Func<IEnumerable<Movie>> moviesWithoutDetailsGetterFunc,
             Func<int, Task<TDetail>> detailsGetterFunc,
             Action<Movie, TDetail> detailsPopulatorAction,
-            string detailType)
+            string detailType,
+            int maxApiCalls)
         {
             IEnumerable<Movie> moviesWithoutDetails = moviesWithoutDetailsGetterFunc();
 
@@ -86,6 +97,13 @@ namespace FilmCRUD
             Log.Information("Movies without details for detail type {DetailType} - total count: {TotalCount}", detailType, moviesWithoutDetailsCount);
 
             if (moviesWithoutDetailsCount == 0) return;
+
+            if (0 < maxApiCalls && maxApiCalls < moviesWithoutDetailsCount)
+            {
+                Log.Information("Limiting number of API calls to {CallLimit}", maxApiCalls);
+                moviesWithoutDetails = moviesWithoutDetails.Take(maxApiCalls).ToList();
+                moviesWithoutDetailsCount = maxApiCalls;
+            }
 
             AsyncPolicyWrap policyWrap = GetPolicyWrapFromConfigs(out TimeSpan initialDelay);
 
@@ -201,5 +219,4 @@ namespace FilmCRUD
         }
 
     }
-
 }
