@@ -26,6 +26,9 @@ namespace FilmCRUD.Verbs
             HelpText = "movie rip difference between two visits with dates YYYYMMDD: added and removed movie rips; example: 20100101:20100102")]
         public IEnumerable<string> VisitDiff { get; set; }
 
+        [Option(SetName = "SearchOption", HelpText = "search movie rip filenames by tokens; examples: \"the.wicker.man.1973\", \"wicker man 1973\"")]
+        public string Search { get; set; }
+
         [Option('l', "listvisits", SetName = "ListVisitsOption", HelpText = "helper; list dates for all visits")]
         public bool ListVisits { get; set; }
 
