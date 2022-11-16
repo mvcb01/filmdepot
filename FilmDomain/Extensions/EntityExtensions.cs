@@ -139,11 +139,10 @@ namespace FilmDomain.Extensions
             string _parsedRipInfo = $"ParsedRipInfo: {movieRip.ParsedRipInfo}";
             string _parsedRipGroup = $"ParsedRipGroup: {movieRip.ParsedRipGroup}";
             string _linkedMovie = $"Linked movie: {movieRip.Movie}";
-            string _warehouseVisits = "Warehouse visits: " + string.Join('\t', movieRip.MovieWarehouseVisits.Select(v => $"{v.VisitDateTime:MMMM dd yyyy}"));
             return string.Join('\n', new string[] {
                 _id, _filename, _parsedTitle, _parsedReleaseDate,
                 _parsedRipQuality, _parsedRipInfo, _parsedRipGroup,
-                _linkedMovie, _warehouseVisits });
+                _linkedMovie });
         }
     }
 }
