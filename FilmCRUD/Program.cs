@@ -234,6 +234,7 @@ namespace FilmCRUD
             else if (opts.Search != null)
             {
                 string toSearch = opts.Search;
+                Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
                 Console.WriteLine($"Search by filename tokens: \"{toSearch}\" \n");
                 IEnumerable<MovieRip> searchResult = scanRipsManager.SearchFromFileNameTokens(visit, toSearch);
                 if (!searchResult.Any())
