@@ -19,5 +19,8 @@ namespace FilmCRUD.Verbs
 
         [Option(SetName = "FetchIMDBIds", HelpText = "fetch imdb ids for movies")]
         public bool IMDBIds { get; set; }
+
+        [Option('m', "maxcalls", HelpText = "optional integer to limit the number of API calls")]
+        public int? MaxCalls { get; set; }
     }
 }

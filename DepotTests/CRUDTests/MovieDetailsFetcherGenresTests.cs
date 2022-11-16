@@ -14,6 +14,7 @@ using MovieAPIClients.Interfaces;
 using FilmCRUD.Interfaces;
 using ConfigUtils.Interfaces;
 using System;
+using System.ComponentModel;
 
 namespace DepotTests.CRUDTests
 {
@@ -188,7 +189,6 @@ namespace DepotTests.CRUDTests
             }
         }
 
-
         [Fact]
         public async Task PopulateDetails_WithMoviesMissingGenres_WithoutSuchGenresInRepo_WithSameGenreForAllMovies_ShouldBePopulatedWithTheSameGenreEntity()
         {
@@ -234,6 +234,33 @@ namespace DepotTests.CRUDTests
                 .First(g => g.ExternalId == dramaGenreResult.ExternalId)
                 .Should()
                 .BeSameAs(secondMovieWithoutGenres.Genres.First(g => g.ExternalId == dramaGenreResult.ExternalId));
+        }
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task PopulateDetails_WithLimitOnNumberOfApiCalls_ShouldNotExceedLimit(int maxApiCalls)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "My Cousin Vinny", ReleaseDate = 1992, ExternalId = 101, Genres = new List<Genre>() };
+            var secondMovie = new Movie() { Title = "Payback", ReleaseDate = 1999, ExternalId = 102, Genres = new List<Genre>() };
+            var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103, Genres = new List<Genre>() };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetMoviesWithoutGenres())
+                .Returns(new[] { firstMovie, secondMovie, thirdMovie });
+
+            this._genreRepositoryMock.Setup(d => d.GetAll()).Returns(Enumerable.Empty<Genre>());
+
+            this._movieAPIClientMock
+                .Setup(m => m.GetMovieGenresAsync(It.IsAny<int>()))
+                .ReturnsAsync(new MovieGenreResult[] { new MovieGenreResult() });
+
+            // act
+            await this._movieDetailsFetcherGenres.PopulateDetails(maxApiCalls);
+
+            // assert
+            this._movieAPIClientMock.Verify(m => m.GetMovieGenresAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
         }
 
     }

@@ -382,12 +382,12 @@ namespace FilmCRUD
             if (opts.Search)
             {
                 Log.Information("Linking movie rips to movies - searching...");
-                await ripToMovieLinker.SearchAndLinkAsync();
+                await ripToMovieLinker.SearchAndLinkAsync(opts.MaxCalls ?? -1);
             }
             else if (opts.FromManualExtIds)
             {
                 Log.Information($"Linking movie rips to movies - from manually configured external ids...");
-                await ripToMovieLinker.LinkFromManualExternalIdsAsync();
+                await ripToMovieLinker.LinkFromManualExternalIdsAsync(opts.MaxCalls ?? -1);
             }
             else if (opts.GetUnlinkedRips)
             {
@@ -395,12 +395,11 @@ namespace FilmCRUD
                 Console.WriteLine($"Unlinked MovieRips:");
                 Console.WriteLine();
                 unlinked.ToList().ForEach(s => Console.WriteLine(s));
-
             }
             else if (opts.ValidateManualExtIds)
             {
                 Log.Information($"Validating manually configured external ids...");
-                await ripToMovieLinker.ValidateManualExternalIdsAsync();
+                await ripToMovieLinker.ValidateManualExternalIdsAsync(opts.MaxCalls ?? -1);
             }
             else
             {
@@ -437,35 +436,35 @@ namespace FilmCRUD
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_genres_.txt");
                 var genresFetcher = new MovieDetailsFetcherGenres(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching genres for movies...");
-                await genresFetcher.PopulateDetails();
+                await genresFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
             else if (opts.Actors)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_actors_.txt");
                 var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching actors for movies...");
-                await actorsFetcher.PopulateDetails();
+                await actorsFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
             else if (opts.Directors)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_directors_.txt");
                 var directorsFetcher = new MovieDetailsFetcherDirectors(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching directors for movies...");
-                await directorsFetcher.PopulateDetails();
+                await directorsFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
             else if (opts.Keywords)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_keywords_.txt");
                 var keywordsFetcher = new MovieDetailsFetcherSimple(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching keywords for movies...");
-                await keywordsFetcher.PopulateMovieKeywords();
+                await keywordsFetcher.PopulateMovieKeywordsAsync(opts.MaxCalls ?? -1);
             }
             else if (opts.IMDBIds)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_imdbids_.txt");
                 var IMDBIdFetcher = new MovieDetailsFetcherSimple(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching IMDB ids for movies...");
-                await IMDBIdFetcher.PopulateMovieIMDBIds();
+                await IMDBIdFetcher.PopulateMovieIMDBIdsAsync(opts.MaxCalls ?? -1);
             }
             else
             {
@@ -547,6 +546,7 @@ namespace FilmCRUD
                 Console.WriteLine(String.Join('\n', item.Value.OrderBy(s => s)));
             }
         }
+
     }
 
 }
