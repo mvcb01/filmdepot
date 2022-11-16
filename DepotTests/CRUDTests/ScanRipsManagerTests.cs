@@ -292,5 +292,55 @@ namespace DepotTests.CRUDTests
                 lastVisitDiff["added"].Should().BeEquivalentTo(new string[] { movieRip3.FileName });
             }
         }
+
+
+        [Theory]
+        [InlineData("gummo", 0)]
+        [InlineData("gummo 1997", 0)]
+        [InlineData("gummo.1997", 0)]
+        [InlineData("gummo (1997)", 0)]
+        [InlineData("Gummo.1997.DVDRip.XviD-DiSSOLVE", 0)]
+        [InlineData("2160p", 1, 2)]
+        [InlineData("the godfather", 1, 2)]
+        [InlineData("the godfather part 2", 1, 2)]
+        [InlineData("the GoDdfatheR   part ii  ", 1, 2)]
+        [InlineData("1972", 1)]
+        [InlineData("1080p")]
+        [InlineData("dissolve", 0)]
+        [InlineData("  petriFIED", 1, 2)]
+        [InlineData("     ")]
+        [InlineData(".")]
+        public void SearchFromFileNameTokens_ShouldReturnExpectedFiles(string fileNameSearch, params int[] idsForExpectedResult)
+        {
+            // arrange
+            var movieRip0 = new MovieRip()
+            {
+                Id = 0, FileName = "Gummo.1997.DVDRip.XviD-DiSSOLVE"
+            };
+            var movieRip1 = new MovieRip()
+            {
+                Id = 1, FileName = "The.Godfather.1972.2160p.WEB.H265-PETRiFiED"
+            };
+            var movieRip2 = new MovieRip()
+            {
+                Id = 2, FileName = "The.Godfather.Part.II.1974.2160p.WEB.H265-PETRiFiED"
+            };
+
+            var visit = new MovieWarehouseVisit()
+            {
+                MovieRips = new List<MovieRip>() { movieRip0, movieRip1, movieRip2 },
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.GetAllRipsInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(visit.MovieRips);
+
+            // act
+            IEnumerable<string> actualSearchResult = this._scanRipsManager.SearchFromFileNameTokens(visit, fileNameSearch);
+
+            // assert
+            actualSearchResult.Should().BeEquivalentTo(
+                visit.MovieRips.Where(mr => idsForExpectedResult.Contains(mr.Id)).Select(mr => mr.FileName));
+        }
     }
 }

@@ -83,5 +83,18 @@ namespace FilmCRUD
             };
         }
 
+        public IEnumerable<string> SearchFromFileNameTokens(MovieWarehouseVisit visit, string fileNameTokens)
+        {
+            // ToList forces execution
+            IEnumerable<string> ripsFilenamesInVisit = this.UnitOfWork.MovieRips.GetAllRipsInVisit(visit).GetFileNames().ToList();
+            
+            var tokensToSearch = fileNameTokens.GetStringTokensWithoutPunctuation(removeDiacritics: true);
+            Dictionary<string, IEnumerable<string>> ripFileNameTokens = ripsFilenamesInVisit.ToDictionary(
+                s => s,
+                s => s.GetStringTokensWithoutPunctuation(removeDiacritics: true)
+            );
+            return ripFileNameTokens.Where(kvp => kvp.Value.Intersect(tokensToSearch).Any()).Select(kvp => kvp.Key);
+        }
+
     }
 }
