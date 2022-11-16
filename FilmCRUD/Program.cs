@@ -231,6 +231,20 @@ namespace FilmCRUD
                 Console.WriteLine("ScanRips: last visit difference \n");
                 PrintVisitDiff(scanRipsManager.GetLastVisitDiff());
             }
+            else if (opts.Search != null)
+            {
+                string toSearch = opts.Search;
+                Console.WriteLine($"Search by filename tokens: \"{toSearch}\" \n");
+                IEnumerable<MovieRip> searchResult = scanRipsManager.SearchFromFileNameTokens(visit, toSearch);
+                if (!searchResult.Any())
+                {
+                    Console.WriteLine("No matches...");
+                }
+                else
+                {
+                    searchResult.ToList().ForEach(mr => Console.WriteLine("-------------" + '\n' + mr.PrettyFormat()));
+                }
+            }
             else
             {
                 Console.WriteLine("No action requested...");

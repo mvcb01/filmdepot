@@ -336,11 +336,11 @@ namespace DepotTests.CRUDTests
                 .Returns(visit.MovieRips);
 
             // act
-            IEnumerable<string> actualSearchResult = this._scanRipsManager.SearchFromFileNameTokens(visit, fileNameSearch);
+            IEnumerable<MovieRip> actualSearchResult = this._scanRipsManager.SearchFromFileNameTokens(visit, fileNameSearch);
 
             // assert
             actualSearchResult.Should().BeEquivalentTo(
-                visit.MovieRips.Where(mr => idsForExpectedResult.Contains(mr.Id)).Select(mr => mr.FileName));
+                visit.MovieRips.Where(mr => idsForExpectedResult.Contains(mr.Id)));
         }
     }
 }

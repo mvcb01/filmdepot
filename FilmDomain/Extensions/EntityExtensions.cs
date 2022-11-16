@@ -128,5 +128,22 @@ namespace FilmDomain.Extensions
             string _kwds = movie.Keywords == null ? string.Empty : string.Join(", ", movie.Keywords);
             return string.Join('\n', new string[] {movie.ToString(), _genres, $"Directors: {_directors}", $"IMDB id: {movie.IMDBId}", $"Keywords: {_kwds}" });
         }
+
+        public static string PrettyFormat(this MovieRip movieRip)
+        {
+            string _id = $"Id: {movieRip.Id}";
+            string _filename = $"Filename: {movieRip.FileName}";
+            string _parsedTitle = $"ParsedTitle: {movieRip.ParsedTitle}";
+            string _parsedReleaseDate = $"ParsedReleaseDate: {movieRip.ParsedReleaseDate}";
+            string _parsedRipQuality = $"ParsedRipQuality: {movieRip.ParsedRipQuality}";
+            string _parsedRipInfo = $"ParsedRipInfo: {movieRip.ParsedRipInfo}";
+            string _parsedRipGroup = $"ParsedRipGroup: {movieRip.ParsedRipGroup}";
+            string _linkedMovie = $"Linked movie: {movieRip.Movie}";
+            string _warehouseVisits = "Warehouse visits: " + string.Join('\t', movieRip.MovieWarehouseVisits.Select(v => $"{v.VisitDateTime:MMMM dd yyyy}"));
+            return string.Join('\n', new string[] {
+                _id, _filename, _parsedTitle, _parsedReleaseDate,
+                _parsedRipQuality, _parsedRipInfo, _parsedRipGroup,
+                _linkedMovie, _warehouseVisits });
+        }
     }
 }
