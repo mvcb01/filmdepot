@@ -46,6 +46,7 @@ namespace MovieAPIClients.TheMovieDb
 
             var searchResultTMDB = JsonSerializer.Deserialize<SearchResultTMDB>(resultString);
             return searchResultTMDB.Results.Select(res => (MovieSearchResult)res);
+
         }
 
         public async Task<bool> ExternalIdExistsAsync(int externalId)
