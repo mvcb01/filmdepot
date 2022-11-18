@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Text.Json;
-
 using MovieAPIClients.Interfaces;
+using FilmDomain.Extensions;
 using ConfigUtils.Interfaces;
 
 namespace MovieAPIClients.TheMovieDb
@@ -32,14 +32,11 @@ namespace MovieAPIClients.TheMovieDb
 
         public async Task<IEnumerable<MovieSearchResult>> SearchMovieAsync(string title)
         {
-            var movieTitle = title.Trim().ToLower();
-
             // example: converts "where, art thou!" to the array ["where", "art", "thou"]
-            char[] punctuation = title.Where(Char.IsPunctuation).Distinct().ToArray();
-            string[] titleWords = movieTitle.Split().Select(s => s.Trim(punctuation)).ToArray();
+            IEnumerable<string> titleTokens = title.GetStringTokensWithoutPunctuation(removeDiacritics: true);
 
             // query string search params: where+art+thou
-            string searchQuery = string.Join('+', titleWords);
+            string searchQuery = string.Join('+', titleTokens);
 
             // currently only using the first page of search results
             string resultString = await _httpClient.GetStringAsync($"search/movie?api_key={_apiKey}&query={searchQuery}&page=1");
