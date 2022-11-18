@@ -455,8 +455,7 @@ namespace FilmCRUD
             IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
             List<MovieSearchResult> searchResult = searchResultAll
                 .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
-                    ||
-                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true)))
+                    || titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true)))
                 .ToList();
 
             int resultCount = searchResult.Count();
@@ -500,11 +499,13 @@ namespace FilmCRUD
                     throw new NoSearchResultsError(
                         $"No search results for \"{parsedTitle}\" with release date in {string.Join(", ", admissibleDates)}");
                 }
-                else if (resultCountFiltered > 1)
+                
+                if (resultCountFiltered > 1)
                 {
                     throw new MultipleSearchResultsError(
                         $"Multiple search results for \"{parsedTitle}\"  with release date in {string.Join(", ", admissibleDates)}; count = {resultCount}");
                 }
+                
                 result = searchResultFiltered.First();
             }
 
