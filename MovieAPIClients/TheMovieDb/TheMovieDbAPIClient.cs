@@ -47,7 +47,7 @@ namespace MovieAPIClients.TheMovieDb
             string searchQuery = string.Join('+', titleTokens);
 
             // currently only using the first page of search results
-            string resultString = await _httpClient.GetStringAsync($"search/movie?api_key={_apiKey}&query={searchQuery}&year={releaseDate}");
+            string resultString = await _httpClient.GetStringAsync($"search/movie?api_key={_apiKey}&query={searchQuery}&year={releaseDate}&page=1");
 
             var searchResultTMDB = JsonSerializer.Deserialize<SearchResultTMDB>(resultString);
             return searchResultTMDB.Results.Select(res => (MovieSearchResult)res);
