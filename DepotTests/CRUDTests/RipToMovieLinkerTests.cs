@@ -729,6 +729,7 @@ namespace DepotTests.CRUDTests
                 { "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous", manualExternalId },
                 { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", manualExternalId }
             };
+
             this._movieRipRepositoryMock
                 .Setup(m => m.GetAll())
                 .Returns(movieRipsToLinkManually);
