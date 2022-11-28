@@ -400,6 +400,52 @@ namespace DepotTests.CRUDTests
 
 
         [Fact]
+        public async Task SearchAndLinkAsync_WithoutMatchesInRepo_WithOnlineTitleMatchForDifferentReleaseDate_ShouldLinkRipToCorrectOnlineMatch()
+        {
+            // arrange
+            var movieRipToLink = new MovieRip()
+            {
+                FileName = "A.Fistful.of.Dollars.1964.REMASTERED.1080p.BluRay.x264-PiGNUS[rarbg]",
+                ParsedTitle = "A Fistful of Dollars",
+                ParsedReleaseDate = "1964"
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
+                .Returns(new MovieRip[] { movieRipToLink });
+
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
+                .Returns(Enumerable.Empty<Movie>());
+
+            var incorrectResult = new MovieSearchResult()
+            {
+                ExternalId = 101,
+                Title = "A Twistful of Dollars",
+                ReleaseDate = 1964
+            };
+
+            var correctResult = new MovieSearchResult()
+            {
+                ExternalId = 102,
+                Title = "A Fistful of Dollars",
+                ReleaseDate = 1965
+            };
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dollars")), It.Is<int>(i => i == 1964)))
+                .ReturnsAsync(new MovieSearchResult[] { incorrectResult });
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dollars")), It.Is<int>(i => i == 1965)))
+                .ReturnsAsync(new MovieSearchResult[] { correctResult });
+
+            // act
+            await this._ripToMovieLinker.SearchAndLinkAsync();
+
+            // assert
+            movieRipToLink.Movie.Should().BeEquivalentTo(correctResult);
+        }
+
+
+        [Fact]
         public async Task LinkFromManualExternalIdsAsync_WithoutManualExternalIds_ShouldNotCallApiMethod()
         {
             // arrange
