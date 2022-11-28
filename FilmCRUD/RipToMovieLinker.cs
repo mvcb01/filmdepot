@@ -473,26 +473,10 @@ namespace FilmCRUD
             }
             else
             {
-                bool parseSuccess = int.TryParse(parsedReleaseDate, out int releaseDate);
-                string[] admissibleDates;
-                if (parseSuccess)
-                {
-                    admissibleDates = new string[] {
-                        releaseDate.ToString(),
-                        (releaseDate + 1).ToString(),
-                        (releaseDate - 1).ToString()
-                    };
-                }
-                else
-                {
-                    admissibleDates = new string[] { parsedReleaseDate };
-                }
-
-                List<MovieSearchResult> searchResultFiltered = searchResult
-                    .Where(r => admissibleDates.Contains(r.ReleaseDate.ToString()))
-                    .ToList();
+                int[] admissibleDates = GetAdmissibleReleaseDates(parsedReleaseDate);
+                List<MovieSearchResult> searchResultFiltered = searchResult.Where(r => admissibleDates.AsEnumerable().Contains(r.ReleaseDate)).ToList();
+                
                 int resultCountFiltered = searchResultFiltered.Count();
-
                 if (resultCountFiltered == 0)
                 {
                     throw new NoSearchResultsError(
@@ -536,6 +520,14 @@ namespace FilmCRUD
                 APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(retryConfig),
                 APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig)
             );
+        }
+
+        private static int[] GetAdmissibleReleaseDates(string parsedReleaseDate)
+        {
+            bool parseSuccess = int.TryParse(parsedReleaseDate, out int releaseDate);
+            if (parseSuccess)
+                return new int[] { releaseDate, releaseDate + 1, releaseDate - 1 };
+            return Array.Empty<int>();
         }
 
     }
