@@ -431,7 +431,6 @@ namespace DepotTests.CRUDTests
                 ReleaseDate = 1965
             };
 
-            // setup for all overloads of IMovieAPIClient.SearchMovieAsync
             this._movieAPIClientMock
                 .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dollars")), It.Is<int>(i => i == 1964)))
                 .ReturnsAsync(new MovieSearchResult[] { incorrectResult });
