@@ -32,6 +32,14 @@ namespace MovieAPIClients.TheMovieDb
 
         public async Task<IEnumerable<MovieSearchResult>> SearchMovieAsync(string title)
         {
+            // these return the same results:
+            //      /search/movie?api_key={apikey}&query=some+movie&year=0
+            //      /search/movie?api_key={apikey}&query=some+movie
+            return await SearchMovieAsync(title, 0);
+        }
+
+        public async Task<IEnumerable<MovieSearchResult>> SearchMovieAsync(string title, int releaseDate)
+        {
             // example: converts "where, art thou!" to the array ["where", "art", "thou"]
             IEnumerable<string> titleTokens = title.GetStringTokensWithoutPunctuation(removeDiacritics: true);
 
@@ -39,11 +47,10 @@ namespace MovieAPIClients.TheMovieDb
             string searchQuery = string.Join('+', titleTokens);
 
             // currently only using the first page of search results
-            string resultString = await _httpClient.GetStringAsync($"search/movie?api_key={_apiKey}&query={searchQuery}&page=1");
+            string resultString = await _httpClient.GetStringAsync($"search/movie?api_key={_apiKey}&query={searchQuery}&year={releaseDate}");
 
             var searchResultTMDB = JsonSerializer.Deserialize<SearchResultTMDB>(resultString);
             return searchResultTMDB.Results.Select(res => (MovieSearchResult)res);
-
         }
 
         public async Task<bool> ExternalIdExistsAsync(int externalId)
