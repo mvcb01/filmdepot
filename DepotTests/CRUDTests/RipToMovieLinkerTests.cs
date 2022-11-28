@@ -759,6 +759,7 @@ namespace DepotTests.CRUDTests
             // arrange
             int validExternalId = 101;
             int invalidExternalId = 999;
+            
             var firstMovieRipToLinkManually = new MovieRip()
             {
                 FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN"
@@ -768,10 +769,12 @@ namespace DepotTests.CRUDTests
                 FileName = "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]"
             };
             var movieRipsToLinkManually = new MovieRip[] { firstMovieRipToLinkManually, secondMovieRipToLinkManually };
+            
             var manualExternalIds = new Dictionary<string, int>() {
                 { "The.Fly.1986.1080p.BluRay.x264-TFiN", validExternalId },
                 { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", invalidExternalId }
             };
+            
             var movieInfo = new MovieSearchResult()
             {
                 ExternalId = validExternalId,
@@ -779,6 +782,7 @@ namespace DepotTests.CRUDTests
                 OriginalTitle = "The Fly",
                 ReleaseDate = 1986
             };
+
             this._movieRipRepositoryMock
                 .Setup(m => m.GetAll())
                 .Returns(movieRipsToLinkManually);
