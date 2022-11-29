@@ -1,24 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using System.Threading.Tasks;
 using Polly;
 using Polly.Wrap;
 using Polly.RateLimit;
-
+using System.Net.Http;
+using System.Net;
+using Serilog;
 using ConfigUtils.Interfaces;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
-using FilmCRUD.Interfaces;
 using FilmCRUD.Helpers;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-using System.Net.Http;
-using System.Net;
-using Serilog;
+
 
 namespace FilmCRUD
 {
