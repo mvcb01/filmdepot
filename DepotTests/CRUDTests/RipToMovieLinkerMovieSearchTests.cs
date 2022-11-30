@@ -38,9 +38,7 @@ namespace DepotTests.CRUDTests
             // nothing to do
 
             // assert
-            Func<Task> methodCall = async () => await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(
-                toSearch,
-                this._policyWrap);
+            Func<Task> methodCall = async () => await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
             methodCall.Should().Throw<NoSearchResultsError>();
         }
 
