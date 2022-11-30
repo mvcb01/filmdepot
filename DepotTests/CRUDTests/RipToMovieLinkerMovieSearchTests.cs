@@ -1,12 +1,12 @@
 ﻿using Xunit;
+using Moq;
 using FluentAssertions;
 using System;
+using System.Threading.Tasks;
 using System.Linq;
 using FilmCRUD.CustomExceptions;
-using MovieAPIClients;
-using FilmCRUD;
 using FilmDomain.Entities;
-using System.Runtime.CompilerServices;
+using MovieAPIClients;
 
 namespace DepotTests.CRUDTests
 {
@@ -16,19 +16,22 @@ namespace DepotTests.CRUDTests
     public class RipToMovieLinkerMovieSearchTests : RipToMovieLinkerTestsBase
     {
 
-        //[Fact]
-        //public void SearchMovieAndPickFromResultsAsync_WithNoSearchResults_ShouldThrowNoSearchResultsError()
-        //{
-        //    // arrange
-        //    string titleWithNoResults = "Some movie";
+        [Fact]
+        public void SearchMovieAndPickFromResultsAsync_WithNoSearchResults_ShouldThrowNoSearchResultsError()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "Some Movie", ParsedReleaseDate = "1977" };
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Some"))))
+                .ReturnsAsync(Enumerable.Empty<MovieSearchResult>);
 
-        //    // act
-        //    // nothing to do
+            // act
+            // nothing to do
 
-        //    // assert
-        //    Action methodCall = () => RipToMovieLinker.SearchMovieAndPickFromResultsAsync(Enumerable.Empty<MovieSearchResult>(), titleWithNoResults);
-        //    methodCall.Should().Throw<NoSearchResultsError>();
-        //}
+            // assert
+            Func<Task> methodCall = async () => await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._ripToMovieLinker.GetPolicyWrapFromConfigs(out _));
+            methodCall.Should().Throw<NoSearchResultsError>();
+        }
 
 
         //[Fact]
