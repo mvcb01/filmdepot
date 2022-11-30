@@ -43,27 +43,27 @@ namespace DepotTests.CRUDTests
         }
 
 
-        //[Fact]
-        //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
-        //{
-        //    // arrange
-            
-        //    var toSearch = new MovieRip() { ParsedTitle = "The Fly" };
+        [Fact]
+        public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
+        {
+            // arrange
 
-        //    MovieSearchResult[] searchResults = {
-        //        new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986 },
-        //        new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958 },
-        //        };
+            var toSearch = new MovieRip() { ParsedTitle = "The Fly" };
 
-        //    this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986 },
+                new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958 },
+                };
 
-        //    // act
-        //    // nothing to do
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
 
-        //    // assert
-        //    Action methodCall = () => RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch);
-        //    methodCall.Should().Throw<MultipleSearchResultsError>();
-        //}
+            // act
+            // nothing to do
+
+            // assert
+            Func<Task> methodCall = async () => await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
+            methodCall.Should().Throw<MultipleSearchResultsError>();
+        }
 
         //[Fact]
         //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndProvidedReleaseDate_ShouldReturnMatchingMovieRip()
