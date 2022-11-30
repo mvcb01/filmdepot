@@ -126,13 +126,13 @@ namespace FilmCRUD
                     Movie movieToLink = FindRelatedMovieEntityInRepo(movieRip);
                     if (movieToLink != null)
                     {
-                        Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
+                        Log.Debug("FOUND LOCALLY: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
                         movieRip.Movie = movieToLink;
                         foundLocallyCount++;
                     }
                     else
                     {
-                        Log.Debug("NOT FOUND: {FileName}", movieRip.FileName);
+                        Log.Debug("NOT FOUND LOCALLY: {FileName}", movieRip.FileName);
                         ripsForOnlineSearch.Add(movieRip);
                     }
                 }
