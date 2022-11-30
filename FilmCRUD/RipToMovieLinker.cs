@@ -178,10 +178,7 @@ namespace FilmCRUD
             {
                 try
                 {
-                    IEnumerable<MovieSearchResult> searchResults = await policyWrap.ExecuteAsync(
-                        () => _movieAPIClient.SearchMovieAsync(movieRip.ParsedTitle)
-                    );
-                    Movie movieToLink = SearchMovieAndPickFromResultsAsync(searchResults, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+                    Movie movieToLink = await SearchMovieAndPickFromResultsAsync(movieRip, policyWrap);
 
                     Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
 
@@ -446,8 +443,15 @@ namespace FilmCRUD
             Log.Information("------------------------------------------------");
         }
 
-        public static Movie SearchMovieAndPickFromResultsAsync(IEnumerable<MovieSearchResult> searchResultAll, string parsedTitle, string parsedReleaseDate = null)
+        // AsyncPolicyWrap needs to be passed as a param so that the same object is used in every method call;
+        // if an AsyncPolicyWrap object was created in the method body then it would serve no purpose
+        public async Task<Movie> SearchMovieAndPickFromResultsAsync(MovieRip movieRip, AsyncPolicyWrap policyWrap)
         {
+            string parsedTitle = movieRip.ParsedTitle;
+            string parsedReleaseDate = movieRip.ParsedReleaseDate;
+
+            IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(() => _movieAPIClient.SearchMovieAsync(parsedTitle));
+
             // filters results using both Title and OriginalTitle
             IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
             List<MovieSearchResult> searchResult = searchResultAll
