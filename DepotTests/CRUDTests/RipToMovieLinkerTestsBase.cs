@@ -1,9 +1,9 @@
-﻿using ConfigUtils.Interfaces;
+﻿using Moq;
+using System;
+using ConfigUtils.Interfaces;
 using FilmCRUD;
 using FilmDomain.Interfaces;
-using Moq;
 using MovieAPIClients.Interfaces;
-using System;
 
 namespace DepotTests.CRUDTests
 {
