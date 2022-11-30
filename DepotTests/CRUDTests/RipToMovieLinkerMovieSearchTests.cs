@@ -102,24 +102,25 @@ namespace DepotTests.CRUDTests
             movieFound.Should().BeEquivalentTo(new { Title = "The Death of Dick Long", ReleaseDate = 2020 });
         }
 
-        //[Fact]
-        //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndProvidedReleaseDateWithoutMatch_ShouldThrowNoSearchResultsError()
-        //{
-        //    // arrange
-        //    string movieTitleToSearch = "the fly";
-        //    string movieReleaseDateToSearch = "1900";
-        //    MovieSearchResult[] searchResults = {
-        //        new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986, ExternalId = 1 },
-        //        new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958, ExternalId = 2 },
-        //        };
+        [Fact]
+        public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndProvidedReleaseDateWithoutMatch_ShouldThrowNoSearchResultsError()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "1900" };
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986, ExternalId = 101 },
+                new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958, ExternalId = 102 },
+                };
 
-        //    // act
-        //    // nothing to do
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
 
-        //    // assert
-        //    Action methodCall = () => RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
-        //    methodCall.Should().Throw<NoSearchResultsError>();
-        //}
+            // act
+            // nothing to do
+
+            // assert
+            Func<Task> methodCall = async () => await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
+            methodCall.Should().Throw<NoSearchResultsError>();
+        }
 
         //[Fact]
         //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsWithSameReleaseDate_ShouldThrowMultipleSearchResultsError()
