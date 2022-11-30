@@ -65,23 +65,23 @@ namespace DepotTests.CRUDTests
             methodCall.Should().Throw<MultipleSearchResultsError>();
         }
 
-        //[Fact]
-        //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndProvidedReleaseDate_ShouldReturnMatchingMovieRip()
-        //{
-        //    // arrange
-        //    string movieTitleToSearch = "the fly";
-        //    string movieReleaseDateToSearch = "1986";
-        //    MovieSearchResult[] searchResults = {
-        //        new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986 },
-        //        new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958 },
-        //        };
+        [Fact]
+        public async Task SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndProvidedReleaseDate_ShouldReturnMatchingMovieRip()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "1986" };
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986 },
+                new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958 },
+                };
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
 
-        //    // act
-        //    Movie movieFound = RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
+            // act
+            Movie movieFound = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
 
-        //    // assert
-        //    movieFound.Should().BeEquivalentTo(new { Title = "The Fly", ReleaseDate = 1986 });
-        //}
+            // assert
+            movieFound.Should().BeEquivalentTo(new { Title = "The Fly", ReleaseDate = 1986 });
+        }
 
         //[Fact]
         //public void SearchMovieAndPickFromResultsAsync_WithProvidedReleaseDate_WithoutDateMatch_ShouldReturnResultWithinDateTolerance()
