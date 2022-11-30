@@ -495,7 +495,7 @@ namespace FilmCRUD
             return (Movie)result;
         }
 
-        private AsyncPolicyWrap GetPolicyWrapFromConfigs(out TimeSpan initialDelay)
+        public AsyncPolicyWrap GetPolicyWrapFromConfigs(out TimeSpan initialDelay)
         {
             // notice the order of the async policies when calling Policy.WrapAsync:
             //      outermost (at left) to innermost (at right)
