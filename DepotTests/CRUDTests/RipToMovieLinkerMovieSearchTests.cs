@@ -122,24 +122,25 @@ namespace DepotTests.CRUDTests
             methodCall.Should().Throw<NoSearchResultsError>();
         }
 
-        //[Fact]
-        //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsWithSameReleaseDate_ShouldThrowMultipleSearchResultsError()
-        //{
-        //    // arrange
-        //    string movieTitleToSearch = "the fly";
-        //    string movieReleaseDateToSearch = "1986";
-        //    MovieSearchResult[] searchResults = {
-        //        new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986, ExternalId = 1 },
-        //        new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1986, ExternalId = 2 },
-        //        };
+        [Fact]
+        public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsWithSameReleaseDate_ShouldThrowMultipleSearchResultsError()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "1986" };
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986, ExternalId = 101 },
+                new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1986, ExternalId = 102 },
+                };
 
-        //    // act
-        //    // nothing to do
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
 
-        //    // assert
-        //    Action methodCall = () => RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
-        //    methodCall.Should().Throw<MultipleSearchResultsError>();
-        //}
+            // act
+            // nothing to do
+
+            // assert
+            Func<Task> methodCall = async () => await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
+            methodCall.Should().Throw<MultipleSearchResultsError>();
+        }
 
         //[Fact]
         //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResults_ShouldReturnTheResultWithTitleExactMatch()
