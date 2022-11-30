@@ -83,23 +83,24 @@ namespace DepotTests.CRUDTests
             movieFound.Should().BeEquivalentTo(new { Title = "The Fly", ReleaseDate = 1986 });
         }
 
-        //[Fact]
-        //public void SearchMovieAndPickFromResultsAsync_WithProvidedReleaseDate_WithoutDateMatch_ShouldReturnResultWithinDateTolerance()
-        //{
-        //    // arrange
-        //    string movieTitleToSearch = "The Death of Dick Long";
-        //    string movieReleaseDateToSearch = "2019";
-        //    MovieSearchResult[] searchResults = {
-        //        new MovieSearchResult() { Title = "The Death of Dick Long", ReleaseDate = 2013 },
-        //        new MovieSearchResult()  { Title = "The Death of Dick Long", ReleaseDate = 2020 },
-        //        };
+        [Fact]
+        public async Task SearchMovieAndPickFromResultsAsync_WithProvidedReleaseDate_WithoutDateMatch_ShouldReturnResultWithinDateTolerance()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "The Death of Dick Long", ParsedReleaseDate = "2019" };
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "The Death of Dick Long", ReleaseDate = 2013 },
+                new MovieSearchResult()  { Title = "The Death of Dick Long", ReleaseDate = 2020 },
+                };
 
-        //    // act
-        //    Movie movieFound = RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Long")))).ReturnsAsync(searchResults);
 
-        //    // assert
-        //    movieFound.Should().BeEquivalentTo(new { Title = "The Death of Dick Long", ReleaseDate = 2020 });
-        //}
+            // act
+            Movie movieFound = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
+
+            // assert
+            movieFound.Should().BeEquivalentTo(new { Title = "The Death of Dick Long", ReleaseDate = 2020 });
+        }
 
         //[Fact]
         //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndProvidedReleaseDateWithoutMatch_ShouldThrowNoSearchResultsError()
