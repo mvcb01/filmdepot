@@ -161,21 +161,23 @@ namespace DepotTests.CRUDTests
             movieFound.Should().BeEquivalentTo(new { Title = "Sorcerer", ReleaseDate = 1977 });
         }
 
-        //[Fact]
-        //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResults_ShouldReturnTheResultWithOriginalTitleExactMatch()
-        //{
-        //    // arrange
-        //    string movieTitleToSearch = "the fly";
-        //    MovieSearchResult[] searchResults = {
-        //        new MovieSearchResult() { OriginalTitle = "The Fly", ReleaseDate = 1986 },
-        //        new MovieSearchResult()  { Title = "Curse of the Fly", ReleaseDate = 1965 },
-        //        };
+        [Fact]
+        public async Task SearchMovieAndPickFromResultsAsync_WithSeveralSearchResults_ShouldReturnTheResultWithOriginalTitleExactMatch()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "1986" };
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { OriginalTitle = "The Fly", ReleaseDate = 1986 },
+                new MovieSearchResult()  { Title = "Curse of the Fly", ReleaseDate = 1965 },
+                };
 
-        //    // act
-        //    Movie movieFound = RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch);
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
 
-        //    // assert
-        //    movieFound.Should().BeEquivalentTo(new { OriginalTitle = "The Fly", ReleaseDate = 1986 });
-        //}
+            // act
+            Movie movieFound = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
+
+            // assert
+            movieFound.Should().BeEquivalentTo(new { OriginalTitle = "The Fly", ReleaseDate = 1986 });
+        }
     }
 }
