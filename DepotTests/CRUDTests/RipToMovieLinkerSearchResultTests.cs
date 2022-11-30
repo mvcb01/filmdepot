@@ -26,7 +26,7 @@ namespace DepotTests.CRUDTests
             // nothing to do
 
             // assert
-            Action methodCall = () => RipToMovieLinker.PickMovieFromSearchResults(Enumerable.Empty<MovieSearchResult>(), titleWithNoResults);
+            Action methodCall = () => RipToMovieLinker.SearchMovieAndPickFromResultsAsync(Enumerable.Empty<MovieSearchResult>(), titleWithNoResults);
             methodCall.Should().Throw<NoSearchResultsError>();
         }
 
@@ -45,7 +45,7 @@ namespace DepotTests.CRUDTests
             // nothing to do
 
             // assert
-            Action methodCall = () => RipToMovieLinker.PickMovieFromSearchResults(searchResults, movieTitleToSearch);
+            Action methodCall = () => RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch);
             methodCall.Should().Throw<MultipleSearchResultsError>();
         }
 
@@ -61,7 +61,7 @@ namespace DepotTests.CRUDTests
                 };
 
             // act
-            Movie movieFound = RipToMovieLinker.PickMovieFromSearchResults(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
+            Movie movieFound = RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
 
             // assert
             movieFound.Should().BeEquivalentTo(new { Title = "The Fly", ReleaseDate = 1986 });
@@ -79,7 +79,7 @@ namespace DepotTests.CRUDTests
                 };
 
             // act
-            Movie movieFound = RipToMovieLinker.PickMovieFromSearchResults(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
+            Movie movieFound = RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
 
             // assert
             movieFound.Should().BeEquivalentTo(new { Title = "The Death of Dick Long", ReleaseDate = 2020 });
@@ -100,7 +100,7 @@ namespace DepotTests.CRUDTests
             // nothing to do
 
             // assert
-            Action methodCall = () => RipToMovieLinker.PickMovieFromSearchResults(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
+            Action methodCall = () => RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
             methodCall.Should().Throw<NoSearchResultsError>();
         }
 
@@ -119,7 +119,7 @@ namespace DepotTests.CRUDTests
             // nothing to do
 
             // assert
-            Action methodCall = () => RipToMovieLinker.PickMovieFromSearchResults(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
+            Action methodCall = () => RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch, movieReleaseDateToSearch);
             methodCall.Should().Throw<MultipleSearchResultsError>();
         }
 
@@ -134,7 +134,7 @@ namespace DepotTests.CRUDTests
                 };
 
             // act
-            Movie movieFound = RipToMovieLinker.PickMovieFromSearchResults(searchResults, movieTitleToSearch);
+            Movie movieFound = RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch);
 
             // assert
             movieFound.Should().BeEquivalentTo(new { Title = "Sorcerer", ReleaseDate = 1977 });
@@ -151,7 +151,7 @@ namespace DepotTests.CRUDTests
                 };
 
             // act
-            Movie movieFound = RipToMovieLinker.PickMovieFromSearchResults(searchResults, movieTitleToSearch);
+            Movie movieFound = RipToMovieLinker.SearchMovieAndPickFromResultsAsync(searchResults, movieTitleToSearch);
 
             // assert
             movieFound.Should().BeEquivalentTo(new { OriginalTitle = "The Fly", ReleaseDate = 1986 });

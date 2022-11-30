@@ -181,7 +181,7 @@ namespace FilmCRUD
                     IEnumerable<MovieSearchResult> searchResults = await policyWrap.ExecuteAsync(
                         () => _movieAPIClient.SearchMovieAsync(movieRip.ParsedTitle)
                     );
-                    Movie movieToLink = PickMovieFromSearchResults(searchResults, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+                    Movie movieToLink = SearchMovieAndPickFromResultsAsync(searchResults, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
 
                     Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
 
@@ -446,7 +446,7 @@ namespace FilmCRUD
             Log.Information("------------------------------------------------");
         }
 
-        public static Movie PickMovieFromSearchResults(IEnumerable<MovieSearchResult> searchResultAll, string parsedTitle, string parsedReleaseDate = null)
+        public static Movie SearchMovieAndPickFromResultsAsync(IEnumerable<MovieSearchResult> searchResultAll, string parsedTitle, string parsedReleaseDate = null)
         {
             // filters results using both Title and OriginalTitle
             IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
