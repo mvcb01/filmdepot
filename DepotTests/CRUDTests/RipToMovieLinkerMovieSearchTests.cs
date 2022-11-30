@@ -6,24 +6,15 @@ using FilmCRUD.CustomExceptions;
 using MovieAPIClients;
 using FilmCRUD;
 using FilmDomain.Entities;
+using System.Runtime.CompilerServices;
 
 namespace DepotTests.CRUDTests
 {
     /// <summary>
-    /// To test method RipToMovieLinker.SearchMovieAndPickFromResultsAsync.
+    /// To test method <c>RipToMovieLinker.SearchMovieAndPickFromResultsAsync</c>.
     /// </summary>
-    public class RipToMovieLinkerMovieSearchTests
+    public class RipToMovieLinkerMovieSearchTests : RipToMovieLinkerTestsBase
     {
-
-        [Fact]
-        public void TestName()
-        {
-            // arrange
-
-            // act
-
-            // assert
-        }
 
         //[Fact]
         //public void SearchMovieAndPickFromResultsAsync_WithNoSearchResults_ShouldThrowNoSearchResultsError()

@@ -30,10 +30,7 @@ namespace FilmCRUD
 
         private readonly ILogger _linkingErrorsLogger;
 
-        public RipToMovieLinker(
-            IUnitOfWork unitOfWork,
-            IAppSettingsManager appSettingsManager,
-            IMovieAPIClient movieAPIClient)
+        public RipToMovieLinker(IUnitOfWork unitOfWork, IAppSettingsManager appSettingsManager, IMovieAPIClient movieAPIClient)
         {
             this._unitOfWork = unitOfWork;
             this._appSettingsManager = appSettingsManager;

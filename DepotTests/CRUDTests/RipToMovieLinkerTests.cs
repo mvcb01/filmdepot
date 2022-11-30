@@ -1,15 +1,6 @@
 using Xunit;
 using Moq;
 using FluentAssertions;
-
-using FilmCRUD;
-using FilmCRUD.Interfaces;
-using FilmCRUD.CustomExceptions;
-using FilmDomain.Entities;
-using FilmDomain.Interfaces;
-using ConfigUtils.Interfaces;
-using MovieAPIClients.Interfaces;
-using MovieAPIClients;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using System;
@@ -18,63 +9,15 @@ using FluentAssertions.Execution;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
+using FilmCRUD.CustomExceptions;
+using FilmDomain.Entities;
+using MovieAPIClients;
+
 
 namespace DepotTests.CRUDTests
 {
-    public class RipToMovieLinkerTests
+    public class RipToMovieLinkerTests : RipToMovieLinkerTestsBase
     {
-        private readonly Mock<IMovieRipRepository> _movieRipRepositoryMock;
-
-        private readonly Mock<IMovieRepository> _movieRepositoryMock;
-
-        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-
-        private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
-
-        private readonly Mock<IRateLimitPolicyConfig> _rateLimitConfigMock;
-
-        private readonly Mock<IRetryPolicyConfig> _retryConfigMock;
-
-        private readonly Mock<IAppSettingsManager> _appSettingsManagerMock;
-
-        private readonly RipToMovieLinker _ripToMovieLinker;
-
-        public RipToMovieLinkerTests()
-        {
-            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>(MockBehavior.Strict);
-            this._movieRepositoryMock = new Mock<IMovieRepository>(MockBehavior.Strict);
-
-            this._unitOfWorkMock = new Mock<IUnitOfWork>();
-            this._unitOfWorkMock
-                .SetupGet(u => u.MovieRips)
-                .Returns(this._movieRipRepositoryMock.Object);
-            this._unitOfWorkMock
-                .SetupGet(u => u.Movies)
-                .Returns(this._movieRepositoryMock.Object);
-            
-            this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
-            this._movieAPIClientMock.SetupGet(m => m.ApiBaseAddress).Returns("https://api.dummy.org/");
-            
-            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
-
-            this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
-            this._retryConfigMock = new Mock<IRetryPolicyConfig>();
-
-            // default policy configs
-            this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(5);
-            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(50));
-
-            this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(2);
-            this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(50));
-
-            this._appSettingsManagerMock.Setup(a => a.GetRateLimitPolicyConfig()).Returns(this._rateLimitConfigMock.Object);
-            this._appSettingsManagerMock.Setup(a => a.GetRetryPolicyConfig()).Returns(this._retryConfigMock.Object);
-
-            this._ripToMovieLinker = new RipToMovieLinker(
-                this._unitOfWorkMock.Object,
-                this._appSettingsManagerMock.Object,
-                this._movieAPIClientMock.Object);
-        }
 
         [Fact]
         public void GetMovieRipsToLink_WithRipFilenamesToIgnore_ShouldNotReturnThem()
