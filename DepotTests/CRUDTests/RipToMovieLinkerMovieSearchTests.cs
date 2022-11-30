@@ -4,9 +4,11 @@ using FluentAssertions;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using Polly.Wrap;
 using FilmCRUD.CustomExceptions;
 using FilmDomain.Entities;
 using MovieAPIClients;
+
 
 namespace DepotTests.CRUDTests
 {
@@ -15,6 +17,13 @@ namespace DepotTests.CRUDTests
     /// </summary>
     public class RipToMovieLinkerMovieSearchTests : RipToMovieLinkerTestsBase
     {
+        private readonly AsyncPolicyWrap _policyWrap;
+
+        public RipToMovieLinkerMovieSearchTests() : base()
+        {
+            // used in several tests
+            this._policyWrap = this._ripToMovieLinker.GetPolicyWrapFromConfigs(out _);
+        }
 
         [Fact]
         public void SearchMovieAndPickFromResultsAsync_WithNoSearchResults_ShouldThrowNoSearchResultsError()
@@ -31,7 +40,7 @@ namespace DepotTests.CRUDTests
             // assert
             Func<Task> methodCall = async () => await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(
                 toSearch,
-                this._ripToMovieLinker.GetPolicyWrapFromConfigs(out _));
+                this._policyWrap);
             methodCall.Should().Throw<NoSearchResultsError>();
         }
 
@@ -40,11 +49,15 @@ namespace DepotTests.CRUDTests
         //public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndWithoutProvidedReleaseDate_ShouldThrowMultipleSearchResultsError()
         //{
         //    // arrange
-        //    string movieTitleToSearch = "the fly";
+            
+        //    var toSearch = new MovieRip() { ParsedTitle = "The Fly" };
+
         //    MovieSearchResult[] searchResults = {
         //        new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986 },
         //        new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958 },
         //        };
+
+        //    this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
 
         //    // act
         //    // nothing to do
