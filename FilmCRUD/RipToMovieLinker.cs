@@ -187,7 +187,7 @@ namespace FilmCRUD
 
                     foundOnlineCount++;
 
-                    // we may already have the "same" Movie from a previous searched
+                    // we may already have the "same" Movie from a previous api call
                     Movie existingMovie = newMovieEntities.Where(m => m.ExternalId == movieToLink.ExternalId).FirstOrDefault();
                     
                     if (existingMovie != null)
