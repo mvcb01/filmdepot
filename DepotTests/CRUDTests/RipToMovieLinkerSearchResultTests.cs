@@ -11,9 +11,9 @@ using FilmDomain.Entities;
 namespace DepotTests.CRUDTests
 {
     /// <summary>
-    /// To test static method RipToMovieLinker.PickMovieFromSearchResults.
+    /// To test method RipToMovieLinker.SearchMovieAndPickFromResultsAsync.
     /// </summary>
-    public class RipToMovieLinkerSearchResultTests
+    public class RipToMovieLinkerMovieSearchTests
     {
 
         [Fact]
