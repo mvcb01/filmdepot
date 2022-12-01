@@ -1,6 +1,7 @@
 ﻿using Xunit;
 using Moq;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
@@ -178,6 +179,26 @@ namespace DepotTests.CRUDTests
 
             // assert
             movieFound.Should().BeEquivalentTo(new { OriginalTitle = "The Fly", ReleaseDate = 1986 });
+        }
+
+
+        [Fact]
+        public async Task SearchMovieAndPickFromResultsAsync_WithUnparseableReleaseDateString_ShouldCallCorrectApiClientMethodOverload()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "abcd1986xyz--!!" };
+
+            // act
+            _ = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
+
+            var x = Times.Never;
+
+            // assert
+            using (new AssertionScope())
+            {
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Never());
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Once());
+            }
         }
     }
 }
