@@ -7,13 +7,11 @@ using Polly;
 using System;
 using System.Net.Http;
 using System.Net;
-using System.IO;
 using Serilog;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients.Interfaces;
 using ConfigUtils.Interfaces;
-using FilmCRUD.Interfaces;
 using FilmCRUD.Helpers;
 using System.Data;
 
