@@ -156,7 +156,7 @@ namespace DepotTests.CRUDTests
                 .Returns(movieMatches);
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             this._ripToMovieLinker
@@ -183,7 +183,7 @@ namespace DepotTests.CRUDTests
                 .Returns(movieMatches);
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             this._ripToMovieLinker
@@ -655,7 +655,7 @@ namespace DepotTests.CRUDTests
             await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
 
             // assert
-            // points to the same object in memory
+            // making sure it references the same object in memory
             movieRipToLinkManually.Movie.Should().BeSameAs(movieInRepo);
         }
 
