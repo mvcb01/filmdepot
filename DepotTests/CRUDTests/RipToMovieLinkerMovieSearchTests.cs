@@ -191,8 +191,6 @@ namespace DepotTests.CRUDTests
             // act
             _ = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
 
-            var x = Times.Never;
-
             // assert
             using (new AssertionScope())
             {
