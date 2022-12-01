@@ -203,5 +203,30 @@ namespace DepotTests.CRUDTests
                 this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Once());
             }
         }
+
+
+        [Fact]
+        public async Task SearchMovieAndPickFromResultsAsync_WithParseableReleaseDateAndSingleCorrectResult_ShouldCallCorrectApiClientMethodOverload()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "1986" };
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { OriginalTitle = "The Fly", ReleaseDate = 1986 },
+            };
+
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")), It.Is<int>(i => i == 1986)))
+                .ReturnsAsync(searchResults);
+
+            // act
+            _ = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
+
+            // assert
+            using (new AssertionScope())
+            {
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Once());
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Never());
+            }
+        }
     }
 }
