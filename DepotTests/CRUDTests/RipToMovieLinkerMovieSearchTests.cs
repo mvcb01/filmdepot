@@ -187,6 +187,11 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "abcd1986xyz--!!" };
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { OriginalTitle = "The Fly", ReleaseDate = 1986 },
+            };
+
+            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
 
             // act
             _ = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
