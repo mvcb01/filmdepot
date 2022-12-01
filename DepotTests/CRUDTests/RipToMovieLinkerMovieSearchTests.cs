@@ -136,7 +136,7 @@ namespace DepotTests.CRUDTests
             this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
 
             // act
-            // nothing to do
+            // nothing to do...
 
             // assert
             Func<Task> methodCall = async () => await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
@@ -225,6 +225,35 @@ namespace DepotTests.CRUDTests
             using (new AssertionScope())
             {
                 this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Once());
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Never());
+            }
+        }
+
+        [Fact]
+        public async Task SearchMovieAndPickFromResultsAsync_WithParseableReleaseDateAndNoInitialResults_ShouldCallCorrectApiClientMethodOverloadForCloseDates()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "1985" };
+            MovieSearchResult[] searchResults_1986 = {
+                new MovieSearchResult() { OriginalTitle = "The Fly", ReleaseDate = 1986 },
+            };
+
+            // will only return results for the correct release date
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")), It.Is<int>(i => i != 1986)))
+                .ReturnsAsync(Enumerable.Empty<MovieSearchResult>());
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")), It.Is<int>(i => i == 1986)))
+                .ReturnsAsync(searchResults_1986);
+
+            // act
+            _ = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
+
+            // assert
+            using (new AssertionScope())
+            {
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>(), It.Is<int>(i => i == 1985)), Times.Once());
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>(), It.Is<int>(i => i != 1985 && Math.Abs(i - 1985) == 1)), Times.AtLeastOnce());
                 this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Never());
             }
         }
