@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using FilmCRUD.CustomExceptions;
 using FilmCRUD.Interfaces;
-using Serilog;
 
 namespace FilmCRUD.Helpers
 {
