@@ -206,7 +206,7 @@ namespace DepotTests.CRUDTests
 
 
         [Fact]
-        public async Task SearchMovieAndPickFromResultsAsync_WithParseableReleaseDateAndSingleCorrectResult_ShouldCallCorrectApiClientMethodOverload()
+        public async Task SearchMovieAndPickFromResultsAsync_WithParseableReleaseDateAndSingleCorrectResult_ShouldCallCorrectApiClientMethodOverloadExactlyOnce()
         {
             // arrange
             var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "1986" };

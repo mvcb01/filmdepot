@@ -447,49 +447,53 @@ namespace FilmCRUD
             string parsedTitle = movieRip.ParsedTitle;
             string parsedReleaseDate = movieRip.ParsedReleaseDate;
 
-            IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(() => _movieAPIClient.SearchMovieAsync(parsedTitle));
+            MovieSearchResult result = parsedReleaseDate is not null ?
+                await SearchAndPickAsync(parsedTitle, parsedReleaseDate, policyWrap)
+                : await SearchAndPickAsync(parsedTitle, policyWrap);
 
-            // filters results using both Title and OriginalTitle
-            IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
-            List<MovieSearchResult> searchResult = searchResultAll
-                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
-                    || titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true)))
-                .ToList();
+            //IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(() => _movieAPIClient.SearchMovieAsync(parsedTitle));
 
-            int resultCount = searchResult.Count();
-            MovieSearchResult result;
-            if (resultCount == 0)
-            {
-                throw new NoSearchResultsError($"No search results for \"{parsedTitle}\" ");
-            }
-            else if (resultCount == 1)
-            {
-                result = searchResult.First();
-            }
-            else if (parsedReleaseDate == null)
-            {
-                throw new MultipleSearchResultsError($"Multiple search results for \"{parsedTitle}\"; count = {resultCount}");
-            }
-            else
-            {
-                int[] admissibleDates = GetAdmissibleReleaseDates(parsedReleaseDate);
-                List<MovieSearchResult> searchResultFiltered = searchResult.Where(r => admissibleDates.AsEnumerable().Contains(r.ReleaseDate)).ToList();
-                
-                int resultCountFiltered = searchResultFiltered.Count();
-                if (resultCountFiltered == 0)
-                {
-                    throw new NoSearchResultsError(
-                        $"No search results for \"{parsedTitle}\" with release date in {string.Join(", ", admissibleDates)}");
-                }
-                
-                if (resultCountFiltered > 1)
-                {
-                    throw new MultipleSearchResultsError(
-                        $"Multiple search results for \"{parsedTitle}\"  with release date in {string.Join(", ", admissibleDates)}; count = {resultCount}");
-                }
-                
-                result = searchResultFiltered.First();
-            }
+            //// filters results using both Title and OriginalTitle
+            //IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
+            //List<MovieSearchResult> searchResult = searchResultAll
+            //    .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
+            //        || titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true)))
+            //    .ToList();
+
+            //int resultCount = searchResult.Count();
+            //MovieSearchResult result;
+            //if (resultCount == 0)
+            //{
+            //    throw new NoSearchResultsError($"No search results for \"{parsedTitle}\" ");
+            //}
+            //else if (resultCount == 1)
+            //{
+            //    result = searchResult.First();
+            //}
+            //else if (parsedReleaseDate == null)
+            //{
+            //    throw new MultipleSearchResultsError($"Multiple search results for \"{parsedTitle}\"; count = {resultCount}");
+            //}
+            //else
+            //{
+            //    int[] admissibleDates = GetAdmissibleReleaseDates(parsedReleaseDate);
+            //    List<MovieSearchResult> searchResultFiltered = searchResult.Where(r => admissibleDates.AsEnumerable().Contains(r.ReleaseDate)).ToList();
+
+            //    int resultCountFiltered = searchResultFiltered.Count();
+            //    if (resultCountFiltered == 0)
+            //    {
+            //        throw new NoSearchResultsError(
+            //            $"No search results for \"{parsedTitle}\" with release date in {string.Join(", ", admissibleDates)}");
+            //    }
+
+            //    if (resultCountFiltered > 1)
+            //    {
+            //        throw new MultipleSearchResultsError(
+            //            $"Multiple search results for \"{parsedTitle}\"  with release date in {string.Join(", ", admissibleDates)}; count = {resultCount}");
+            //    }
+
+            //    result = searchResultFiltered.First();
+            //}
 
             // explicit conversion is defined
             return (Movie)result;
@@ -521,12 +525,74 @@ namespace FilmCRUD
             );
         }
 
-        private static int[] GetAdmissibleReleaseDates(string parsedReleaseDate)
+        private async Task<MovieSearchResult> SearchAndPickAsync(string parsedTitle, AsyncPolicyWrap policyWrap)
         {
-            bool parseSuccess = int.TryParse(parsedReleaseDate, out int releaseDate);
-            if (parseSuccess)
-                return new int[] { releaseDate, releaseDate + 1, releaseDate - 1 };
-            return Array.Empty<int>();
+            IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(() => _movieAPIClient.SearchMovieAsync(parsedTitle));
+
+            // filters results using both Title and OriginalTitle
+            IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
+            List<MovieSearchResult> searchResult = searchResultAll
+                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
+                    || titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true)))
+                .ToList();
+
+            int resultCount = searchResult.Count();
+
+            return resultCount switch
+            {
+                0 => throw new NoSearchResultsError($"No search results for \"{parsedTitle}\" "),
+                > 1 => throw new MultipleSearchResultsError($"Multiple search results for \"{parsedTitle}\"; count = {resultCount}"),
+                _ => searchResult.First()
+            };
+        }
+
+        private async Task<MovieSearchResult> SearchAndPickAsync(string parsedTitle, string parsedReleaseDate, AsyncPolicyWrap policyWrap)
+        {
+            var dateTol = new ReleaseDateToleranceNeighbourhood(parsedReleaseDate);
+
+            // if release date cannot be parsed into an int then we fall back into the other overload
+            if (!dateTol.ParseSuccess) return await SearchAndPickAsync(parsedTitle, policyWrap);
+
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Nested class <c>ReleaseDateToleranceNeighbourhood</c> defines the tolerance given for the release date when searching for movie info online.
+        /// </summary>
+        class ReleaseDateToleranceNeighbourhood
+        {
+            public readonly bool ParseSuccess;
+
+            public const int NeighbourhoodRadius = 1;
+
+            public readonly int ReleaseDate;
+
+            /// <summary>
+            /// All the integers in the closed interval [ReleaseDate - NeighbourhoodRadius, ReleaseDate + NeighbourhoodRadius], except for ReleaseDate. 
+            /// </summary>
+            public IEnumerable<int> Neighbourhood
+            {
+                get => ParseSuccess ?
+                    Enumerable.Range(1, NeighbourhoodRadius).SelectMany(tol => new[] { ReleaseDate + tol, ReleaseDate - tol })
+                    : Enumerable.Empty<int>();
+            }
+
+            public ReleaseDateToleranceNeighbourhood(string releaseDateString)
+            {
+                bool parseSucess = int.TryParse(releaseDateString, out int releaseDate);
+
+                // from wikipedia:
+                //          1888 - In Leeds, England Louis Le Prince films Roundhay Garden Scene, believed to be the first motion picture recorded.[5]
+                // https://en.wikipedia.org/wiki/List_of_cinematic_firsts
+                ParseSuccess = parseSucess && 1888 <= releaseDate && releaseDate <= 2100;
+                if (!ParseSuccess)
+                {
+                    Log.Debug("Cannot parse release date string to int: \"{ReleaseDateString}\"", releaseDateString);
+                    releaseDate = 0;
+                }
+
+                ReleaseDate = releaseDate;
+            }
         }
 
     }
