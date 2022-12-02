@@ -32,7 +32,7 @@ namespace DepotTests.CRUDTests
             // arrange
             var toSearch = new MovieRip() { ParsedTitle = "Some Movie", ParsedReleaseDate = "1977" };
             this._movieAPIClientMock
-                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Some"))))
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Some")), It.IsAny<int>()))
                 .ReturnsAsync(Enumerable.Empty<MovieSearchResult>);
 
             // act
