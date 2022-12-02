@@ -360,7 +360,7 @@ namespace FilmCRUD
             int errorCount = errors.Count();
             if (errorCount > 0)
             {
-                Log.Information("Saving manual external ids linking errors in separate file...");
+                Log.Information("Saving manual external ids linking errors in separate log file...");
                 this._linkingErrorsLogger?.Information("----------------------------------");
                 this._linkingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
                 this._linkingErrorsLogger?.Information("----------------------------------");
@@ -515,12 +515,12 @@ namespace FilmCRUD
             // using the release dates in the tolerance neighbourhood
             if (!searchResult.Any())
             {
-                Log.Debug("No results for release date {ReleaseDate}", dateTol.ReleaseDate);
+                Log.Debug("No results for \"{ParsedTitle}\" with release date {ReleaseDate}", parsedTitle, dateTol.ReleaseDate);
+                Log.Debug("Searching the same title with other release dates: {OtherReleaseDates}", string.Join(", ", dateTol.Neighbourhood));
+                
                 var searchResultAllOtherDates = new List<MovieSearchResult>();
-
                 foreach (int date in dateTol.Neighbourhood)
                 {
-                    Log.Debug("Trying for release date {ReleaseDate}", date);
                     searchResultAllOtherDates.AddRange(await policyWrap.ExecuteAsync(
                         () => _movieAPIClient.SearchMovieAsync(parsedTitle, date)
                     ));
