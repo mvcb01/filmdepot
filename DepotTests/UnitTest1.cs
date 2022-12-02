@@ -3,6 +3,9 @@ using Xunit;
 using MovieAPIClients.TheMovieDb;
 using ConfigUtils;
 using System.Linq;
+using System.Threading.Tasks;
+using MovieAPIClients;
+using System.Collections.Generic;
 
 namespace DepotTests
 {
@@ -11,7 +14,6 @@ namespace DepotTests
         [Fact]
         public void Test1()
         {
-
         }
     }
 }

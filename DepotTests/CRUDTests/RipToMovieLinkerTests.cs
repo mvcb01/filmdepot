@@ -1,15 +1,6 @@
 using Xunit;
 using Moq;
 using FluentAssertions;
-
-using FilmCRUD;
-using FilmCRUD.Interfaces;
-using FilmCRUD.CustomExceptions;
-using FilmDomain.Entities;
-using FilmDomain.Interfaces;
-using ConfigUtils.Interfaces;
-using MovieAPIClients.Interfaces;
-using MovieAPIClients;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using System;
@@ -18,63 +9,15 @@ using FluentAssertions.Execution;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
+using FilmCRUD.CustomExceptions;
+using FilmDomain.Entities;
+using MovieAPIClients;
+
 
 namespace DepotTests.CRUDTests
 {
-    public class RipToMovieLinkerTests
+    public class RipToMovieLinkerTests : RipToMovieLinkerTestsBase
     {
-        private readonly Mock<IMovieRipRepository> _movieRipRepositoryMock;
-
-        private readonly Mock<IMovieRepository> _movieRepositoryMock;
-
-        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-
-        private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
-
-        private readonly Mock<IRateLimitPolicyConfig> _rateLimitConfigMock;
-
-        private readonly Mock<IRetryPolicyConfig> _retryConfigMock;
-
-        private readonly Mock<IAppSettingsManager> _appSettingsManagerMock;
-
-        private readonly RipToMovieLinker _ripToMovieLinker;
-
-        public RipToMovieLinkerTests()
-        {
-            this._movieRipRepositoryMock = new Mock<IMovieRipRepository>(MockBehavior.Strict);
-            this._movieRepositoryMock = new Mock<IMovieRepository>(MockBehavior.Strict);
-
-            this._unitOfWorkMock = new Mock<IUnitOfWork>();
-            this._unitOfWorkMock
-                .SetupGet(u => u.MovieRips)
-                .Returns(this._movieRipRepositoryMock.Object);
-            this._unitOfWorkMock
-                .SetupGet(u => u.Movies)
-                .Returns(this._movieRepositoryMock.Object);
-            
-            this._movieAPIClientMock = new Mock<IMovieAPIClient>(MockBehavior.Strict);
-            this._movieAPIClientMock.SetupGet(m => m.ApiBaseAddress).Returns("https://api.dummy.org/");
-            
-            this._appSettingsManagerMock = new Mock<IAppSettingsManager>();
-
-            this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
-            this._retryConfigMock = new Mock<IRetryPolicyConfig>();
-
-            // default policy configs
-            this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(5);
-            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(50));
-
-            this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(2);
-            this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(50));
-
-            this._appSettingsManagerMock.Setup(a => a.GetRateLimitPolicyConfig()).Returns(this._rateLimitConfigMock.Object);
-            this._appSettingsManagerMock.Setup(a => a.GetRetryPolicyConfig()).Returns(this._retryConfigMock.Object);
-
-            this._ripToMovieLinker = new RipToMovieLinker(
-                this._unitOfWorkMock.Object,
-                this._appSettingsManagerMock.Object,
-                this._movieAPIClientMock.Object);
-        }
 
         [Fact]
         public void GetMovieRipsToLink_WithRipFilenamesToIgnore_ShouldNotReturnThem()
@@ -213,7 +156,7 @@ namespace DepotTests.CRUDTests
                 .Returns(movieMatches);
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             this._ripToMovieLinker
@@ -240,7 +183,7 @@ namespace DepotTests.CRUDTests
                 .Returns(movieMatches);
 
             // act
-            // nada a fazer...
+            // nothing to do...
 
             // assert
             this._ripToMovieLinker
@@ -338,7 +281,7 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.Find((It.IsAny<Expression<Func<MovieRip, bool>>>())))
                 .Returns(allMovieRipsInRepo);
             this._movieAPIClientMock
-                .Setup(cl => cl.SearchMovieAsync(It.Is<string>(s => s.Contains("velvet", StringComparison.InvariantCultureIgnoreCase))))
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Velvet")), It.Is<int>(i => i == 1986)))
                 .ReturnsAsync(new MovieSearchResult[] { movieInfo });
             this._movieRepositoryMock
                 .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
@@ -387,15 +330,87 @@ namespace DepotTests.CRUDTests
                 .Returns(Enumerable.Empty<Movie>());
 
             var dummySearchResult = new MovieSearchResult();
+
+            var firstSearchResult = new MovieSearchResult { Title = "Witchfinder General", ReleaseDate = 1976 };
+            var secondSearchResult = new MovieSearchResult { Title = "Men and Chicken", ReleaseDate = 2015 };
+            var thirdSearchResult = new MovieSearchResult { Title = "Into the Wild", ReleaseDate = 2007 };
+
             this._movieAPIClientMock
-                .Setup(m => m.SearchMovieAsync(It.IsAny<string>()))
-                .ReturnsAsync(new MovieSearchResult[] { dummySearchResult });
+                .Setup(m => m.SearchMovieAsync(
+                    It.Is<string>(s => s == firstMovieRipToLink.ParsedTitle),
+                    It.Is<int>(i => i == int.Parse(firstMovieRipToLink.ParsedReleaseDate))))
+                .ReturnsAsync(new MovieSearchResult[] { firstSearchResult });
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(
+                    It.Is<string>(s => s == secondMovieRipToLink.ParsedTitle),
+                    It.Is<int>(i => i == int.Parse(secondMovieRipToLink.ParsedReleaseDate))))
+                .ReturnsAsync(new MovieSearchResult[] { secondSearchResult });
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(
+                    It.Is<string>(s => s == thirdMovieRipToLink.ParsedTitle),
+                    It.Is<int>(i => i == int.Parse(thirdMovieRipToLink.ParsedReleaseDate))))
+                .ReturnsAsync(new MovieSearchResult[] { thirdSearchResult });
 
             // act
             await this._ripToMovieLinker.SearchAndLinkAsync(maxApiCalls);
 
             // assert
-            this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Exactly(maxApiCalls));
+            // testing method call count in both overloads
+            using (new AssertionScope())
+            {
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Exactly(maxApiCalls));
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Never());
+            }
+        }
+
+
+        [Fact]
+        public async Task SearchAndLinkAsync_WithoutMatchesInRepo_WithOnlineTitleMatchForDifferentReleaseDate_ShouldLinkRipToCorrectOnlineMatch()
+        {
+            // arrange
+            var movieRipToLink = new MovieRip()
+            {
+                FileName = "A.Fistful.of.Dollars.1964.REMASTERED.1080p.BluRay.x264-PiGNUS[rarbg]",
+                ParsedTitle = "A Fistful of Dollars",
+                ParsedReleaseDate = "1964"
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.Find(It.IsAny<Expression<Func<MovieRip, bool>>>()))
+                .Returns(new MovieRip[] { movieRipToLink });
+
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
+                .Returns(Enumerable.Empty<Movie>());
+
+            var incorrectResult = new MovieSearchResult()
+            {
+                ExternalId = 101,
+                Title = "A Twistful of Dollars",
+                ReleaseDate = 1964
+            };
+
+            var correctResult = new MovieSearchResult()
+            {
+                ExternalId = 102,
+                Title = "A Fistful of Dollars",
+                ReleaseDate = 1965
+            };
+
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dollars")), It.Is<int>(i => i == 1964)))
+                .ReturnsAsync(new MovieSearchResult[] { incorrectResult });
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dollars")), It.Is<int>(i => i == 1965)))
+                .ReturnsAsync(new MovieSearchResult[] { correctResult });
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dollars")), It.Is<int>(i => i != 1964 && i != 1965)))
+                .ReturnsAsync(Enumerable.Empty<MovieSearchResult>());
+
+            // act
+            await this._ripToMovieLinker.SearchAndLinkAsync();
+
+            // assert
+            movieRipToLink.Movie.Should().BeEquivalentTo(correctResult);
         }
 
 
@@ -665,7 +680,7 @@ namespace DepotTests.CRUDTests
             await this._ripToMovieLinker.LinkFromManualExternalIdsAsync();
 
             // assert
-            // points to the same object in memory
+            // making sure it references the same object in memory
             movieRipToLinkManually.Movie.Should().BeSameAs(movieInRepo);
         }
 
@@ -729,6 +744,7 @@ namespace DepotTests.CRUDTests
                 { "Blue.Velvet.1986.1080p.BluRay.x264.anoXmous", manualExternalId },
                 { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", manualExternalId }
             };
+
             this._movieRipRepositoryMock
                 .Setup(m => m.GetAll())
                 .Returns(movieRipsToLinkManually);
@@ -759,6 +775,7 @@ namespace DepotTests.CRUDTests
             // arrange
             int validExternalId = 101;
             int invalidExternalId = 999;
+            
             var firstMovieRipToLinkManually = new MovieRip()
             {
                 FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN"
@@ -768,10 +785,12 @@ namespace DepotTests.CRUDTests
                 FileName = "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]"
             };
             var movieRipsToLinkManually = new MovieRip[] { firstMovieRipToLinkManually, secondMovieRipToLinkManually };
+            
             var manualExternalIds = new Dictionary<string, int>() {
                 { "The.Fly.1986.1080p.BluRay.x264-TFiN", validExternalId },
                 { "Blue.Velvet.1986.INTERNAL.REMASTERED.1080p.BluRay.X264-AMIABLE[rarbg]", invalidExternalId }
             };
+            
             var movieInfo = new MovieSearchResult()
             {
                 ExternalId = validExternalId,
@@ -779,6 +798,7 @@ namespace DepotTests.CRUDTests
                 OriginalTitle = "The Fly",
                 ReleaseDate = 1986
             };
+
             this._movieRipRepositoryMock
                 .Setup(m => m.GetAll())
                 .Returns(movieRipsToLinkManually);

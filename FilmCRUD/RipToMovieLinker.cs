@@ -1,24 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using System.Threading.Tasks;
 using Polly;
 using Polly.Wrap;
 using Polly.RateLimit;
-
+using System.Net.Http;
+using System.Net;
+using Serilog;
 using ConfigUtils.Interfaces;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
 using FilmCRUD.CustomExceptions;
-using FilmCRUD.Interfaces;
 using FilmCRUD.Helpers;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-using System.Net.Http;
-using System.Net;
-using Serilog;
+
 
 namespace FilmCRUD
 {
@@ -32,10 +30,7 @@ namespace FilmCRUD
 
         private readonly ILogger _linkingErrorsLogger;
 
-        public RipToMovieLinker(
-            IUnitOfWork unitOfWork,
-            IAppSettingsManager appSettingsManager,
-            IMovieAPIClient movieAPIClient)
+        public RipToMovieLinker(IUnitOfWork unitOfWork, IAppSettingsManager appSettingsManager, IMovieAPIClient movieAPIClient)
         {
             this._unitOfWork = unitOfWork;
             this._appSettingsManager = appSettingsManager;
@@ -65,7 +60,6 @@ namespace FilmCRUD
 
         public Movie FindRelatedMovieEntityInRepo(MovieRip movieRip)
         {
-
             Movie relatedMovie = null;
 
             // we'll have ripReleaseDate == 0 and parsed == false whenever movieRip.ParsedReleaseDate == null
@@ -129,13 +123,13 @@ namespace FilmCRUD
                     Movie movieToLink = FindRelatedMovieEntityInRepo(movieRip);
                     if (movieToLink != null)
                     {
-                        Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
+                        Log.Debug("FOUND LOCALLY: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
                         movieRip.Movie = movieToLink;
                         foundLocallyCount++;
                     }
                     else
                     {
-                        Log.Debug("NOT FOUND: {FileName}", movieRip.FileName);
+                        Log.Debug("NOT FOUND LOCALLY: {FileName}", movieRip.FileName);
                         ripsForOnlineSearch.Add(movieRip);
                     }
                 }
@@ -181,16 +175,13 @@ namespace FilmCRUD
             {
                 try
                 {
-                    IEnumerable<MovieSearchResult> searchResults = await policyWrap.ExecuteAsync(
-                        () => _movieAPIClient.SearchMovieAsync(movieRip.ParsedTitle)
-                    );
-                    Movie movieToLink = PickMovieFromSearchResults(searchResults, movieRip.ParsedTitle, movieRip.ParsedReleaseDate);
+                    Movie movieToLink = await SearchMovieAndPickFromResultsAsync(movieRip, policyWrap);
 
                     Log.Debug("FOUND: {FileName} -> {Movie}", movieRip.FileName, movieToLink.ToString());
 
                     foundOnlineCount++;
 
-                    // we may already have the "same" Movie from a previous searched
+                    // we may already have the "same" Movie from a previous api call in this for loop
                     Movie existingMovie = newMovieEntities.Where(m => m.ExternalId == movieToLink.ExternalId).FirstOrDefault();
                     
                     if (existingMovie != null)
@@ -369,7 +360,7 @@ namespace FilmCRUD
             int errorCount = errors.Count();
             if (errorCount > 0)
             {
-                Log.Information("Saving manual external ids linking errors in separate file...");
+                Log.Information("Saving manual external ids linking errors in separate log file...");
                 this._linkingErrorsLogger?.Information("----------------------------------");
                 this._linkingErrorsLogger?.Information("--- {DateTime} ---", DateTime.Now.ToString("g"));
                 this._linkingErrorsLogger?.Information("----------------------------------");
@@ -449,70 +440,22 @@ namespace FilmCRUD
             Log.Information("------------------------------------------------");
         }
 
-        public static Movie PickMovieFromSearchResults(IEnumerable<MovieSearchResult> searchResultAll, string parsedTitle, string parsedReleaseDate = null)
+        // AsyncPolicyWrap needs to be passed as a param so that the same object is used in every method call;
+        // if an AsyncPolicyWrap object was created in the method body then it would serve no purpose
+        public async Task<Movie> SearchMovieAndPickFromResultsAsync(MovieRip movieRip, AsyncPolicyWrap policyWrap)
         {
-            // filters results using both Title and OriginalTitle
-            IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
-            List<MovieSearchResult> searchResult = searchResultAll
-                .Where(r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
-                    ||
-                    titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true)))
-                .ToList();
+            string parsedTitle = movieRip.ParsedTitle;
+            string parsedReleaseDate = movieRip.ParsedReleaseDate;
 
-            int resultCount = searchResult.Count();
-            MovieSearchResult result;
-            if (resultCount == 0)
-            {
-                throw new NoSearchResultsError($"No search results for \"{parsedTitle}\" ");
-            }
-            else if (resultCount == 1)
-            {
-                result = searchResult.First();
-            }
-            else if (parsedReleaseDate == null)
-            {
-                throw new MultipleSearchResultsError($"Multiple search results for \"{parsedTitle}\"; count = {resultCount}");
-            }
-            else
-            {
-                bool parseSuccess = int.TryParse(parsedReleaseDate, out int releaseDate);
-                string[] admissibleDates;
-                if (parseSuccess)
-                {
-                    admissibleDates = new string[] {
-                        releaseDate.ToString(),
-                        (releaseDate + 1).ToString(),
-                        (releaseDate - 1).ToString()
-                    };
-                }
-                else
-                {
-                    admissibleDates = new string[] { parsedReleaseDate };
-                }
-
-                List<MovieSearchResult> searchResultFiltered = searchResult
-                    .Where(r => admissibleDates.Contains(r.ReleaseDate.ToString()))
-                    .ToList();
-                int resultCountFiltered = searchResultFiltered.Count();
-
-                if (resultCountFiltered == 0)
-                {
-                    throw new NoSearchResultsError(
-                        $"No search results for \"{parsedTitle}\" with release date in {string.Join(", ", admissibleDates)}");
-                }
-                else if (resultCountFiltered > 1)
-                {
-                    throw new MultipleSearchResultsError(
-                        $"Multiple search results for \"{parsedTitle}\"  with release date in {string.Join(", ", admissibleDates)}; count = {resultCount}");
-                }
-                result = searchResultFiltered.First();
-            }
+            MovieSearchResult result = parsedReleaseDate is not null ?
+                await SearchAndPickAsync(parsedTitle, parsedReleaseDate, policyWrap)
+                : await SearchAndPickAsync(parsedTitle, policyWrap);
 
             // explicit conversion is defined
             return (Movie)result;
         }
 
-        private AsyncPolicyWrap GetPolicyWrapFromConfigs(out TimeSpan initialDelay)
+        public AsyncPolicyWrap GetPolicyWrapFromConfigs(out TimeSpan initialDelay)
         {
             // notice the order of the async policies when calling Policy.WrapAsync:
             //      outermost (at left) to innermost (at right)
@@ -536,6 +479,117 @@ namespace FilmCRUD
                 APIClientPolicyBuilder.GetAsyncRetryPolicy<RateLimitRejectedException>(retryConfig),
                 APIClientPolicyBuilder.GetAsyncRateLimitPolicy(rateLimitConfig)
             );
+        }
+
+        private async Task<MovieSearchResult> SearchAndPickAsync(string parsedTitle, AsyncPolicyWrap policyWrap)
+        {
+            IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(() => _movieAPIClient.SearchMovieAsync(parsedTitle));
+
+            // ToList is invoked to trigger execution
+            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter(parsedTitle, searchResultAll).ToList();
+
+            int resultCount = searchResult.Count();
+            return resultCount switch
+            {
+                0 => throw new NoSearchResultsError($"No search results for \"{parsedTitle}\" "),
+                > 1 => throw new MultipleSearchResultsError($"Multiple search results for \"{parsedTitle}\"; count = {resultCount}"),
+                _ => searchResult.First()
+            };
+        }
+
+        private async Task<MovieSearchResult> SearchAndPickAsync(string parsedTitle, string parsedReleaseDate, AsyncPolicyWrap policyWrap)
+        {
+            var dateTol = new ReleaseDateToleranceNeighbourhood(parsedReleaseDate);
+
+            // if release date cannot be parsed into an int then we fall back into the other overload which only uses the parsed title
+            if (!dateTol.ParseSuccess) return await SearchAndPickAsync(parsedTitle, policyWrap);
+
+            IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(
+                () => _movieAPIClient.SearchMovieAsync(parsedTitle, dateTol.ReleaseDate)
+            );
+
+            // ToList is invoked to trigger execution
+            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter(parsedTitle, searchResultAll).ToList();
+
+            // if no initial results are found using the original release date then we search
+            // using the release dates in the tolerance neighbourhood
+            if (!searchResult.Any())
+            {
+                Log.Debug("No results for \"{ParsedTitle}\" with release date {ReleaseDate}", parsedTitle, dateTol.ReleaseDate);
+                Log.Debug("Searching the same title with other release dates: {OtherReleaseDates}", string.Join(", ", dateTol.Neighbourhood));
+                
+                var searchResultAllOtherDates = new List<MovieSearchResult>();
+                foreach (int date in dateTol.Neighbourhood)
+                {
+                    searchResultAllOtherDates.AddRange(await policyWrap.ExecuteAsync(
+                        () => _movieAPIClient.SearchMovieAsync(parsedTitle, date)
+                    ));
+                }
+
+                // ToList is invoked to trigger execution
+                searchResult = TokenizeSearchResultsAndFilter(parsedTitle, searchResultAllOtherDates).ToList();
+            }
+
+            int resultCount = searchResult.Count();
+            return resultCount switch
+            {
+                0 => throw new NoSearchResultsError($"No search results for \"{parsedTitle}\" with release date in {dateTol}"),
+                > 1 => throw new MultipleSearchResultsError($"Multiple search results for \"{parsedTitle}\"  with release date in {dateTol}; count = {resultCount}"),
+                _ => searchResult.First()
+            };
+        }
+
+        /// <summary>
+        /// Tokenizes the search results and filters using both Title and OriginalTitle.
+        /// </summary>
+        private static IEnumerable<MovieSearchResult> TokenizeSearchResultsAndFilter(string parsedTitle, IEnumerable<MovieSearchResult> searchResultAll)
+        {
+            IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
+            return searchResultAll.Where(
+                r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
+                    || titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true))
+            );
+        }
+
+        /// <summary>
+        /// Nested class <c>ReleaseDateToleranceNeighbourhood</c> defines the tolerance given for the release date when searching for movie info online.
+        /// </summary>
+        class ReleaseDateToleranceNeighbourhood
+        {
+            public const int NeighbourhoodRadius = 1;
+
+            public readonly bool ParseSuccess;
+
+            public readonly int ReleaseDate;
+
+            /// <summary>
+            /// All the integers in the closed interval [ReleaseDate - NeighbourhoodRadius, ReleaseDate + NeighbourhoodRadius], except for ReleaseDate. 
+            /// </summary>
+            public IEnumerable<int> Neighbourhood
+            {
+                get => ParseSuccess ?
+                    Enumerable.Range(1, NeighbourhoodRadius).SelectMany(tol => new[] { ReleaseDate + tol, ReleaseDate - tol })
+                    : Enumerable.Empty<int>();
+            }
+
+            public ReleaseDateToleranceNeighbourhood(string releaseDateString)
+            {
+                bool parseSucess = int.TryParse(releaseDateString, out int releaseDate);
+
+                // from wikipedia:
+                //          1888 - In Leeds, England Louis Le Prince films Roundhay Garden Scene, believed to be the first motion picture recorded.[5]
+                // https://en.wikipedia.org/wiki/List_of_cinematic_firsts
+                ParseSuccess = parseSucess && 1888 <= releaseDate && releaseDate <= 2100;
+                if (!ParseSuccess)
+                {
+                    Log.Debug("Cannot parse release date string to int: \"{ReleaseDateString}\"", releaseDateString);
+                    releaseDate = 0;
+                }
+
+                ReleaseDate = releaseDate;
+            }
+
+            public override string ToString() => ReleaseDate.ToString() + ", " + string.Join(", ", Neighbourhood);
         }
 
     }
