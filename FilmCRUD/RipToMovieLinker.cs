@@ -556,9 +556,9 @@ namespace FilmCRUD
         /// </summary>
         class ReleaseDateToleranceNeighbourhood
         {
-            public readonly bool ParseSuccess;
-
             public const int NeighbourhoodRadius = 1;
+
+            public readonly bool ParseSuccess;
 
             public readonly int ReleaseDate;
 
