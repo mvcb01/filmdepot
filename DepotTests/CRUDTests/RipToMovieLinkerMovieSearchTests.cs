@@ -154,7 +154,9 @@ namespace DepotTests.CRUDTests
                 new MovieSearchResult()  { Title = "Highlander III: The Sorcerer", ReleaseDate = 1994},
                 };
 
-            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Sorcerer")))).ReturnsAsync(searchResults);
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Sorcerer")), It.IsAny<int>()))
+                .ReturnsAsync(searchResults);
 
             // act
             Movie movieFound = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
