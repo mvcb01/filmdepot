@@ -196,7 +196,7 @@ namespace FilmCRUD
             {
                 Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
                 string releaseDates = string.Join(" or ", opts.WithDates);
-                Console.WriteLine($"ScanRips: rips with ReleaseDate {releaseDates}\n");
+                Console.WriteLine($"ScanRips: rips with ParsedReleaseDate {releaseDates}\n");
                 List<string> ripFileNames = scanRipsManager
                     .GetAllRipsWithReleaseDate(visit, opts.WithDates.ToArray())
                     .ToList();
