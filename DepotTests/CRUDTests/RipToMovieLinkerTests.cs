@@ -281,7 +281,7 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.Find((It.IsAny<Expression<Func<MovieRip, bool>>>())))
                 .Returns(allMovieRipsInRepo);
             this._movieAPIClientMock
-                .Setup(cl => cl.SearchMovieAsync(It.Is<string>(s => s.Contains("velvet", StringComparison.InvariantCultureIgnoreCase))))
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Velvet")), It.Is<int>(i => i == 1986)))
                 .ReturnsAsync(new MovieSearchResult[] { movieInfo });
             this._movieRepositoryMock
                 .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
