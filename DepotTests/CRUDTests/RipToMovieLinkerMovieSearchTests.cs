@@ -89,12 +89,13 @@ namespace DepotTests.CRUDTests
         {
             // arrange
             var toSearch = new MovieRip() { ParsedTitle = "The Death of Dick Long", ParsedReleaseDate = "2019" };
-            MovieSearchResult[] searchResults = {
-                new MovieSearchResult() { Title = "The Death of Dick Long", ReleaseDate = 2013 },
-                new MovieSearchResult()  { Title = "The Death of Dick Long", ReleaseDate = 2020 },
-                };
 
-            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Long")))).ReturnsAsync(searchResults);
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Long")), It.Is<int>(i => i != 2020)))
+                .ReturnsAsync(Enumerable.Empty<MovieSearchResult>());
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Long")), It.Is<int>(i => i == 2020)))
+                .ReturnsAsync(new MovieSearchResult[] { new MovieSearchResult() { Title = "The Death of Dick Long", ReleaseDate = 2020 } });
 
             // act
             Movie movieFound = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
