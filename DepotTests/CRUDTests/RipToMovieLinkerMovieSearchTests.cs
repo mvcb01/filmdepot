@@ -87,26 +87,6 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsAndProvidedReleaseDateWithoutMatch_ShouldThrowNoSearchResultsError()
-        {
-            // arrange
-            var toSearch = new MovieRip() { ParsedTitle = "The Fly", ParsedReleaseDate = "1900" };
-            MovieSearchResult[] searchResults = {
-                new MovieSearchResult() { Title = "The Fly", ReleaseDate = 1986, ExternalId = 101 },
-                new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1958, ExternalId = 102 },
-                };
-
-            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
-
-            // act
-            // nothing to do
-
-            // assert
-            Func<Task> methodCall = async () => await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
-            methodCall.Should().Throw<NoSearchResultsError>();
-        }
-
-        [Fact]
         public void SearchMovieAndPickFromResultsAsync_WithSeveralSearchResultsWithSameReleaseDate_ShouldThrowMultipleSearchResultsError()
         {
             // arrange
