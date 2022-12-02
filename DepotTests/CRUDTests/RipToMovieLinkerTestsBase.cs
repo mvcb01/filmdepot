@@ -50,11 +50,11 @@ namespace DepotTests.CRUDTests
             this._retryConfigMock = new Mock<IRetryPolicyConfig>();
 
             // default policy configs
-            this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(5);
-            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(50));
+            this._rateLimitConfigMock.SetupGet(pol => pol.NumberOfExecutions).Returns(50);
+            this._rateLimitConfigMock.SetupGet(pol => pol.PerTimeSpan).Returns(TimeSpan.FromMilliseconds(10000));
 
-            this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(2);
-            this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(50));
+            this._retryConfigMock.SetupGet(pol => pol.RetryCount).Returns(10);
+            this._retryConfigMock.SetupGet(pol => pol.SleepDuration).Returns(TimeSpan.FromMilliseconds(1));
 
             this._appSettingsManagerMock.Setup(a => a.GetRateLimitPolicyConfig()).Returns(this._rateLimitConfigMock.Object);
             this._appSettingsManagerMock.Setup(a => a.GetRetryPolicyConfig()).Returns(this._retryConfigMock.Object);
