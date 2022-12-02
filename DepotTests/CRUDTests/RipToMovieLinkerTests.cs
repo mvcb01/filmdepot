@@ -330,15 +330,37 @@ namespace DepotTests.CRUDTests
                 .Returns(Enumerable.Empty<Movie>());
 
             var dummySearchResult = new MovieSearchResult();
+
+            var firstSearchResult = new MovieSearchResult { Title = "Witchfinder General", ReleaseDate = 1976 };
+            var secondSearchResult = new MovieSearchResult { Title = "Men and Chicken", ReleaseDate = 2015 };
+            var thirdSearchResult = new MovieSearchResult { Title = "Into the Wild", ReleaseDate = 2007 };
+
             this._movieAPIClientMock
-                .Setup(m => m.SearchMovieAsync(It.IsAny<string>()))
-                .ReturnsAsync(new MovieSearchResult[] { dummySearchResult });
+                .Setup(m => m.SearchMovieAsync(
+                    It.Is<string>(s => s == firstMovieRipToLink.ParsedTitle),
+                    It.Is<int>(i => i == int.Parse(firstMovieRipToLink.ParsedReleaseDate))))
+                .ReturnsAsync(new MovieSearchResult[] { firstSearchResult });
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(
+                    It.Is<string>(s => s == secondMovieRipToLink.ParsedTitle),
+                    It.Is<int>(i => i == int.Parse(secondMovieRipToLink.ParsedReleaseDate))))
+                .ReturnsAsync(new MovieSearchResult[] { secondSearchResult });
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(
+                    It.Is<string>(s => s == thirdMovieRipToLink.ParsedTitle),
+                    It.Is<int>(i => i == int.Parse(thirdMovieRipToLink.ParsedReleaseDate))))
+                .ReturnsAsync(new MovieSearchResult[] { thirdSearchResult });
 
             // act
             await this._ripToMovieLinker.SearchAndLinkAsync(maxApiCalls);
 
             // assert
-            this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Exactly(maxApiCalls));
+            // testing method call count in both overloads
+            using (new AssertionScope())
+            {
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Exactly(maxApiCalls));
+                this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Never());
+            }
         }
 
 
