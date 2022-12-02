@@ -402,6 +402,9 @@ namespace DepotTests.CRUDTests
             this._movieAPIClientMock
                 .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dollars")), It.Is<int>(i => i == 1965)))
                 .ReturnsAsync(new MovieSearchResult[] { correctResult });
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dollars")), It.Is<int>(i => i != 1964 && i != 1965)))
+                .ReturnsAsync(Enumerable.Empty<MovieSearchResult>());
 
             // act
             await this._ripToMovieLinker.SearchAndLinkAsync();
