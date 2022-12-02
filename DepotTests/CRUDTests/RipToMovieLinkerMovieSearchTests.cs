@@ -96,7 +96,9 @@ namespace DepotTests.CRUDTests
                 new MovieSearchResult()  { Title = "The Fly", ReleaseDate = 1986, ExternalId = 102 },
                 };
 
-            this._movieAPIClientMock.Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")))).ReturnsAsync(searchResults);
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Fly")), It.IsAny<int>()))
+                .ReturnsAsync(searchResults);
 
             // act
             // nothing to do...
