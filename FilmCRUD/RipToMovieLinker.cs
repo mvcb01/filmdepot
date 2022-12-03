@@ -89,7 +89,8 @@ namespace FilmCRUD
                             $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\" and ReleaseDate = {ripReleaseDate}; count = {matchCount}"
                             );
                     }
-                    else if (matchCountWithDate == 1)
+                    
+                    if (matchCountWithDate == 1)
                     {
                         relatedMovie = existingMatchesWithDate.First();
                     }
