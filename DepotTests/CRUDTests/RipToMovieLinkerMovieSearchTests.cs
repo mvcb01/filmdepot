@@ -294,7 +294,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void FindRelatedMovieEntityInRepo_WithParsedReleaseDate_WithSeveralMatchesInRepo_ShouldThrowMultipleMovieMatchesError()
+        public void FindRelatedMovieEntityInRepo_WithParsedReleaseDate_WithSeveralMatchesInRepoWithDifferentButCloseDates_ShouldThrowMultipleMovieMatchesError()
         {
             // arrange
             var movieRip = new MovieRip()
@@ -304,7 +304,7 @@ namespace DepotTests.CRUDTests
                 ParsedReleaseDate = "1986"
             };
             Movie[] movieMatches = {
-                new Movie() { Title = "The Fly", ReleaseDate = 1986 },
+                new Movie() { Title = "The Fly", ReleaseDate = 1985 },
                 new Movie() { Title = "The Fly", ReleaseDate = 1986 }
             };
             this._movieRepositoryMock
