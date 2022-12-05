@@ -305,7 +305,7 @@ namespace DepotTests.CRUDTests
             };
             Movie[] movieMatches = {
                 new Movie() { Title = "The Fly", ReleaseDate = 1985 },
-                new Movie() { Title = "The Fly", ReleaseDate = 1986 }
+                new Movie() { Title = "The Fly", ReleaseDate = 1987 }
             };
             this._movieRepositoryMock
                 .Setup(m => m.SearchMoviesWithTitle(movieRip.ParsedTitle))
