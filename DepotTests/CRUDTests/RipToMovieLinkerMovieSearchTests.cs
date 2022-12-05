@@ -328,8 +328,8 @@ namespace DepotTests.CRUDTests
                 ParsedReleaseDate = "1986"
             };
 
-            Movie dateMatch = new Movie() { Title = "The Fly", ReleaseDate = 1986 };
-            Movie dateMismatch = new Movie() { Title = "The Fly", ReleaseDate = 1987 };
+            var dateMatch = new Movie() { Title = "The Fly", ReleaseDate = 1986 };
+            var dateMismatch = new Movie() { Title = "The Fly", ReleaseDate = 1987 };
 
             Movie[] movieMatches = { dateMatch, dateMismatch };
 
