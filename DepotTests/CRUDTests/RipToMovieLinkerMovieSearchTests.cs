@@ -266,26 +266,6 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasMatchInMovieRepository_ShouldCallMovieRepositorySearchMoviesWithTitleMethodOnce()
-        {
-            // arrange
-            var movieRip = new MovieRip()
-            {
-                FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
-                ParsedTitle = "khrustalyov my car"
-            };
-            this._movieRepositoryMock
-                .Setup(m => m.SearchMoviesWithTitle(It.Is<string>(s => s.Contains("khrustalyov"))))
-                .Returns(Enumerable.Empty<Movie>());
-
-            // act
-            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
-
-            // assert
-            this._movieRepositoryMock.Verify(m => m.SearchMoviesWithTitle(movieRip.ParsedTitle), Times.Once);
-        }
-
-        [Fact]
         public void FindRelatedMovieEntityInRepo_WithoutParsedReleaseDate_WithSeveralMatchesInRepo_ShouldThrowMultipleMovieMatchesError()
         {
             // arrange
