@@ -449,8 +449,8 @@ namespace FilmCRUD
             string parsedReleaseDate = movieRip.ParsedReleaseDate;
 
             MovieSearchResult result = parsedReleaseDate is not null ?
-                await SearchAndPickAsync(parsedTitle, parsedReleaseDate, policyWrap)
-                : await SearchAndPickAsync(parsedTitle, policyWrap);
+                await SearchAndPickAsync(policyWrap, parsedTitle, parsedReleaseDate)
+                : await SearchAndPickAsync(policyWrap, parsedTitle);
 
             // explicit conversion is defined
             return (Movie)result;
@@ -482,7 +482,7 @@ namespace FilmCRUD
             );
         }
 
-        private async Task<MovieSearchResult> SearchAndPickAsync(string parsedTitle, AsyncPolicyWrap policyWrap)
+        private async Task<MovieSearchResult> SearchAndPickAsync(AsyncPolicyWrap policyWrap, string parsedTitle)
         {
             IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(() => _movieAPIClient.SearchMovieAsync(parsedTitle));
 
@@ -498,12 +498,12 @@ namespace FilmCRUD
             };
         }
 
-        private async Task<MovieSearchResult> SearchAndPickAsync(string parsedTitle, string parsedReleaseDate, AsyncPolicyWrap policyWrap)
+        private async Task<MovieSearchResult> SearchAndPickAsync(AsyncPolicyWrap policyWrap, string parsedTitle, string parsedReleaseDate)
         {
             var dateTol = new ReleaseDateToleranceNeighbourhood(parsedReleaseDate);
 
             // if release date cannot be parsed into an int then we fall back into the other overload which only uses the parsed title
-            if (!dateTol.ParseSuccess) return await SearchAndPickAsync(parsedTitle, policyWrap);
+            if (!dateTol.ParseSuccess) return await SearchAndPickAsync(policyWrap, parsedTitle);
 
             IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(
                 () => _movieAPIClient.SearchMovieAsync(parsedTitle, dateTol.ReleaseDate)
