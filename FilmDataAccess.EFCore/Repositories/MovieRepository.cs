@@ -43,7 +43,7 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Movie> SearchMoviesWithTitle(string title)
         {
-            return  this._context.Movies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
+            return this._context.Movies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
         }
 
         public IEnumerable<Movie> GetAllMoviesInVisit(MovieWarehouseVisit visit)
