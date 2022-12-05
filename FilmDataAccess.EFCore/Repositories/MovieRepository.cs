@@ -9,9 +9,7 @@ namespace FilmDataAccess.EFCore.Repositories
 {
     public class MovieRepository : GenericRepository<Movie>, IMovieRepository
     {
-        public MovieRepository(SQLiteAppContext context) : base(context)
-        {
-        }
+        public MovieRepository(SQLiteAppContext context) : base(context) { }
 
         public Movie FindByExternalId(int externalId)
         {
