@@ -245,7 +245,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasMatchInMovieRepository_ShouldReturnTheMatchedMovie()
+        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasExactTokenMatchInMovieRepository_ShouldReturnTheMatchedMovie()
         {
             // arrange
             var movieRip = new MovieRip()
