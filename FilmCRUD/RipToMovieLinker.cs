@@ -449,8 +449,8 @@ namespace FilmCRUD
             string parsedReleaseDate = movieRip.ParsedReleaseDate;
 
             MovieSearchResult result = parsedReleaseDate is not null ?
-                await SearchAndPickAsync(policyWrap, parsedTitle, parsedReleaseDate)
-                : await SearchAndPickAsync(policyWrap, parsedTitle);
+                await SearchAndPickAsync(policyWrap, parsedTitle, parsedReleaseDate) :
+                await SearchAndPickAsync(policyWrap, parsedTitle);
 
             // explicit conversion is defined
             return (Movie)result;
