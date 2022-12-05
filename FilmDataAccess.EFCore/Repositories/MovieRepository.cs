@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace FilmDataAccess.EFCore.Repositories
 {
