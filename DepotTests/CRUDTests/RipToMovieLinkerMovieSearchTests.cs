@@ -294,6 +294,33 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
+        public void FindRelatedMovieEntityInRepo_WithParsedReleaseDate_WithSeveralTitleTokenMatchesInRepo_ShouldReturnReleaseDateMatch()
+        {
+            // arrange
+            var movieRip = new MovieRip()
+            {
+                FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN",
+                ParsedTitle = "the fly",
+                ParsedReleaseDate = "1986"
+            };
+
+            Movie dateMatch = new Movie() { Title = "The Fly", ReleaseDate = 1986 };
+            Movie dateMismatch = new Movie() { Title = "The Fly", ReleaseDate = 1987 };
+
+            Movie[] movieMatches = { dateMatch, dateMismatch };
+
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(movieRip.ParsedTitle))
+                .Returns(movieMatches);
+
+            // act
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
+
+            //assert
+            result.Should().Be(dateMatch);
+        }
+
+        [Fact]
         public void FindRelatedMovieEntityInRepo_WithParsedReleaseDate_WithSeveralMatchesInRepoWithDifferentButCloseDates_ShouldThrowMultipleMovieMatchesError()
         {
             // arrange
