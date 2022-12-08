@@ -226,5 +226,150 @@ namespace DepotTests.CRUDTests
                 this._movieAPIClientMock.Verify(m => m.SearchMovieAsync(It.IsAny<string>()), Times.Never());
             }
         }
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WithoutAnyMatchesInRepo_ShouldReturnNull()
+        {
+            // arrange
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
+                .Returns(Enumerable.Empty<Movie>());
+
+            // act
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(
+                new MovieRip() { ParsedTitle = "some.file.480p.x264-DUMMYGROUP" }
+                );
+
+            // assert
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WithoutExactMatchesInRepo_ShouldReturnNull()
+        {
+            // arrange
+            var movieRip = new MovieRip()
+            {
+                FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN",
+                ParsedTitle = "the fly",
+                ParsedReleaseDate = "1986"
+            };
+
+            Movie[] movieMatches = { new Movie() { Title = "The Fly II", ReleaseDate = 1958 } };
+
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(It.Is<string>(s => s.Contains("fly"))))
+                .Returns(movieMatches);
+
+            // act
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
+
+            // assert
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WhenParsedTitleHasExactTokenMatchInMovieRepository_ShouldReturnTheMatchedMovie()
+        {
+            // arrange
+            var movieRip = new MovieRip()
+            {
+                FileName = "Khrustalyov.My.Car.1998.720p.BluRay.x264-GHOULS[rarbg]",
+                ParsedTitle = "khrustalyov my car"
+            };
+            var movieMatch = new Movie() { Title = "Khrustalyov, My Car!", ReleaseDate = 1998 };
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
+                .Returns(new Movie[] { movieMatch });
+
+            // act
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
+
+            //assert
+            result.Should().Be(movieMatch);
+        }
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WithoutParsedReleaseDate_WithSeveralMatchesInRepo_ShouldThrowMultipleMovieMatchesError()
+        {
+            // arrange
+            var movieRip = new MovieRip()
+            {
+                FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN",
+                ParsedTitle = "the fly",
+                ParsedReleaseDate = null
+            };
+            Movie[] movieMatches = {
+                new Movie() { Title = "The Fly", ReleaseDate = 1958 },
+                new Movie() { Title = "The Fly", ReleaseDate = 1986 }
+            };
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(movieRip.ParsedTitle))
+                .Returns(movieMatches);
+
+            // act
+            // nothing to do...
+
+            // assert
+            this._ripToMovieLinker
+                .Invoking(r => r.FindRelatedMovieEntityInRepo(movieRip))
+                .Should()
+                .Throw<MultipleMovieMatchesError>();
+        }
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WithParsedReleaseDate_WithSeveralTitleTokenMatchesInRepo_ShouldReturnReleaseDateMatch()
+        {
+            // arrange
+            var movieRip = new MovieRip()
+            {
+                FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN",
+                ParsedTitle = "the fly",
+                ParsedReleaseDate = "1986"
+            };
+
+            var dateMatch = new Movie() { Title = "The Fly", ReleaseDate = 1986 };
+            var dateMismatch = new Movie() { Title = "The Fly", ReleaseDate = 1987 };
+
+            Movie[] movieMatches = { dateMatch, dateMismatch };
+
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(movieRip.ParsedTitle))
+                .Returns(movieMatches);
+
+            // act
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
+
+            //assert
+            result.Should().Be(dateMatch);
+        }
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WithParsedReleaseDate_WithSeveralMatchesInRepoWithDifferentButCloseDates_ShouldThrowMultipleMovieMatchesError()
+        {
+            // arrange
+            var movieRip = new MovieRip()
+            {
+                FileName = "The.Fly.1986.1080p.BluRay.x264-TFiN",
+                ParsedTitle = "the fly",
+                ParsedReleaseDate = "1986"
+            };
+            Movie[] movieMatches = {
+                new Movie() { Title = "The Fly", ReleaseDate = 1985 },
+                new Movie() { Title = "The Fly", ReleaseDate = 1987 }
+            };
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(movieRip.ParsedTitle))
+                .Returns(movieMatches);
+
+            // act
+            // nothing to do...
+
+            // assert
+            this._ripToMovieLinker
+                .Invoking(r => r.FindRelatedMovieEntityInRepo(movieRip))
+                .Should()
+                .Throw<MultipleMovieMatchesError>();
+        }
     }
 }

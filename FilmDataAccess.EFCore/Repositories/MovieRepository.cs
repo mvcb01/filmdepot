@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace FilmDataAccess.EFCore.Repositories
 {
     public class MovieRepository : GenericRepository<Movie>, IMovieRepository
     {
-        public MovieRepository(SQLiteAppContext context) : base(context)
-        {
-        }
+        public MovieRepository(SQLiteAppContext context) : base(context) { }
 
         public Movie FindByExternalId(int externalId)
         {
@@ -45,12 +43,12 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public IEnumerable<Movie> SearchMoviesWithTitle(string title)
         {
-            return  this._context.Movies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
+            return this._context.Movies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
         }
 
         public IEnumerable<Movie> GetAllMoviesInVisit(MovieWarehouseVisit visit)
         {
-            return visit.MovieRips.Select(r => r.Movie).Where(m => m != null).Distinct();
+            return visit.MovieRips.Select(r => r.Movie).Where(m => m != null);
         }
     }
 }
