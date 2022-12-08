@@ -16,7 +16,7 @@ using FilmCRUD.CustomExceptions;
 using FilmCRUD.Helpers;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-
+using System.Reflection;
 
 namespace FilmCRUD
 {
@@ -417,46 +417,59 @@ namespace FilmCRUD
         }
 
         public Movie FindRelatedMovieEntityInRepo(MovieRip movieRip)
-        {
-            Movie relatedMovie = null;
+        { 
+            IEnumerable<string> titleTokens = movieRip.ParsedTitle.GetStringTokensWithoutPunctuation();
 
-            // we'll have ripReleaseDate == 0 and parsed == false whenever movieRip.ParsedReleaseDate == null
-            bool releaseDateParsed = int.TryParse(movieRip.ParsedReleaseDate, out int ripReleaseDate);
+            IEnumerable<Movie> allMatches = this._unitOfWork.Movies.SearchMoviesWithTitle(movieRip.ParsedTitle);
+            IEnumerable<Movie> tokenFilteredMatches = allMatches.Where(
+                mr => titleTokens.SequenceEqual(mr.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
+                    || titleTokens.SequenceEqual(mr.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true))
+            );
 
-            IEnumerable<Movie> existingMatches = this._unitOfWork.Movies.SearchMoviesWithTitle(movieRip.ParsedTitle);
-            int matchCount = existingMatches.Count();
-            if (matchCount == 1)
-            {
-                relatedMovie = existingMatches.First();
-            }
-            else if (matchCount > 1)
-            {
-                if (!releaseDateParsed)
-                {
-                    throw new MultipleMovieMatchesError(
-                        $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\"; count = {matchCount}"
-                        );
-                }
-                else
-                {
-                    IEnumerable<Movie> existingMatchesWithDate = existingMatches.Where(m => m.ReleaseDate == ripReleaseDate);
-                    int matchCountWithDate = existingMatchesWithDate.Count();
-                    if (matchCountWithDate > 1)
-                    {
-                        throw new MultipleMovieMatchesError(
-                            $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\" and ReleaseDate = {ripReleaseDate}; count = {matchCount}"
-                            );
-                    }
+            int tokenFilteredMatchesCount = tokenFilteredMatches.Count();
 
-                    if (matchCountWithDate == 1)
-                    {
-                        relatedMovie = existingMatchesWithDate.First();
-                    }
-                }
-            }
+            // returns null if empty, the only match if singleton
+            if (tokenFilteredMatchesCount < 2)
+                return tokenFilteredMatches.FirstOrDefault();
 
-            return relatedMovie;
+            // for cases where we have more than one title match we'll use the date tolerance nested class
+
+            var dateTol = new ReleaseDateToleranceNeighbourhood(movieRip.ParsedReleaseDate);
+
+            // throwing when we cannot parse the release date to filter the results further
+            if (!dateTol.ParseSuccess)
+                throw new MultipleMovieMatchesError(
+                    $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\"; count = {tokenFilteredMatchesCount}"
+                );
+
+            // giving priority to exact date matches
+            IEnumerable<Movie> withExactDateMatch = tokenFilteredMatches.Where(m => m.ReleaseDate == dateTol.ReleaseDate);
+            int withExactDateMatchCount = withExactDateMatch.Count();
+
+            if (withExactDateMatchCount == 1)
+                return withExactDateMatch.First();
+
+            if (withExactDateMatchCount > 1)
+                throw new MultipleMovieMatchesError(
+                    $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\" and ReleaseDate = {movieRip.ParsedReleaseDate}; count = {withExactDateMatchCount}"
+                );
+
+            // trying for matches where the release date is close but no equal to the parsed release date from the MovieRip entity
+            IEnumerable<Movie> withDateWithinTolerance = tokenFilteredMatches.Where(m => dateTol.Neighbourhood.Contains(m.ReleaseDate));
+            int withDateWithinToleranceCount = withDateWithinTolerance.Count();
+
+            if (withDateWithinToleranceCount == 1)
+                return withDateWithinTolerance.First();
+
+            if (withDateWithinToleranceCount > 1)
+                throw new MultipleMovieMatchesError(
+                        $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\" and ReleaseDate in {string.Join(", ", dateTol.Neighbourhood)}; count = {withExactDateMatchCount}"
+                    );
+            
+            // no match
+            return null;
         }
+
 
         public AsyncPolicyWrap GetPolicyWrapFromConfigs(out TimeSpan initialDelay)
         {
