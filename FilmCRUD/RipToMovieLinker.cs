@@ -43,62 +43,7 @@ namespace FilmCRUD
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient,
             ILogger linkingErrorsLogger) : this(unitOfWork, appSettingsManager, movieAPIClient) => this._linkingErrorsLogger = linkingErrorsLogger;
-
-        /// <summary>
-        /// Gets MovieRips not linked to a Movie, excluding RipFilenamesToIgnore and also those with ManualExternalIds
-        /// </summary>
-        public IEnumerable<MovieRip> GetMovieRipsToLink()
-        {
-            IEnumerable<string> toIgnore = _appSettingsManager.GetRipFilenamesToIgnoreOnLinking();
-            Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
-            IEnumerable<string> ripNamesToExclude = Enumerable.Concat<string>(toIgnore, manualExternalIds.Keys);
-            // using Find before Where so we limit the number of objects loaded into memory
-            return _unitOfWork.MovieRips
-                .Find(r => r.Movie == null)
-                .Where(r => r.ParsedTitle != null && !ripNamesToExclude.Contains(r.FileName));
-        }
-
-        public Movie FindRelatedMovieEntityInRepo(MovieRip movieRip)
-        {
-            Movie relatedMovie = null;
-
-            // we'll have ripReleaseDate == 0 and parsed == false whenever movieRip.ParsedReleaseDate == null
-            bool releaseDateParsed = int.TryParse(movieRip.ParsedReleaseDate, out int ripReleaseDate);
-
-            IEnumerable<Movie> existingMatches = this._unitOfWork.Movies.SearchMoviesWithTitle(movieRip.ParsedTitle);
-            int matchCount = existingMatches.Count();
-            if (matchCount == 1)
-            {
-                relatedMovie = existingMatches.First();
-            }
-            else if (matchCount > 1)
-            {
-                if (!releaseDateParsed)
-                {
-                    throw new MultipleMovieMatchesError(
-                        $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\"; count = {matchCount}"
-                        );
-                }
-                else
-                {
-                    IEnumerable<Movie> existingMatchesWithDate = existingMatches.Where(m => m.ReleaseDate == ripReleaseDate);
-                    int matchCountWithDate = existingMatchesWithDate.Count();
-                    if (matchCountWithDate > 1)
-                    {
-                        throw new MultipleMovieMatchesError(
-                            $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\" and ReleaseDate = {ripReleaseDate}; count = {matchCount}"
-                            );
-                    }
-                    
-                    if (matchCountWithDate == 1)
-                    {
-                        relatedMovie = existingMatchesWithDate.First();
-                    }
-                }
-            }
-
-            return relatedMovie;
-        }
+        
 
         public async Task SearchAndLinkAsync(int maxApiCalls = -1)
         {   
@@ -377,7 +322,7 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
-        public IEnumerable<string> GetAllUnlinkedMovieRips() => this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
+        
 
         public async Task ValidateManualExternalIdsAsync(int maxApiCalls = -1)
         {
@@ -454,6 +399,64 @@ namespace FilmCRUD
 
             // explicit conversion is defined
             return (Movie)result;
+        }
+
+        public IEnumerable<string> GetAllUnlinkedMovieRips() => this._unitOfWork.MovieRips.Find(m => m.Movie == null).GetFileNames();
+
+        /// <summary>
+        /// Gets MovieRips not linked to a Movie, excluding RipFilenamesToIgnore and also those with ManualExternalIds
+        /// </summary>
+        public IEnumerable<MovieRip> GetMovieRipsToLink()
+        {
+            IEnumerable<string> toIgnore = _appSettingsManager.GetRipFilenamesToIgnoreOnLinking();
+            Dictionary<string, int> manualExternalIds = _appSettingsManager.GetManualExternalIds() ?? new Dictionary<string, int>();
+            IEnumerable<string> ripNamesToExclude = Enumerable.Concat<string>(toIgnore, manualExternalIds.Keys);
+            // using Find before Where so we limit the number of objects loaded into memory
+            return _unitOfWork.MovieRips
+                .Find(r => r.Movie == null)
+                .Where(r => r.ParsedTitle != null && !ripNamesToExclude.Contains(r.FileName));
+        }
+
+        public Movie FindRelatedMovieEntityInRepo(MovieRip movieRip)
+        {
+            Movie relatedMovie = null;
+
+            // we'll have ripReleaseDate == 0 and parsed == false whenever movieRip.ParsedReleaseDate == null
+            bool releaseDateParsed = int.TryParse(movieRip.ParsedReleaseDate, out int ripReleaseDate);
+
+            IEnumerable<Movie> existingMatches = this._unitOfWork.Movies.SearchMoviesWithTitle(movieRip.ParsedTitle);
+            int matchCount = existingMatches.Count();
+            if (matchCount == 1)
+            {
+                relatedMovie = existingMatches.First();
+            }
+            else if (matchCount > 1)
+            {
+                if (!releaseDateParsed)
+                {
+                    throw new MultipleMovieMatchesError(
+                        $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\"; count = {matchCount}"
+                        );
+                }
+                else
+                {
+                    IEnumerable<Movie> existingMatchesWithDate = existingMatches.Where(m => m.ReleaseDate == ripReleaseDate);
+                    int matchCountWithDate = existingMatchesWithDate.Count();
+                    if (matchCountWithDate > 1)
+                    {
+                        throw new MultipleMovieMatchesError(
+                            $"Several matches in Movie repository for \"{movieRip.FileName}\" with Title = \"{movieRip.ParsedTitle}\" and ReleaseDate = {ripReleaseDate}; count = {matchCount}"
+                            );
+                    }
+
+                    if (matchCountWithDate == 1)
+                    {
+                        relatedMovie = existingMatchesWithDate.First();
+                    }
+                }
+            }
+
+            return relatedMovie;
         }
 
         public AsyncPolicyWrap GetPolicyWrapFromConfigs(out TimeSpan initialDelay)
