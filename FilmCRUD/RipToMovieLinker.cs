@@ -322,7 +322,6 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
-        
 
         public async Task ValidateManualExternalIdsAsync(int maxApiCalls = -1)
         {
