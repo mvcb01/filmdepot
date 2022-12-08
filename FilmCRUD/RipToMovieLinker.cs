@@ -607,7 +607,6 @@ namespace FilmCRUD
 
             public override string ToString() => ReleaseDate.ToString() + ", " + string.Join(", ", Neighbourhood);
         }
-
     }
 
 }
