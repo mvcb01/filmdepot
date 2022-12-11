@@ -501,7 +501,7 @@ namespace FilmCRUD
             IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(() => _movieAPIClient.SearchMovieAsync(parsedTitle));
 
             // ToList is invoked to trigger execution
-            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter(parsedTitle, searchResultAll).ToList();
+            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter<MovieSearchResult>(parsedTitle, searchResultAll).ToList();
 
             int resultCount = searchResult.Count();
             return resultCount switch
@@ -524,7 +524,7 @@ namespace FilmCRUD
             );
 
             // ToList is invoked to trigger execution
-            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter(parsedTitle, searchResultAll).ToList();
+            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter<MovieSearchResult>(parsedTitle, searchResultAll).ToList();
 
             // if no initial results are found using the original release date then we search
             // using the release dates in the tolerance neighbourhood
@@ -542,7 +542,7 @@ namespace FilmCRUD
                 }
 
                 // ToList is invoked to trigger execution
-                searchResult = TokenizeSearchResultsAndFilter(parsedTitle, searchResultAllOtherDates).ToList();
+                searchResult = TokenizeSearchResultsAndFilter<MovieSearchResult>(parsedTitle, searchResultAllOtherDates).ToList();
             }
 
             int resultCount = searchResult.Count();
@@ -557,7 +557,9 @@ namespace FilmCRUD
         /// <summary>
         /// Tokenizes the search results and filters using both Title and OriginalTitle.
         /// </summary>
-        private static IEnumerable<MovieSearchResult> TokenizeSearchResultsAndFilter(string parsedTitle, IEnumerable<MovieSearchResult> searchResultAll)
+        private static IEnumerable<TEntity> TokenizeSearchResultsAndFilter<TEntity>(
+            string parsedTitle,
+            IEnumerable<TEntity> searchResultAll) where TEntity : IEntityWithTitleAndOriginalTitle
         {
             IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
             return searchResultAll.Where(
