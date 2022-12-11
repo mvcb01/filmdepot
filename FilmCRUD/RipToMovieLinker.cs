@@ -16,7 +16,6 @@ using FilmCRUD.CustomExceptions;
 using FilmCRUD.Helpers;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-using System.Reflection;
 
 namespace FilmCRUD
 {

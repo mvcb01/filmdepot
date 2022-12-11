@@ -12,8 +12,11 @@ namespace DepotTests
     public class UnitTest1
     {
         [Fact]
-        public void Test1()
+        public async Task Test1()
         {
+            var client = new TheMovieDbAPIClient("a8eaaf114c647102f1cf89f260985ce5");
+
+            var results = await client.SearchMovieAsync("dead mans shoes");
         }
     }
 }
