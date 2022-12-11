@@ -571,8 +571,8 @@ namespace FilmCRUD
             if (!result.Any())
             {
                 result = searchResultAll.Where(
-                r => titleTokens.SequenceEqual(r.Title.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: true))
-                    || titleTokens.SequenceEqual(r.OriginalTitle.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: true))
+                    r => titleTokens.SequenceEqual(r.Title.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: true))
+                        || titleTokens.SequenceEqual(r.OriginalTitle.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: true))
                 );
             }
             return result;
