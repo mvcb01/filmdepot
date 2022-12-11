@@ -416,14 +416,10 @@ namespace FilmCRUD
         }
 
         public Movie FindRelatedMovieEntityInRepo(MovieRip movieRip)
-        { 
-            IEnumerable<string> titleTokens = movieRip.ParsedTitle.GetStringTokensWithoutPunctuation();
-
+        {
             IEnumerable<Movie> allMatches = this._unitOfWork.Movies.SearchMoviesWithTitle(movieRip.ParsedTitle);
-            IEnumerable<Movie> tokenFilteredMatches = allMatches.Where(
-                mr => titleTokens.SequenceEqual(mr.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
-                    || titleTokens.SequenceEqual(mr.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true))
-            );
+
+            IEnumerable<Movie> tokenFilteredMatches = TokenizeSearchResultsAndFilter<Movie>(movieRip.ParsedTitle, allMatches);
 
             int tokenFilteredMatchesCount = tokenFilteredMatches.Count();
 

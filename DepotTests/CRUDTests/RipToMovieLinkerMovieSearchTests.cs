@@ -280,7 +280,7 @@ namespace DepotTests.CRUDTests
                 ParsedReleaseDate = "1986"
             };
 
-            Movie[] movieMatches = { new Movie() { Title = "The Fly II", ReleaseDate = 1958 } };
+            Movie[] movieMatches = { new Movie() { Title = "The Fly II", OriginalTitle = "The Fly II", ReleaseDate = 1958 } };
 
             this._movieRepositoryMock
                 .Setup(m => m.SearchMoviesWithTitle(It.Is<string>(s => s.Contains("fly"))))
