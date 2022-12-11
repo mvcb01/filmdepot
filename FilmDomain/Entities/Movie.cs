@@ -1,9 +1,10 @@
+using FilmDomain.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace FilmDomain.Entities
 {
-    public class Movie
+    public class Movie : IEntityWithTitleAndOriginalTitle
     {
         public int Id { get; set; }
 
