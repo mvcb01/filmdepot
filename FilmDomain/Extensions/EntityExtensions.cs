@@ -70,9 +70,7 @@ namespace FilmDomain.Extensions
             var titleTokensWithoutPunctuation = title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
 
             if (!titleTokensWithoutPunctuation.Any())
-            {
                 return Enumerable.Empty<Movie>();
-            }
 
             string titleRegex = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuation) + @")(\s*)";
 
