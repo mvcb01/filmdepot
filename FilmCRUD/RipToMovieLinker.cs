@@ -562,10 +562,20 @@ namespace FilmCRUD
             IEnumerable<TEntity> searchResultAll) where TEntity : IEntityWithTitleAndOriginalTitle
         {
             IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
-            return searchResultAll.Where(
+            IEnumerable<TEntity> result = searchResultAll.Where(
                 r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
                     || titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true))
             );
+
+            // trying the same filter but removing single quotes to match cases like "dead man's shoes" -> "dead mans shoes"
+            if (!result.Any())
+            {
+                result = searchResultAll.Where(
+                r => titleTokens.SequenceEqual(r.Title.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: true))
+                    || titleTokens.SequenceEqual(r.OriginalTitle.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: true))
+                );
+            }
+            return result;
         }
 
         /// <summary>
