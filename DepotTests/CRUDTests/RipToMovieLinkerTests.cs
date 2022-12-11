@@ -278,6 +278,7 @@ namespace DepotTests.CRUDTests
             {
                 ExternalId = 101,
                 Title = "A Twistful of Dollars",
+                OriginalTitle = "A Twistful of Dollars",
                 ReleaseDate = 1964
             };
 
@@ -285,6 +286,7 @@ namespace DepotTests.CRUDTests
             {
                 ExternalId = 102,
                 Title = "A Fistful of Dollars",
+                OriginalTitle = "A Fistful of Dollars",
                 ReleaseDate = 1965
             };
 

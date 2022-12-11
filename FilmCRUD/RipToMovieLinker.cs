@@ -16,7 +16,6 @@ using FilmCRUD.CustomExceptions;
 using FilmCRUD.Helpers;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-using System.Reflection;
 
 namespace FilmCRUD
 {
@@ -417,14 +416,10 @@ namespace FilmCRUD
         }
 
         public Movie FindRelatedMovieEntityInRepo(MovieRip movieRip)
-        { 
-            IEnumerable<string> titleTokens = movieRip.ParsedTitle.GetStringTokensWithoutPunctuation();
-
+        {
             IEnumerable<Movie> allMatches = this._unitOfWork.Movies.SearchMoviesWithTitle(movieRip.ParsedTitle);
-            IEnumerable<Movie> tokenFilteredMatches = allMatches.Where(
-                mr => titleTokens.SequenceEqual(mr.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
-                    || titleTokens.SequenceEqual(mr.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true))
-            );
+
+            IEnumerable<Movie> tokenFilteredMatches = TokenizeSearchResultsAndFilter<Movie>(movieRip.ParsedTitle, allMatches);
 
             int tokenFilteredMatchesCount = tokenFilteredMatches.Count();
 
@@ -502,7 +497,7 @@ namespace FilmCRUD
             IEnumerable<MovieSearchResult> searchResultAll = await policyWrap.ExecuteAsync(() => _movieAPIClient.SearchMovieAsync(parsedTitle));
 
             // ToList is invoked to trigger execution
-            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter(parsedTitle, searchResultAll).ToList();
+            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter<MovieSearchResult>(parsedTitle, searchResultAll).ToList();
 
             int resultCount = searchResult.Count();
             return resultCount switch
@@ -525,7 +520,7 @@ namespace FilmCRUD
             );
 
             // ToList is invoked to trigger execution
-            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter(parsedTitle, searchResultAll).ToList();
+            IEnumerable<MovieSearchResult> searchResult = TokenizeSearchResultsAndFilter<MovieSearchResult>(parsedTitle, searchResultAll).ToList();
 
             // if no initial results are found using the original release date then we search
             // using the release dates in the tolerance neighbourhood
@@ -543,7 +538,7 @@ namespace FilmCRUD
                 }
 
                 // ToList is invoked to trigger execution
-                searchResult = TokenizeSearchResultsAndFilter(parsedTitle, searchResultAllOtherDates).ToList();
+                searchResult = TokenizeSearchResultsAndFilter<MovieSearchResult>(parsedTitle, searchResultAllOtherDates).ToList();
             }
 
             int resultCount = searchResult.Count();
@@ -558,13 +553,25 @@ namespace FilmCRUD
         /// <summary>
         /// Tokenizes the search results and filters using both Title and OriginalTitle.
         /// </summary>
-        private static IEnumerable<MovieSearchResult> TokenizeSearchResultsAndFilter(string parsedTitle, IEnumerable<MovieSearchResult> searchResultAll)
+        private static IEnumerable<TEntity> TokenizeSearchResultsAndFilter<TEntity>(
+            string parsedTitle,
+            IEnumerable<TEntity> searchResultAll) where TEntity : IEntityWithTitleAndOriginalTitle
         {
             IEnumerable<string> titleTokens = parsedTitle.GetStringTokensWithoutPunctuation();
-            return searchResultAll.Where(
+            IEnumerable<TEntity> result = searchResultAll.Where(
                 r => titleTokens.SequenceEqual(r.Title.GetStringTokensWithoutPunctuation(removeDiacritics: true))
                     || titleTokens.SequenceEqual(r.OriginalTitle.GetStringTokensWithoutPunctuation(removeDiacritics: true))
             );
+
+            // trying the same filter but removing single quotes to match cases like "dead man's shoes" -> "dead mans shoes"
+            if (!result.Any())
+            {
+                result = searchResultAll.Where(
+                    r => titleTokens.SequenceEqual(r.Title.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: true))
+                        || titleTokens.SequenceEqual(r.OriginalTitle.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: true))
+                );
+            }
+            return result;
         }
 
         /// <summary>
@@ -607,7 +614,6 @@ namespace FilmCRUD
 
             public override string ToString() => ReleaseDate.ToString() + ", " + string.Join(", ", Neighbourhood);
         }
-
     }
 
 }

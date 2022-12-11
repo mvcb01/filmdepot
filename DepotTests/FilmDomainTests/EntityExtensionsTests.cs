@@ -138,5 +138,27 @@ namespace DepotTests.FilmDomainTests
             // assert
             searchResult.Should().BeEquivalentTo(new[] { firstMovie });
         }
+
+        [Theory]
+        [InlineData("dead man's shoes")]
+        [InlineData("dead mans shoes")]
+        [InlineData("dead man's shoes (2004)")]
+        [InlineData("dead mans shoes (2004)")]
+        public void GetMoviesFromTitleFuzzyMatching_WithRemoveDiacritics_WithSingleQuotesInMovieTitle_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "Dead Man's Shoes", ReleaseDate = 2004 };
+            var secondMovie = new Movie() { Title = "The Turin Horse", ReleaseDate = 2011 };
+            var thirdMovie = new Movie() { Title = "Natural Born Killers", ReleaseDate = 1994 };
+            var fourthMovie = new Movie() { Title = "Sátántangó", ReleaseDate = 1994 };
+
+            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie };
+
+            // act
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: false);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new[] { firstMovie });
+        }
     }
 }

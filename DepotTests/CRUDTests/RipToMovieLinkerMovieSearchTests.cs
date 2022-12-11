@@ -228,6 +228,31 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
+        public async Task SearchMovieAndPickFromResultsAsync_WhenSearchResultsHaveSingleQuoteChars_ShouldReturnTheTitleMatchedMovieIgnoringSingleQuotes()
+        {
+            // arrange
+            var toSearch = new MovieRip() { ParsedTitle = "Dead Mans Shoes", ParsedReleaseDate = "2004" };
+            MovieSearchResult[] searchResults = {
+                new MovieSearchResult() { Title = "Dead Man's Shoes", ReleaseDate = 2004 },
+            };
+
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dead")), It.Is<int>(i => i == 2004)))
+                .ReturnsAsync(searchResults);
+
+            // other release dates shouls return empty
+            this._movieAPIClientMock
+                .Setup(m => m.SearchMovieAsync(It.Is<string>(s => s.Contains("Dead")), It.Is<int>(i => i != 2004)))
+                .ReturnsAsync(Enumerable.Empty<MovieSearchResult>());
+
+            // act
+            Movie movieFound = await this._ripToMovieLinker.SearchMovieAndPickFromResultsAsync(toSearch, this._policyWrap);
+
+            // assert
+            movieFound.Should().BeEquivalentTo(new { Title = "Dead Man's Shoes", ReleaseDate = 2004 });
+        }
+
+        [Fact]
         public void FindRelatedMovieEntityInRepo_WithoutAnyMatchesInRepo_ShouldReturnNull()
         {
             // arrange
@@ -255,7 +280,7 @@ namespace DepotTests.CRUDTests
                 ParsedReleaseDate = "1986"
             };
 
-            Movie[] movieMatches = { new Movie() { Title = "The Fly II", ReleaseDate = 1958 } };
+            Movie[] movieMatches = { new Movie() { Title = "The Fly II", OriginalTitle = "The Fly II", ReleaseDate = 1958 } };
 
             this._movieRepositoryMock
                 .Setup(m => m.SearchMoviesWithTitle(It.Is<string>(s => s.Contains("fly"))))
@@ -280,6 +305,28 @@ namespace DepotTests.CRUDTests
             var movieMatch = new Movie() { Title = "Khrustalyov, My Car!", ReleaseDate = 1998 };
             this._movieRepositoryMock
                 .Setup(m => m.SearchMoviesWithTitle(It.IsAny<string>()))
+                .Returns(new Movie[] { movieMatch });
+
+            // act
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
+
+            //assert
+            result.Should().Be(movieMatch);
+        }
+
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WhenFoundMoviesHaveSingleQuoteChars_ShouldReturnTheMatchedMovieAndIgnoreSingleQuotes()
+        {
+            // arrange
+            var movieRip = new MovieRip()
+            {
+                FileName = "Dead.Mans.Shoes.2004.1080p.BluRay.x264-CiNEFiLE",
+                ParsedTitle = "dead mans shoes"
+            };
+            var movieMatch = new Movie() { Title = "Dead Man's Shoes", ReleaseDate = 2004 };
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(It.Is<string>(s => s.Contains("dead"))))
                 .Returns(new Movie[] { movieMatch });
 
             // act
