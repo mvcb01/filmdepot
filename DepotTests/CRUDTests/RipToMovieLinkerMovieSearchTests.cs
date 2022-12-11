@@ -289,6 +289,28 @@ namespace DepotTests.CRUDTests
             result.Should().Be(movieMatch);
         }
 
+
+        [Fact]
+        public void FindRelatedMovieEntityInRepo_WhenFoundMoviesHaveSingleQuoteChars_ShouldReturnTheMatchedMovieAndIgnoreSingleQuotes()
+        {
+            // arrange
+            var movieRip = new MovieRip()
+            {
+                FileName = "Dead.Mans.Shoes.2004.1080p.BluRay.x264-CiNEFiLE",
+                ParsedTitle = "dead mans shoes"
+            };
+            var movieMatch = new Movie() { Title = "Dead Man's Shoes", ReleaseDate = 2004 };
+            this._movieRepositoryMock
+                .Setup(m => m.SearchMoviesWithTitle(It.Is<string>(s => s.Contains("dead"))))
+                .Returns(new Movie[] { movieMatch });
+
+            // act
+            Movie result = this._ripToMovieLinker.FindRelatedMovieEntityInRepo(movieRip);
+
+            //assert
+            result.Should().Be(movieMatch);
+        }
+
         [Fact]
         public void FindRelatedMovieEntityInRepo_WithoutParsedReleaseDate_WithSeveralMatchesInRepo_ShouldThrowMultipleMovieMatchesError()
         {
