@@ -10,9 +10,9 @@ namespace FilmDataAccess.EFCore.Repositories
     {
         public MovieWarehouseVisitRepository(SQLiteAppContext context) : base(context) { }
 
-        public MovieWarehouseVisit GetClosestMovieWarehouseVisit() => GetClosestMovieWarehouseVisit(DateTime.UtcNow);
-
         public IEnumerable<DateTime> GetVisitDates() => this._context.MovieWarehouseVisits.Select(v => v.VisitDateTime);
+
+        public MovieWarehouseVisit GetClosestMovieWarehouseVisit() => GetClosestMovieWarehouseVisit(DateTime.UtcNow);
 
         public MovieWarehouseVisit GetClosestMovieWarehouseVisit(DateTime dt)
         {
