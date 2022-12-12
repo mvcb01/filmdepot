@@ -10,8 +10,7 @@ namespace FilmCRUD
 {
     public class ScanMoviesManager : GeneralScanManager
     {
-        public ScanMoviesManager(IUnitOfWork unitOfWork) : base(unitOfWork)
-        { }
+        public ScanMoviesManager(IUnitOfWork unitOfWork) : base(unitOfWork) { }
 
         /// <summary>
         /// Method <c>GetMoviesWithGenres</c> returns all the movies that have at least
@@ -86,20 +85,11 @@ namespace FilmCRUD
             return moviesInVisit.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
         }
 
-        public IEnumerable<Genre> GenresFromName(string name)
-        {
-            return this.UnitOfWork.Genres.GetGenresFromName(name);
-        }
+        public IEnumerable<Genre> GenresFromName(string name) => this.UnitOfWork.Genres.GetGenresFromName(name);
 
-        public IEnumerable<Actor> GetActorsFromName(string name)
-        {
-            return this.UnitOfWork.Actors.GetActorsFromName(name);
-        }
+        public IEnumerable<Actor> GetActorsFromName(string name) => this.UnitOfWork.Actors.GetActorsFromName(name);
 
-        public IEnumerable<Director> GetDirectorsFromName(string name)
-        {
-            return this.UnitOfWork.Directors.GetDirectorsFromName(name);
-        }
+        public IEnumerable<Director> GetDirectorsFromName(string name) => this.UnitOfWork.Directors.GetDirectorsFromName(name);    
 
         public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
         {
