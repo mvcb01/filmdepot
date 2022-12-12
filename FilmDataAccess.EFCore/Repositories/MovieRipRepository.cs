@@ -7,24 +7,12 @@ namespace FilmDataAccess.EFCore.Repositories
 {
     public class MovieRipRepository : GenericRepository<MovieRip>, IMovieRipRepository
     {
-        public MovieRipRepository(SQLiteAppContext context) : base(context)
-        {
-        }
+        public MovieRipRepository(SQLiteAppContext context) : base(context) { }
 
-        public MovieRip FindByFileName(string fileName)
-        {
-            return _context.MovieRips.Where(mr => mr.FileName == fileName).FirstOrDefault();
-        }
+        public MovieRip FindByFileName(string fileName) => this._context.MovieRips.Where(mr => mr.FileName == fileName).FirstOrDefault();
 
-        public IEnumerable<MovieRip> GetAllRipsForMovie(Movie movie)
-        {
-            return _context.MovieRips.Where(mr => mr.Movie == movie);
-        }
+        public IEnumerable<MovieRip> GetAllRipsForMovie(Movie movie) => this._context.MovieRips.Where(mr => mr.Movie == movie);
 
-        public IEnumerable<MovieRip> GetAllRipsInVisit(MovieWarehouseVisit visit)
-        {
-            return visit.MovieRips;
-        }
-
+        public IEnumerable<MovieRip> GetAllRipsInVisit(MovieWarehouseVisit visit) => visit.MovieRips;
     }
 }
