@@ -18,49 +18,22 @@ namespace FilmDataAccess.EFCore.Repositories
     {
         protected readonly SQLiteAppContext _context;
 
-        public GenericRepository(SQLiteAppContext context)
-        {
-            _context = context;
-        }
+        public GenericRepository(SQLiteAppContext context) => this._context = context;
 
-        public void Add(TEntity entity)
-        {
-            _context.Set<TEntity>().Add(entity);
-        }
+        public void Add(TEntity entity) => this._context.Set<TEntity>().Add(entity);
 
-        public void AddRange(IEnumerable<TEntity> entities)
-        {
-            _context.Set<TEntity>().AddRange(entities);
-        }
+        public void AddRange(IEnumerable<TEntity> entities) => this._context.Set<TEntity>().AddRange(entities);
 
-        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
-        {
-            return _context.Set<TEntity>().Where(predicate);
-        }
+        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate) => this._context.Set<TEntity>().Where(predicate);
 
-        public IEnumerable<TEntity> GetAll()
-        {
-            return _context.Set<TEntity>();
-        }
+        public IEnumerable<TEntity> GetAll() => this._context.Set<TEntity>();
 
-        public TEntity GetById(int id)
-        {
-            return _context.Set<TEntity>().Find(id);
-        }
+        public TEntity GetById(int id) => this._context.Set<TEntity>().Find(id);
 
-        public FilmDomainEntityState GetEntityState(TEntity entity)
-        {
-            return (FilmDomainEntityState)_context.Entry(entity).State;
-        }
+        public FilmDomainEntityState GetEntityState(TEntity entity) => (FilmDomainEntityState)this._context.Entry(entity).State;
 
-        public void Remove(TEntity entity)
-        {
-            _context.Set<TEntity>().Remove(entity);
-        }
+        public void Remove(TEntity entity) => this._context.Set<TEntity>().Remove(entity);
 
-        public void RemoveRange(IEnumerable<TEntity> entities)
-        {
-            _context.Set<TEntity>().RemoveRange(entities);
-        }
+        public void RemoveRange(IEnumerable<TEntity> entities) => this._context.Set<TEntity>().RemoveRange(entities);
     }
 }

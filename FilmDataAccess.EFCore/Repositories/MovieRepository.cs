@@ -11,44 +11,27 @@ namespace FilmDataAccess.EFCore.Repositories
     {
         public MovieRepository(SQLiteAppContext context) : base(context) { }
 
-        public Movie FindByExternalId(int externalId)
-        {
-            return _context.Movies.Where(m => m.ExternalId == externalId).FirstOrDefault();
-        }
+        public Movie FindByExternalId(int externalId) => this._context.Movies.Where(m => m.ExternalId == externalId).FirstOrDefault();
 
-        public IEnumerable<Movie> GetMoviesWithoutActors()
-        {
-            return _context.Movies.Where(m => !m.Actors.Any());
-        }
+        public IEnumerable<Movie> GetMoviesWithoutActors() => this._context.Movies.Where(m => !m.Actors.Any());
 
-        public IEnumerable<Movie> GetMoviesWithoutDirectors()
-        {
-            return _context.Movies.Where(m => !m.Directors.Any());
-        }
+        public IEnumerable<Movie> GetMoviesWithoutDirectors() => this._context.Movies.Where(m => !m.Directors.Any());
 
-        public IEnumerable<Movie> GetMoviesWithoutGenres()
-        {
-            return _context.Movies.Where(m => !m.Genres.Any());
-        }
+        public IEnumerable<Movie> GetMoviesWithoutGenres() => this._context.Movies.Where(m => !m.Genres.Any());
 
-        public IEnumerable<Movie> GetMoviesWithoutImdbId()
-        {
-            return _context.Movies.Where(m => m.IMDBId == null);
-        }
+        public IEnumerable<Movie> GetMoviesWithoutImdbId() => this._context.Movies.Where(m => m.IMDBId == null);
 
-        public IEnumerable<Movie> GetMoviesWithoutKeywords()
-        {
-            return _context.Movies.Where(m => m.Keywords == null);
-        }
+        public IEnumerable<Movie> GetMoviesWithoutKeywords() => this._context.Movies.Where(m => m.Keywords == null);
 
-        public IEnumerable<Movie> SearchMoviesWithTitle(string title)
-        {
-            return this._context.Movies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
-        }
+        public IEnumerable<Movie> SearchMoviesWithTitle(string title) => this._context.Movies.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
 
         public IEnumerable<Movie> GetAllMoviesInVisit(MovieWarehouseVisit visit)
         {
-            return visit.MovieRips.Select(r => r.Movie).Where(m => m != null);
+            // calling Distinct since, in the same visit, we can have more than one MovieRip entity refering to the same Movie entity:
+            //      Haxan.1922.1080p.BluRay.x264-CiNEFiLE
+            //      Haxan.1922.1080p.HDRip.x264.AAC-RARBG
+            return visit.MovieRips.Select(r => r.Movie).Where(m => m != null).Distinct();
         }
+
     }
 }
