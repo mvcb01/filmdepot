@@ -9,21 +9,16 @@ namespace FilmDataAccess.EFCore.Repositories
 {
     public class ActorRepository : GenericRepository<Actor>, IActorRepository
     {
-        public ActorRepository(SQLiteAppContext context) : base(context)
-        {
-        }
+        public ActorRepository(SQLiteAppContext context) : base(context) { }
 
-        public Actor FindByExternalId(int externalId)
-        {
-            return _context.Actors.Where(m => m.ExternalId == externalId).FirstOrDefault();
-        }
+        public Actor FindByExternalId(int externalId) => this._context.Actors.Where(m => m.ExternalId == externalId).FirstOrDefault();
 
         public IEnumerable<Actor> GetActorsFromName(string name)
         {
             IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation(removeDiacritics: false);
             string nameLike = "%" + string.Join('%', nameTokens) + "%";
 
-            IEnumerable<Actor> result =  _context.Actors.Where(a => EF.Functions.Like(a.Name, nameLike));
+            IEnumerable<Actor> result =  this._context.Actors.Where(a => EF.Functions.Like(a.Name, nameLike));
 
             // searches again without diacritics if no results are found
             if (!result.Any())
