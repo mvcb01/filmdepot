@@ -9,9 +9,7 @@ namespace FilmDataAccess.EFCore.Repositories
 {
     public class DirectorRepository : GenericRepository<Director>, IDirectorRepository
     {
-        public DirectorRepository(SQLiteAppContext context) : base(context)
-        {
-        }
+        public DirectorRepository(SQLiteAppContext context) : base(context) { }
 
         public IEnumerable<Director> GetDirectorsFromName(string name)
         {
