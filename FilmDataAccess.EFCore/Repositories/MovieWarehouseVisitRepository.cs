@@ -3,6 +3,7 @@ using FilmDomain.Entities;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 
 namespace FilmDataAccess.EFCore.Repositories
 {
@@ -30,11 +31,7 @@ namespace FilmDataAccess.EFCore.Repositories
 
         private static DateTime GetClosestDatetime(IEnumerable<DateTime> allDateTimes, DateTime dt)
         {
-            if (allDateTimes.Count() == 0)
-            {
-                throw new Exception("Argument allDateTimes is empty");
-            }
-
+            if (!allDateTimes.Any()) throw new ArgumentException("Argument is empty", nameof(allDateTimes));
             return allDateTimes.OrderBy(_dt => Math.Abs((_dt - dt).Ticks)).First();
         }
     }
