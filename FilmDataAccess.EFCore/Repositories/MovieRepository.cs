@@ -50,5 +50,6 @@ namespace FilmDataAccess.EFCore.Repositories
         {
             return visit.MovieRips.Select(r => r.Movie).Where(m => m != null);
         }
+
     }
 }
