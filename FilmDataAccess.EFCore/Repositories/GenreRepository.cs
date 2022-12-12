@@ -22,6 +22,5 @@ namespace FilmDataAccess.EFCore.Repositories
             //      https://docs.microsoft.com/en-us/ef/core/providers/sqlite/functions
             return this._context.Genres.Where(g => EF.Functions.Like(g.Name, nameLike));
         }
-
     }
 }
