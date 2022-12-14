@@ -178,7 +178,7 @@ namespace FilmCRUD
 
             var scanRipsManager = new ScanRipsManager(unitOfWork);
 
-            // defaults to the latest visit if opts.Visit == null
+            // defaults to the latest visit if opts.Visit is null
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanRipsManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
@@ -231,7 +231,7 @@ namespace FilmCRUD
                 Console.WriteLine("ScanRips: last visit difference \n");
                 PrintVisitDiff(scanRipsManager.GetLastVisitDiff());
             }
-            else if (opts.Search != null)
+            else if (opts.Search is not null)
             {
                 string toSearch = opts.Search;
                 Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
@@ -265,7 +265,7 @@ namespace FilmCRUD
                 return;
             }
 
-            // defaults to the latest visit if opts.Visit == null
+            // defaults to the latest visit if opts.Visit is null
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanMoviesManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
@@ -340,7 +340,7 @@ namespace FilmCRUD
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
             }
-            else if (opts.Search != null)
+            else if (opts.Search is not null)
             {
                 string toSearch = opts.Search;
                 Console.WriteLine($"Search by title: \"{toSearch}\" \n");
@@ -498,7 +498,7 @@ namespace FilmCRUD
         private static MovieWarehouseVisit GetClosestMovieWarehouseVisit(GeneralScanManager scanManager, string dateString)
         {
             MovieWarehouseVisit visit;
-            if (dateString == null)
+            if (dateString is null)
             {
                 visit = scanManager.GetClosestVisit();
             }
