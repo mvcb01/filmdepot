@@ -13,20 +13,10 @@ namespace FilmCRUD
 
         public GeneralScanManager(IUnitOfWork unitOfWork) => this.UnitOfWork = unitOfWork;
 
-        public MovieWarehouseVisit GetClosestVisit()
-        {
-            return this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
-        }
+        public MovieWarehouseVisit GetClosestVisit() => this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
 
-        public MovieWarehouseVisit GetClosestVisit(DateTime dt)
-        {
-            return this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
-        }
+        public MovieWarehouseVisit GetClosestVisit(DateTime dt) => this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
 
-        public MovieWarehouseVisit GetPreviousVisit(MovieWarehouseVisit visit)
-        {
-            return this.UnitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(visit);
-        }
-
+        public MovieWarehouseVisit GetPreviousVisit(MovieWarehouseVisit visit) => this.UnitOfWork.MovieWarehouseVisits.GetPreviousMovieWarehouseVisit(visit);
     }
 }
