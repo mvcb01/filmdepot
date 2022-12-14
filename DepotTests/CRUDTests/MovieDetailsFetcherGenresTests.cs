@@ -86,7 +86,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task PopulateDetails_WithMoviesMissingGenres_ShouldCallMovieAPIClient()
+        public async Task PopulateDetails_WithMoviesMissingGenres_WithoutAnyGenresInRepo_ShouldCallMovieAPIClient()
         {
             // arrange
             int externalId = 101;
