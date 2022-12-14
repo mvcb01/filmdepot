@@ -15,6 +15,7 @@ namespace DepotTests.CRUDTests
     public class ScanMoviesManagerTests
     {
         private readonly Mock<IMovieWarehouseVisitRepository> _movieWarehouseVisitRepositoryMock;
+
         private readonly Mock<IMovieRepository> _movieRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
