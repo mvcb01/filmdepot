@@ -511,9 +511,9 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Works for both ScanMoviesManager.GetVisitDiff and ScanRipsManager.GetVisitDiff.
-        /// Parameter <paramref name="diffDates"/> should be as is provided in ScanMoviesOptions.VisitDiff
-        /// and ScanRipsOptions.VisitDiff respectively.
+        /// Works for both methods <see cref="ScanMoviesManager.GetVisitDiff"/> and <see cref="ScanRipsManager.GetVisitDiff"/>.
+        /// Parameter <paramref name="diffDates"/> should be as is provided in <see cref="ScanMoviesOptions.VisitDiff"/>
+        /// and <see cref="ScanRipsOptions.VisitDiff"/> respectively.
         /// </summary>
         private static void GetVisitDiffAndPrint(
             GeneralScanManager scanManager,
