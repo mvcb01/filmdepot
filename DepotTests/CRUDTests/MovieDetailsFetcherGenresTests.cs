@@ -95,7 +95,7 @@ namespace DepotTests.CRUDTests
             };
             this._genreRepositoryMock
                 .Setup(g => g.GetAll())
-                .Returns(new List<Genre>());
+                .Returns(Enumerable.Empty<Genre>());
             this._movieRepositoryMock
                 .Setup(m => m.GetMoviesWithoutGenres())
                 .Returns(new Movie[] { movieWithoutGenres });
