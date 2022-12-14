@@ -9,12 +9,9 @@ namespace FilmCRUD
     // to provide some useful methods to other Scan classes
     public class GeneralScanManager
     {
-        protected IUnitOfWork UnitOfWork { get; init; }
+        protected readonly IUnitOfWork UnitOfWork;
 
-        public GeneralScanManager(IUnitOfWork unitOfWork)
-        {
-            this.UnitOfWork = unitOfWork;
-        }
+        public GeneralScanManager(IUnitOfWork unitOfWork) => this.UnitOfWork = unitOfWork;
 
         public MovieWarehouseVisit GetClosestVisit()
         {
