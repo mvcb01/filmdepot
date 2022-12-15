@@ -13,8 +13,8 @@ namespace FilmCRUD
         public ScanMoviesManager(IUnitOfWork unitOfWork) : base(unitOfWork) { }
 
         /// <summary>
-        /// Method <c>GetMoviesWithGenres</c> returns all the movies that have at least
-        /// one corresponding MovieRip in <paramref name="visit"/> and at least one Genre in <paramref name="genres"/>.
+        /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/> that have at least
+        /// one genre in param <paramref name="genres"/>.
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithGenres(MovieWarehouseVisit visit, params Genre[] genres)
         {
@@ -23,8 +23,8 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Method <c>GetMoviesWithActors</c> returns all the movies that have at least
-        /// one corresponding MovieRip in <paramref name="visit"/> and at least one Actor in <paramref name="actors"/>.
+        /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/> that have at least
+        /// one actor in param <paramref name="actors"/>.
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithActors(MovieWarehouseVisit visit, params Actor[] actors)
         {
@@ -33,8 +33,8 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Method <c>GetMoviesWithDirectors</c> returns all the movies that have at least
-        /// one corresponding MovieRip in <paramref name="visit"/> and at least one Director in <paramref name="directors"/>.
+        /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/> that have at least one
+        /// director in param <paramref name="directors"/>.
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithDirectors(MovieWarehouseVisit visit, params Director[] directors)
         {
@@ -43,8 +43,8 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Method <c>GetMoviesWithReleaseDates</c> returns all the movies that have its ReleaseDate in
-        /// <paramref name="dates"/>.
+        /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>
+        /// with release date in param <paramref name="dates"/>.
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithReleaseDates(MovieWarehouseVisit visit, params int[] dates)
         {
@@ -52,6 +52,9 @@ namespace FilmCRUD
             return moviesInVisit.Where(m => dates.Contains(m.ReleaseDate));
         }
 
+        /// <summary>
+        /// Group by and count by genre in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// </summary>
         public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
@@ -61,6 +64,9 @@ namespace FilmCRUD
             return grouped.Select(group => new KeyValuePair<Genre, int>(group.Key, group.Count()));
         }
 
+        /// <summary>
+        /// Group by and count by actor in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// </summary>
         public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
@@ -70,6 +76,9 @@ namespace FilmCRUD
             return grouped.Select(group => new KeyValuePair<Actor, int>(group.Key, group.Count()));
         }
 
+        /// <summary>
+        /// Group by and count by director in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// </summary>
         public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
@@ -79,6 +88,9 @@ namespace FilmCRUD
             return grouped.Select(group => new KeyValuePair<Director, int>(group.Key, group.Count()));
         }
 
+        /// <summary>
+        /// Title fuzzy match search on all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// </summary>
         public IEnumerable<Movie> SearchMovieEntitiesByTitle(MovieWarehouseVisit visit, string title)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
