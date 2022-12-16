@@ -239,15 +239,19 @@ namespace DepotTests.CRUDTests
             var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019, Directors = new Director[] { firstDirector, secondDirector } };
             var secondMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007, Directors = new Director[] { thirdDirector } };
             var thirdMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021, Directors = new Director[] { thirdDirector } };
+            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Directors = Array.Empty<Director>() };
+            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Directors = Array.Empty<Director>() };
+
+            var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie, fifthMovie };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._movieRepositoryMock
                 .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
-                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+                .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<Director, int>> actual = this._scanMoviesManager.GetCountByDirector(visit);
+            IEnumerable<KeyValuePair<Director, int>> actual = this._scanMoviesManager.GetCountByDirector(visit, out int withoutDirectors);
 
             // assert
             var expected = new List<KeyValuePair<Director, int>>() {
@@ -255,7 +259,13 @@ namespace DepotTests.CRUDTests
                 new KeyValuePair<Director, int>(secondDirector, 1),
                 new KeyValuePair<Director, int>(firstDirector, 1)
             };
-            actual.Should().BeEquivalentTo(expected);
+
+            using (new AssertionScope())
+            {
+                actual.Should().BeEquivalentTo(expected);
+                withoutDirectors.Should().Be(moviesInVisit.Where(m => !m.Directors.Any()).Count());
+            }
+            
         }
 
         [Theory]

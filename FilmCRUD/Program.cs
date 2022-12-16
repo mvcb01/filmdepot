@@ -349,12 +349,13 @@ namespace FilmCRUD
             else if (opts.ByDirector)
             {
                 Console.WriteLine("Count by director:\n");
-                IEnumerable<KeyValuePair<Director, int>> directorCount = scanMoviesManager.GetCountByDirector(visit);
+                IEnumerable<KeyValuePair<Director, int>> directorCount = scanMoviesManager.GetCountByDirector(visit, out int withoutDirectors);
                 int toTake = opts.Top ?? directorCount.Count();
                 directorCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
+                Console.WriteLine($"<empty>: {withoutDirectors}");
             }
             else if (opts.Search is not null)
             {
