@@ -125,7 +125,6 @@ namespace DepotTests.CRUDTests
 
             // assert
             actual.Should().BeEquivalentTo(new Movie[] { firstMovie });
-
         }
 
         [Fact]
@@ -282,7 +281,6 @@ namespace DepotTests.CRUDTests
 
             // assert
             this._scanMoviesManager.Invoking(s => s.GetVisitDiff(null, null)).Should().Throw<ArgumentNullException>();
-
         }
 
         [Fact]
