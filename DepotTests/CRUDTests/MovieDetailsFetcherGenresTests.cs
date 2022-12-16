@@ -86,7 +86,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task PopulateDetails_WithMoviesMissingGenres_ShouldCallMovieAPIClient()
+        public async Task PopulateDetails_WithMoviesMissingGenres_WithoutAnyGenresInRepo_ShouldCallMovieAPIClient()
         {
             // arrange
             int externalId = 101;
@@ -95,7 +95,7 @@ namespace DepotTests.CRUDTests
             };
             this._genreRepositoryMock
                 .Setup(g => g.GetAll())
-                .Returns(new List<Genre>());
+                .Returns(Enumerable.Empty<Genre>());
             this._movieRepositoryMock
                 .Setup(m => m.GetMoviesWithoutGenres())
                 .Returns(new Movie[] { movieWithoutGenres });

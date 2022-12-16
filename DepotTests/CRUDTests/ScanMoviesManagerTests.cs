@@ -4,17 +4,18 @@ using Moq;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmCRUD;
 using FluentAssertions.Execution;
+using Microsoft.VisualBasic;
 
 namespace DepotTests.CRUDTests
 {
     public class ScanMoviesManagerTests
     {
         private readonly Mock<IMovieWarehouseVisitRepository> _movieWarehouseVisitRepositoryMock;
+
         private readonly Mock<IMovieRepository> _movieRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
@@ -58,7 +59,7 @@ namespace DepotTests.CRUDTests
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._unitOfWorkMock
-                .Setup(u => u.Movies.GetAllMoviesInVisit(visit))
+                .Setup(u => u.Movies.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
                 .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
@@ -89,7 +90,7 @@ namespace DepotTests.CRUDTests
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._unitOfWorkMock
-                .Setup(u => u.Movies.GetAllMoviesInVisit(visit))
+                .Setup(u => u.Movies.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
                 .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
@@ -117,7 +118,7 @@ namespace DepotTests.CRUDTests
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._unitOfWorkMock
-                .Setup(u => u.Movies.GetAllMoviesInVisit(visit))
+                .Setup(u => u.Movies.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
                 .Returns(new Movie[] { firstMovie, secondMovie });
 
             // act
@@ -125,7 +126,6 @@ namespace DepotTests.CRUDTests
 
             // assert
             actual.Should().BeEquivalentTo(new Movie[] { firstMovie });
-
         }
 
         [Fact]
@@ -139,7 +139,7 @@ namespace DepotTests.CRUDTests
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
                 .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
@@ -159,17 +159,21 @@ namespace DepotTests.CRUDTests
             var comedyGenre = new Genre() { Name = "comedy" };
 
             var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Genres = new Genre[] { dramaGenre, horrorGenre } };
-            var secondMovie = new Movie() {Title = "gummo", ReleaseDate = 1997, Genres = new Genre[] { dramaGenre } };
+            var secondMovie = new Movie() {Title = "wake in fright", ReleaseDate = 1971, Genres = new Genre[] { dramaGenre } };
             var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Genres = new Genre[] { comedyGenre } };
+            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Genres = Array.Empty<Genre>() };
+            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Genres = Array.Empty<Genre>() };
+
+            var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie, fifthMovie };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(visit))
-                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<Genre, int>> actual = this._scanMoviesManager.GetCountByGenre(visit);
+            IEnumerable<KeyValuePair<Genre, int>> actual = this._scanMoviesManager.GetCountByGenre(visit, out int withoutGenres);
 
             // assert
             var expected = new List<KeyValuePair<Genre, int>>() {
@@ -177,7 +181,12 @@ namespace DepotTests.CRUDTests
                 new KeyValuePair<Genre, int>(horrorGenre, 1),
                 new KeyValuePair<Genre, int>(comedyGenre, 1),
             };
-            actual.Should().BeEquivalentTo(expected);
+
+            using (new AssertionScope())
+            {
+                actual.Should().BeEquivalentTo(expected);
+                withoutGenres.Should().Be(moviesInVisit.Where(m => !m.Genres.Any()).Count());
+            }
         }
 
         [Fact]
@@ -191,15 +200,19 @@ namespace DepotTests.CRUDTests
             var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Actors = new Actor[] { firstActor, secondActor } };
             var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, Actors = new Actor[] { firstActor } };
             var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Actors = new Actor[] { thirdActor } };
+            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Actors = Array.Empty<Actor>() };
+            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Actors = Array.Empty<Actor>() };
+
+            var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie, fifthMovie };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(visit))
-                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<Actor, int>> actual = this._scanMoviesManager.GetCountByActor(visit);
+            IEnumerable<KeyValuePair<Actor, int>> actual = this._scanMoviesManager.GetCountByActor(visit, out int withoutActors);
 
             // assert
             var expected = new List<KeyValuePair<Actor, int>>() {
@@ -207,7 +220,12 @@ namespace DepotTests.CRUDTests
                 new KeyValuePair<Actor, int>(secondActor, 1),
                 new KeyValuePair<Actor, int>(thirdActor, 1)
             };
-            actual.Should().BeEquivalentTo(expected);
+
+            using (new AssertionScope())
+            {
+                actual.Should().BeEquivalentTo(expected);
+                withoutActors.Should().Be(moviesInVisit.Where(m => !m.Actors.Any()).Count());
+            }
         }
 
         [Fact]
@@ -221,15 +239,19 @@ namespace DepotTests.CRUDTests
             var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019, Directors = new Director[] { firstDirector, secondDirector } };
             var secondMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007, Directors = new Director[] { thirdDirector } };
             var thirdMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021, Directors = new Director[] { thirdDirector } };
+            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Directors = Array.Empty<Director>() };
+            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Directors = Array.Empty<Director>() };
+
+            var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie, fifthMovie };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(visit))
-                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<Director, int>> actual = this._scanMoviesManager.GetCountByDirector(visit);
+            IEnumerable<KeyValuePair<Director, int>> actual = this._scanMoviesManager.GetCountByDirector(visit, out int withoutDirectors);
 
             // assert
             var expected = new List<KeyValuePair<Director, int>>() {
@@ -237,7 +259,12 @@ namespace DepotTests.CRUDTests
                 new KeyValuePair<Director, int>(secondDirector, 1),
                 new KeyValuePair<Director, int>(firstDirector, 1)
             };
-            actual.Should().BeEquivalentTo(expected);
+
+            using (new AssertionScope())
+            {
+                actual.Should().BeEquivalentTo(expected);
+                withoutDirectors.Should().Be(moviesInVisit.Where(m => !m.Directors.Any()).Count());
+            }
         }
 
         [Theory]
@@ -260,7 +287,7 @@ namespace DepotTests.CRUDTests
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(visit))
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
                 .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
@@ -282,7 +309,6 @@ namespace DepotTests.CRUDTests
 
             // assert
             this._scanMoviesManager.Invoking(s => s.GetVisitDiff(null, null)).Should().Throw<ArgumentNullException>();
-
         }
 
         [Fact]
@@ -336,7 +362,7 @@ namespace DepotTests.CRUDTests
                 VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
                 };
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(visitRight))
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visitRight.VisitDateTime)))
                 .Returns(visitRight.MovieRips.Select(mr => mr.Movie));
 
             // act
@@ -386,10 +412,10 @@ namespace DepotTests.CRUDTests
             };
 
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(visitLeft))
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visitLeft.VisitDateTime)))
                 .Returns(visitLeft.MovieRips.Select(mr => mr.Movie));
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(visitRight))
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visitRight.VisitDateTime)))
                 .Returns(visitRight.MovieRips.Select(mr => mr.Movie));
 
             // act
@@ -452,13 +478,13 @@ namespace DepotTests.CRUDTests
                 .Returns(secondVisit);
 
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(firstVisit))
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == firstVisit.VisitDateTime)))
                 .Returns(firstVisit.MovieRips.Select(mr => mr.Movie));
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(secondVisit))
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == secondVisit.VisitDateTime)))
                 .Returns(secondVisit.MovieRips.Select(mr => mr.Movie));
             this._movieRepositoryMock
-                .Setup(m => m.GetAllMoviesInVisit(thirdVisit))
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == thirdVisit.VisitDateTime)))
                 .Returns(thirdVisit.MovieRips.Select(mr => mr.Movie));
 
             // act

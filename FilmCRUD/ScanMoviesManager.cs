@@ -10,12 +10,11 @@ namespace FilmCRUD
 {
     public class ScanMoviesManager : GeneralScanManager
     {
-        public ScanMoviesManager(IUnitOfWork unitOfWork) : base(unitOfWork)
-        { }
+        public ScanMoviesManager(IUnitOfWork unitOfWork) : base(unitOfWork) { }
 
         /// <summary>
-        /// Method <c>GetMoviesWithGenres</c> returns all the movies that have at least
-        /// one corresponding MovieRip in <paramref name="visit"/> and at least one Genre in <paramref name="genres"/>.
+        /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/> that have at least
+        /// one genre in param <paramref name="genres"/>.
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithGenres(MovieWarehouseVisit visit, params Genre[] genres)
         {
@@ -24,8 +23,8 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Method <c>GetMoviesWithActors</c> returns all the movies that have at least
-        /// one corresponding MovieRip in <paramref name="visit"/> and at least one Actor in <paramref name="actors"/>.
+        /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/> that have at least
+        /// one actor in param <paramref name="actors"/>.
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithActors(MovieWarehouseVisit visit, params Actor[] actors)
         {
@@ -34,8 +33,8 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Method <c>GetMoviesWithDirectors</c> returns all the movies that have at least
-        /// one corresponding MovieRip in <paramref name="visit"/> and at least one Director in <paramref name="directors"/>.
+        /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/> that have at least one
+        /// director in param <paramref name="directors"/>.
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithDirectors(MovieWarehouseVisit visit, params Director[] directors)
         {
@@ -44,8 +43,8 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Method <c>GetMoviesWithReleaseDates</c> returns all the movies that have its ReleaseDate in
-        /// <paramref name="dates"/>.
+        /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>
+        /// with release date in param <paramref name="dates"/>.
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithReleaseDates(MovieWarehouseVisit visit, params int[] dates)
         {
@@ -53,54 +52,77 @@ namespace FilmCRUD
             return moviesInVisit.Where(m => dates.Contains(m.ReleaseDate));
         }
 
-        public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit)
+        /// <summary>
+        /// Group by and count by genre in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// </summary>
+        public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit, out int withoutGenres)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            withoutGenres = moviesInVisit.Where(m => !m.Genres.Any()).Count();
 
             // flatten -> group by Genre and count
             IEnumerable<IGrouping<Genre, Genre>> grouped = moviesInVisit.SelectMany(m => m.Genres).GroupBy(g => g);
             return grouped.Select(group => new KeyValuePair<Genre, int>(group.Key, group.Count()));
         }
 
-        public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit)
+        /// <summary>
+        /// Group by and count by actor in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// </summary>
+        public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit, out int withoutActors)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            withoutActors = moviesInVisit.Where(m => !m.Actors.Any()).Count();
 
             // flatten -> group by Actor and count
             IEnumerable<IGrouping<Actor, Actor>> grouped = moviesInVisit.SelectMany(m => m.Actors).GroupBy(a => a);
             return grouped.Select(group => new KeyValuePair<Actor, int>(group.Key, group.Count()));
         }
 
-        public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit)
+        /// <summary>
+        /// Group by and count by director in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// </summary>
+        public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit, out int withoutDirectors)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            withoutDirectors = moviesInVisit.Where(m => !m.Directors.Any()).Count();
 
             // flatten -> group by Director and count
             IEnumerable<IGrouping<Director, Director>> grouped = moviesInVisit.SelectMany(m => m.Directors).GroupBy(a => a);
             return grouped.Select(group => new KeyValuePair<Director, int>(group.Key, group.Count()));
         }
 
+        /// <summary>
+        /// Title fuzzy match search on all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// </summary>
         public IEnumerable<Movie> SearchMovieEntitiesByTitle(MovieWarehouseVisit visit, string title)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
         }
 
-        public IEnumerable<Genre> GenresFromName(string name)
-        {
-            return this.UnitOfWork.Genres.GetGenresFromName(name);
-        }
+        /// <summary>
+        /// Returns all <see cref="Genre"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.
+        /// </summary>
+        public IEnumerable<Genre> GenresFromName(string name) => this.UnitOfWork.Genres.GetGenresFromName(name);
 
-        public IEnumerable<Actor> GetActorsFromName(string name)
-        {
-            return this.UnitOfWork.Actors.GetActorsFromName(name);
-        }
+        /// <summary>
+        /// Returns all <see cref="Actor"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.
+        /// </summary>
+        public IEnumerable<Actor> GetActorsFromName(string name) => this.UnitOfWork.Actors.GetActorsFromName(name);
 
-        public IEnumerable<Director> GetDirectorsFromName(string name)
-        {
-            return this.UnitOfWork.Directors.GetDirectorsFromName(name);
-        }
+        /// <summary>
+        /// Returns all <see cref="Director"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.
+        /// </summary>
+        public IEnumerable<Director> GetDirectorsFromName(string name) => this.UnitOfWork.Directors.GetDirectorsFromName(name);
 
+        /// <summary>
+        /// Considers all the distinct <see cref="Movie"/> entities linked to some <see cref="MovieRip"/> in the last two visits and outputs
+        /// a dictionary with the keys "added" and "removed" where the values are the set difference of <see cref="MovieRip.FileName"/>'s
+        /// between both visits.
+        /// </summary>
         public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
         {
             MovieWarehouseVisit lastVisit = this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
@@ -109,24 +131,19 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Method <c>GetVisitDiff</c> considers all the distinct Movie entities linked to some
-        /// MovieRip in <paramref name="visitLeft"/> or in <paramref name="visitLeft"/> and outputs the difference in
-        /// a dictionary with keys "added" and "removed".
+        /// Considers all the distinct <see cref="Movie"/> entities linked to some
+        /// <see cref="MovieRip"/> in <paramref name="visitLeft"/> or in <paramref name="visitLeft"/> and outputs
+        /// a dictionary with the keys "added" and "removed" where the values are the set difference of <see cref="MovieRip.FileName"/>'s
+        /// between both visits.
         /// </summary>
         public Dictionary<string, IEnumerable<string>> GetVisitDiff(MovieWarehouseVisit visitLeft, MovieWarehouseVisit visitRight)
         {
-            if (visitRight == null)
-            {
-                throw new ArgumentNullException("visitRight should not be null");
-            }
+            if (visitRight is null) throw new ArgumentNullException(nameof(visitRight));
 
-            if (visitLeft == null)
-            {
-                return new Dictionary<string, IEnumerable<string>>() {
-                    ["added"] = this.UnitOfWork.Movies.GetAllMoviesInVisit(visitRight).Select(m => m.ToString()),
-                    ["removed"] = Enumerable.Empty<string>()
-                };
-            }
+            if (visitLeft is null) return new Dictionary<string, IEnumerable<string>>() {
+                ["added"] = this.UnitOfWork.Movies.GetAllMoviesInVisit(visitRight).Select(m => m.ToString()),
+                ["removed"] = Enumerable.Empty<string>()
+            };
 
             if (visitLeft.VisitDateTime >= visitRight.VisitDateTime)
             {
