@@ -9,20 +9,14 @@ namespace FilmCRUD.Helpers
 {
     public class DirectoryFileLister
     {
+        private readonly IFileSystemIOWrapper _fileSystemIOWrapper;
 
-        private IFileSystemIOWrapper _fileSystemIOWrapper { get; init; }
-
-        public DirectoryFileLister(IFileSystemIOWrapper fileSystemIOWrapper)
-        {
-            this._fileSystemIOWrapper = fileSystemIOWrapper;
-        }
+        public DirectoryFileLister(IFileSystemIOWrapper fileSystemIOWrapper) => this._fileSystemIOWrapper = fileSystemIOWrapper;
 
         public void ListMoviesAndPersistToTextFile(string movieWarehousePath, string destinationDirectory, string filename)
         {
             if (!this._fileSystemIOWrapper.DirectoryExists(destinationDirectory))
-            {
                 throw new DirectoryNotFoundException(destinationDirectory);
-            }
 
             List<string> movieFiles = GetMovieFileNames(movieWarehousePath);
 
@@ -33,14 +27,10 @@ namespace FilmCRUD.Helpers
 
         public List<string> GetMovieFileNames(string movieWarehousePath)
         {
-
-            if (!_fileSystemIOWrapper.DirectoryExists(movieWarehousePath))
-            {
-                throw new DirectoryNotFoundException(movieWarehousePath);
-            }
+            if (!_fileSystemIOWrapper.DirectoryExists(movieWarehousePath)) throw new DirectoryNotFoundException(movieWarehousePath);
 
             // movie rips are considered to be directories, not strict files
-            IEnumerable<string> allMoviePaths = _fileSystemIOWrapper.GetSubdirectories(movieWarehousePath);
+            IEnumerable<string> allMoviePaths = this._fileSystemIOWrapper.GetSubdirectories(movieWarehousePath);
             List<string> allFileNames = allMoviePaths.Select(m => Path.GetFileName(m)).ToList();
 
             return allFileNames;
@@ -49,18 +39,15 @@ namespace FilmCRUD.Helpers
         private void PersistFileNamesToTextFile(string destinationDirectory, string fileName, string fileContents)
         {
             if (!_fileSystemIOWrapper.DirectoryExists(destinationDirectory))
-            {
                 throw new DirectoryNotFoundException(destinationDirectory);
-            }
 
             string filePath = Path.Combine(destinationDirectory, fileName);
 
             if (_fileSystemIOWrapper.GetFiles(destinationDirectory).Contains(filePath))
-            {
                 throw new FileExistsError(filePath);
-            }
 
             _fileSystemIOWrapper.WriteAllText(filePath, fileContents);
         }
     }
+
 }
