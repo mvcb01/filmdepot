@@ -52,7 +52,9 @@ namespace FilmCRUD.Helpers
 
         public static readonly Regex TokenSplitterRegex;
 
-        // initializing Regex properties
+        /// <summary>
+        /// Static constructor to initialize Regex fields.
+        /// </summary>
         static FileNameParser()
         {
             RipQualityRegex = new Regex(
