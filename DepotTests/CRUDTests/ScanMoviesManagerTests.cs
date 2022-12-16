@@ -8,6 +8,7 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmCRUD;
 using FluentAssertions.Execution;
+using Microsoft.VisualBasic;
 
 namespace DepotTests.CRUDTests
 {
@@ -158,17 +159,21 @@ namespace DepotTests.CRUDTests
             var comedyGenre = new Genre() { Name = "comedy" };
 
             var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Genres = new Genre[] { dramaGenre, horrorGenre } };
-            var secondMovie = new Movie() {Title = "gummo", ReleaseDate = 1997, Genres = new Genre[] { dramaGenre } };
+            var secondMovie = new Movie() {Title = "wake in fright", ReleaseDate = 1971, Genres = new Genre[] { dramaGenre } };
             var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Genres = new Genre[] { comedyGenre } };
+            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Genres = Array.Empty<Genre>() };
+            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Genres = Array.Empty<Genre>() };
+
+            var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie, fifthMovie };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._movieRepositoryMock
                 .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
-                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+                .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<Genre, int>> actual = this._scanMoviesManager.GetCountByGenre(visit);
+            IEnumerable<KeyValuePair<Genre, int>> actual = this._scanMoviesManager.GetCountByGenre(visit, out int withoutGenre);
 
             // assert
             var expected = new List<KeyValuePair<Genre, int>>() {
@@ -176,7 +181,12 @@ namespace DepotTests.CRUDTests
                 new KeyValuePair<Genre, int>(horrorGenre, 1),
                 new KeyValuePair<Genre, int>(comedyGenre, 1),
             };
-            actual.Should().BeEquivalentTo(expected);
+
+            using (new AssertionScope())
+            {
+                actual.Should().BeEquivalentTo(expected);
+                withoutGenre.Should().Be(moviesInVisit.Where(m => !m.Genres.Any()).Count());
+            }
         }
 
         [Fact]
