@@ -265,7 +265,6 @@ namespace DepotTests.CRUDTests
                 actual.Should().BeEquivalentTo(expected);
                 withoutDirectors.Should().Be(moviesInVisit.Where(m => !m.Directors.Any()).Count());
             }
-            
         }
 
         [Theory]
