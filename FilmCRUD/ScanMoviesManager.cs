@@ -113,9 +113,9 @@ namespace FilmCRUD
         public IEnumerable<Director> GetDirectorsFromName(string name) => this.UnitOfWork.Directors.GetDirectorsFromName(name);
 
         /// <summary>
-        /// Considers all the distinct <see cref="Movie"/> entities linked to some
-        /// <see cref="MovieRip"/> in the last two visits and outputs the difference in
-        /// a dictionary with keys "added" and "removed".
+        /// Considers all the distinct <see cref="Movie"/> entities linked to some <see cref="MovieRip"/> in the last two visits and outputs
+        /// a dictionary with the keys "added" and "removed" where the values are the set difference of <see cref="MovieRip.FileName"/>'s
+        /// between both visits.
         /// </summary>
         public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
         {
@@ -126,8 +126,9 @@ namespace FilmCRUD
 
         /// <summary>
         /// Considers all the distinct <see cref="Movie"/> entities linked to some
-        /// <see cref="MovieRip"/> in <paramref name="visitLeft"/> or in <paramref name="visitLeft"/> and outputs the difference in
-        /// a dictionary with keys "added" and "removed".
+        /// <see cref="MovieRip"/> in <paramref name="visitLeft"/> or in <paramref name="visitLeft"/> and outputs
+        /// a dictionary with the keys "added" and "removed" where the values are the set difference of <see cref="MovieRip.FileName"/>'s
+        /// between both visits.
         /// </summary>
         public Dictionary<string, IEnumerable<string>> GetVisitDiff(MovieWarehouseVisit visitLeft, MovieWarehouseVisit visitRight)
         {
