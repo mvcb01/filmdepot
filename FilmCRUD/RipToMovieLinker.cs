@@ -200,8 +200,8 @@ namespace FilmCRUD
                 .Where(kvp => ripFileNamesInRepo.Contains(kvp.Key))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-            // we'll only use the api client for those external ids that do not have a matching external id
-            // in the movie repo
+            // avoiding unnecessary calls to the api by only using the api client for those external ids that do not already
+            // have a matching external id in the movie repo;
             IEnumerable<int> externalIdsForApiCalls = manualExternalIds
                 .Select(kvp => kvp.Value)
                 .Distinct()

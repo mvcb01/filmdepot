@@ -18,18 +18,18 @@ namespace FilmCRUD
 
     public class VisitCRUDManager
     {
-        private IUnitOfWork _unitOfWork { get; init; }
+        private readonly IUnitOfWork _unitOfWork;
 
-        private IFileSystemIOWrapper _fileSystemIOWrapper { get; init; }
+        private readonly IFileSystemIOWrapper _fileSystemIOWrapper;
 
-        private IAppSettingsManager _appSettingsManager { get; init; }
+        private readonly IAppSettingsManager _appSettingsManager;
 
-        private DirectoryFileLister _directoryFileLister { get; init; }
+        private readonly ILogger _parsingErrorsLogger;
+
+        private readonly DirectoryFileLister _directoryFileLister;
 
         // to match filenames like "movies_20220321.txt"
         private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[0-9][0-3][0-9].txt$";
-
-        private readonly ILogger _parsingErrorsLogger;
 
         public string MovieWarehouseDirectory { get => _appSettingsManager.GetMovieWarehouseDirectory(); }
 
