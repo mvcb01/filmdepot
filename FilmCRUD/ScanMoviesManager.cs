@@ -55,11 +55,11 @@ namespace FilmCRUD
         /// <summary>
         /// Group by and count by genre in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
         /// </summary>
-        public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit, out int withoutGenre)
+        public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit, out int withoutGenres)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
 
-            withoutGenre = moviesInVisit.Where(m => !m.Genres.Any()).Count();
+            withoutGenres = moviesInVisit.Where(m => !m.Genres.Any()).Count();
 
             // flatten -> group by Genre and count
             IEnumerable<IGrouping<Genre, Genre>> grouped = moviesInVisit.SelectMany(m => m.Genres).GroupBy(g => g);

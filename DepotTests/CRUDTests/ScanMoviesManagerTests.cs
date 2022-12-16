@@ -173,7 +173,7 @@ namespace DepotTests.CRUDTests
                 .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<Genre, int>> actual = this._scanMoviesManager.GetCountByGenre(visit, out int withoutGenre);
+            IEnumerable<KeyValuePair<Genre, int>> actual = this._scanMoviesManager.GetCountByGenre(visit, out int withoutGenres);
 
             // assert
             var expected = new List<KeyValuePair<Genre, int>>() {
@@ -185,7 +185,7 @@ namespace DepotTests.CRUDTests
             using (new AssertionScope())
             {
                 actual.Should().BeEquivalentTo(expected);
-                withoutGenre.Should().Be(moviesInVisit.Where(m => !m.Genres.Any()).Count());
+                withoutGenres.Should().Be(moviesInVisit.Where(m => !m.Genres.Any()).Count());
             }
         }
 
