@@ -29,6 +29,10 @@ namespace FilmCRUD
         /// </summary>
         private const string _logOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
 
+        /// <summary>
+        /// Handles the options defined in verbs <see cref="VisitOptions"/>, <see cref="ScanRipsOptions"/>, <see cref="ScanMoviesOptions"/>
+        /// <see cref="LinkOptions"/> or <see cref="FetchOptions"/>.
+        /// </summary>
         static async Task Main(string[] args)
         {
             // CONFIGURING MAIN LOGGER FROM THE Serilog.Log STATIC CLASS
