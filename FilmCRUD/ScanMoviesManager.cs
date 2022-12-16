@@ -97,12 +97,26 @@ namespace FilmCRUD
             return moviesInVisit.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
         }
 
+        /// <summary>
+        /// Returns all <see cref="Genre"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.
+        /// </summary>
         public IEnumerable<Genre> GenresFromName(string name) => this.UnitOfWork.Genres.GetGenresFromName(name);
 
+        /// <summary>
+        /// Returns all <see cref="Actor"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.
+        /// </summary>
         public IEnumerable<Actor> GetActorsFromName(string name) => this.UnitOfWork.Actors.GetActorsFromName(name);
 
-        public IEnumerable<Director> GetDirectorsFromName(string name) => this.UnitOfWork.Directors.GetDirectorsFromName(name);    
+        /// <summary>
+        /// Returns all <see cref="Director"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.
+        /// </summary>
+        public IEnumerable<Director> GetDirectorsFromName(string name) => this.UnitOfWork.Directors.GetDirectorsFromName(name);
 
+        /// <summary>
+        /// Considers all the distinct <see cref="Movie"/> entities linked to some
+        /// <see cref="MovieRip"/> in the last two visits and outputs the difference in
+        /// a dictionary with keys "added" and "removed".
+        /// </summary>
         public Dictionary<string, IEnumerable<string>> GetLastVisitDiff()
         {
             MovieWarehouseVisit lastVisit = this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
@@ -111,24 +125,18 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Method <c>GetVisitDiff</c> considers all the distinct Movie entities linked to some
-        /// MovieRip in <paramref name="visitLeft"/> or in <paramref name="visitLeft"/> and outputs the difference in
+        /// Considers all the distinct <see cref="Movie"/> entities linked to some
+        /// <see cref="MovieRip"/> in <paramref name="visitLeft"/> or in <paramref name="visitLeft"/> and outputs the difference in
         /// a dictionary with keys "added" and "removed".
         /// </summary>
         public Dictionary<string, IEnumerable<string>> GetVisitDiff(MovieWarehouseVisit visitLeft, MovieWarehouseVisit visitRight)
         {
-            if (visitRight == null)
-            {
-                throw new ArgumentNullException("visitRight should not be null");
-            }
+            if (visitRight is null) throw new ArgumentNullException(nameof(visitRight));
 
-            if (visitLeft == null)
-            {
-                return new Dictionary<string, IEnumerable<string>>() {
-                    ["added"] = this.UnitOfWork.Movies.GetAllMoviesInVisit(visitRight).Select(m => m.ToString()),
-                    ["removed"] = Enumerable.Empty<string>()
-                };
-            }
+            if (visitLeft is null) return new Dictionary<string, IEnumerable<string>>() {
+                ["added"] = this.UnitOfWork.Movies.GetAllMoviesInVisit(visitRight).Select(m => m.ToString()),
+                ["removed"] = Enumerable.Empty<string>()
+            };
 
             if (visitLeft.VisitDateTime >= visitRight.VisitDateTime)
             {
