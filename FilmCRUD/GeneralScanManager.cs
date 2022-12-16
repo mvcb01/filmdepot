@@ -20,7 +20,8 @@ namespace FilmCRUD
         public MovieWarehouseVisit GetClosestVisit() => this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit();
 
         /// <summary>
-        /// Finds and returns the <see cref="MovieWarehouseVisit"/> in the repository with the closest visit datetime to the provided <paramref name="dt"/>.
+        /// Finds and returns the <see cref="MovieWarehouseVisit"/> in the repository with the closest visit datetime
+        /// to the provided parameter <paramref name="dt"/>.
         /// </summary>
         public MovieWarehouseVisit GetClosestVisit(DateTime dt) => this.UnitOfWork.MovieWarehouseVisits.GetClosestMovieWarehouseVisit(dt);
 

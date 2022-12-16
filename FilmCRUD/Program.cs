@@ -24,7 +24,9 @@ namespace FilmCRUD
 {
     class Program
     {
-        // default serilog template without the timezone
+        /// <summary>
+        /// Default serilog template minus the timezone.
+        /// </summary>
         private const string _logOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
 
         static async Task Main(string[] args)
@@ -86,6 +88,9 @@ namespace FilmCRUD
             services.AddSingleton<IMovieAPIClient, TheMovieDbAPIClient>();
         }
 
+        /// <summary>
+        /// To handle options defined in verb <see cref="VisitOptions"/>.
+        /// </summary>
         private static void HandleVisitOptions(VisitOptions opts, ServiceProvider serviceProvider)
         {
             // local func to create the logger that saves parsing errors;
@@ -164,7 +169,9 @@ namespace FilmCRUD
             }
         }
 
-        // not a persistent method and so does not log
+        /// <summary>
+        /// To handle options defined in verb <see cref="ScanRipsOptions"/>. Not a peristent method so there's no logging.
+        /// </summary>
         private static void HandleScanRipsOptions(ScanRipsOptions opts, ServiceProvider serviceProvider)
         {
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
@@ -253,6 +260,9 @@ namespace FilmCRUD
             Console.WriteLine("------------");
         }
 
+        /// <summary>
+        /// To handle options defined in verb <see cref="ScanMoviesOptions "/>. Not a peristent method so there's no logging.
+        /// </summary>
         private static void HandleScanMoviesOptions(ScanMoviesOptions opts, ServiceProvider serviceProvider)
         {
             IUnitOfWork unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
@@ -373,6 +383,10 @@ namespace FilmCRUD
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// To handle options defined in verb <see cref="LinkOptions"/>. This is an asynchronous method since, depending
+        /// on parameter <paramref name="opts"/>, <see cref="IMovieAPIClient"/> may be used.
+        /// </summary>
         private static async Task HandleLinkOptions(LinkOptions opts, ServiceProvider serviceProvider)
         {
             // default MinimumLevel is Information
@@ -422,7 +436,11 @@ namespace FilmCRUD
             }
         }
 
-        public static async Task HandleFetchOptions(FetchOptions opts, ServiceProvider serviceProvider)
+        /// <summary>
+        /// To handle options defined in verb <see cref="FetchOptions"/>. This is an asynchronous method
+        /// since <see cref="IMovieAPIClient"/> will be used.
+        /// </summary>
+        private static async Task HandleFetchOptions(FetchOptions opts, ServiceProvider serviceProvider)
         {
             // local func to create the logger for each fetcher class;
             // made static since it does not need local variables or instance state
@@ -487,11 +505,17 @@ namespace FilmCRUD
             }
         }
 
+        /// <summary>
+        /// To handle errors on parsing the commands line args from <see cref="Main"/>.
+        /// </summary>
+        /// <param name="errors"></param>
         private static void HandleParseError(IEnumerable<Error> errors)
         {
+            string msg;
             foreach (var errorObj in errors)
             {
-                Console.WriteLine(errorObj.Tag);
+                msg = errorObj is TokenError tokenError ? $"{tokenError.Tag}: {tokenError.Token}" : $"{errorObj.Tag}";
+                Console.WriteLine(msg);
             }
         }
 
