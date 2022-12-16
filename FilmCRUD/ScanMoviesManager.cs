@@ -69,9 +69,11 @@ namespace FilmCRUD
         /// <summary>
         /// Group by and count by actor in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
         /// </summary>
-        public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit)
+        public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit, out int withoutActors)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            withoutActors = moviesInVisit.Where(m => !m.Actors.Any()).Count();
 
             // flatten -> group by Actor and count
             IEnumerable<IGrouping<Actor, Actor>> grouped = moviesInVisit.SelectMany(m => m.Actors).GroupBy(a => a);

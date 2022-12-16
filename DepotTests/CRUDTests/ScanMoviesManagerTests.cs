@@ -200,15 +200,19 @@ namespace DepotTests.CRUDTests
             var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Actors = new Actor[] { firstActor, secondActor } };
             var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, Actors = new Actor[] { firstActor } };
             var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Actors = new Actor[] { thirdActor } };
+            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Actors = Array.Empty<Actor>() };
+            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Actors = Array.Empty<Actor>() };
+
+            var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie, fifthMovie };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
 
             this._movieRepositoryMock
                 .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
-                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+                .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<Actor, int>> actual = this._scanMoviesManager.GetCountByActor(visit);
+            IEnumerable<KeyValuePair<Actor, int>> actual = this._scanMoviesManager.GetCountByActor(visit, out int withoutActors);
 
             // assert
             var expected = new List<KeyValuePair<Actor, int>>() {
@@ -216,7 +220,12 @@ namespace DepotTests.CRUDTests
                 new KeyValuePair<Actor, int>(secondActor, 1),
                 new KeyValuePair<Actor, int>(thirdActor, 1)
             };
-            actual.Should().BeEquivalentTo(expected);
+
+            using (new AssertionScope())
+            {
+                actual.Should().BeEquivalentTo(expected);
+                withoutActors.Should().Be(moviesInVisit.Where(m => !m.Actors.Any()).Count());
+            }
         }
 
         [Fact]

@@ -338,12 +338,13 @@ namespace FilmCRUD
             else if (opts.ByActor)
             {
                 Console.WriteLine("Count by actor:\n");
-                IEnumerable<KeyValuePair<Actor, int>> actorCount = scanMoviesManager.GetCountByActor(visit);
+                IEnumerable<KeyValuePair<Actor, int>> actorCount = scanMoviesManager.GetCountByActor(visit, out int withoutActors);
                 int toTake = opts.Top ?? actorCount.Count();
                 actorCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
+                Console.WriteLine($"<empty>: {withoutActors}");
             }
             else if (opts.ByDirector)
             {
