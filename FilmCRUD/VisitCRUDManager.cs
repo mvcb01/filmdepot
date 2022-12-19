@@ -26,14 +26,14 @@ namespace FilmCRUD
 
         private readonly ILogger _parsingErrorsLogger;
 
-        private readonly DirectoryFileLister _directoryFileLister;
+        private readonly WarehouseLister _directoryFileLister;
 
         // to match filenames like "movies_20220321.txt"
         private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[0-9][0-3][0-9].txt$";
 
-        public string MovieWarehouseDirectory { get => _appSettingsManager.GetMovieWarehouseDirectory(); }
+        public string MovieWarehouseDirectory { get => this._appSettingsManager.GetMovieWarehouseDirectory(); }
 
-        public string WarehouseContentsTextFilesDirectory { get => _appSettingsManager.GetWarehouseContentsTextFilesDirectory(); }
+        public string WarehouseContentsTextFilesDirectory { get => this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(); }
 
         public VisitCRUDManager(
             IUnitOfWork unitOfWork,
@@ -42,7 +42,7 @@ namespace FilmCRUD
         {
             this._unitOfWork = unitOfWork;
             this._fileSystemIOWrapper = fileSystemIOWrapper;
-            this._directoryFileLister = new DirectoryFileLister(this._fileSystemIOWrapper);
+            this._directoryFileLister = new WarehouseLister(this._fileSystemIOWrapper);
             this._appSettingsManager = appSettingsManager;
         }
 
@@ -61,11 +61,11 @@ namespace FilmCRUD
 
             try
             {
-                this._directoryFileLister.ListMoviesAndPersistToTextFile(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory, filename);
+                this._directoryFileLister.ListAndPersist(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory, filename);
             }
             catch (Exception ex) when (ex is FileExistsError || ex is DirectoryNotFoundException)
             {
-                Log.Error(ex, ex.Message);
+                Log.Fatal(ex, ex.Message);
                 throw;
             }
             
@@ -77,7 +77,7 @@ namespace FilmCRUD
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
             if (this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
-                Log.Error("There's already a visit for date {VisitDate}", visitDate.ToString("MMMM dd yyyy"));
+                Log.Fatal("There's already a visit for date {VisitDate}", visitDate.ToString("MMMM dd yyyy"));
                 throw new DoubleVisitError(fileDateString);
             }
 
@@ -250,7 +250,7 @@ namespace FilmCRUD
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, ex.Message);
+                    Log.Fatal(ex, ex.Message);
                     this._unitOfWork.Dispose();
                     throw;
                 }
@@ -329,7 +329,7 @@ namespace FilmCRUD
         {
             if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
             {
-                Log.Error("Not a directory: {DirPath}", WarehouseContentsTextFilesDirectory);
+                Log.Fatal("Not a directory: {DirPath}", WarehouseContentsTextFilesDirectory);
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
 
@@ -343,12 +343,13 @@ namespace FilmCRUD
 
             if (!filesWithDate.Any())
             {
-                Log.Error("No warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
+                Log.Fatal("No warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
                 throw new FileNotFoundException(fileDateString);
             }
-            else if (filesWithDate.Count > 1)
+            
+            if (filesWithDate.Count > 1)
             {
-                Log.Error("Several warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
+                Log.Fatal("Several warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
                 throw new FileNotFoundException(fileDateString);
             }
 

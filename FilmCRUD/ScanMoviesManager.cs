@@ -10,6 +10,11 @@ namespace FilmCRUD
 {
     public class ScanMoviesManager : GeneralScanManager
     {
+        /// <summary>
+        /// Utility methods to query info about the <see cref="Movie"/> entities in the repository. Methods where the first
+        /// parameter is a <see cref="MovieWarehouseVisit"/> object return info about the provided visit.
+        /// </summary>
+        /// <param name="unitOfWork"></param>
         public ScanMoviesManager(IUnitOfWork unitOfWork) : base(unitOfWork) { }
 
         /// <summary>
