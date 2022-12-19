@@ -108,7 +108,7 @@ namespace DepotTests.CRUDTests
             _fileSystemIOWrapper.Setup(f => f.GetSubdirectories(existentWarehousePath)).Returns(warehouseContents);
 
             // act
-            List<string> result = _warehouseLister.GetMovieFileNames(existentWarehousePath);
+            IEnumerable<string> result = _warehouseLister.GetMovieFileNames(existentWarehousePath);
 
             // assert
             // from the official docs:

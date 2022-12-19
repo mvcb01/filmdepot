@@ -9,8 +9,8 @@ using FilmDomain.Entities;
 namespace FilmCRUD.Helpers
 {
     /// <summary>
-    /// Class with utility methods to find and list movie files in a given directory. These movie files are expected to be directories
-    /// and will later be converted to <see cref="MovieRip"/> entities.
+    /// Class with utility methods to find and list subdirectories in a given directory. These subdirectories will later be filtered
+    /// and converted to <see cref="MovieRip"/> entities.
     /// </summary>
     public class WarehouseLister
     {
@@ -21,40 +21,40 @@ namespace FilmCRUD.Helpers
 
         public WarehouseLister(IFileSystemIOWrapper fileSystemIOWrapper) => this._fileSystemIOWrapper = fileSystemIOWrapper;
 
-        public void ListAndPersist(string movieWarehousePath, string destinationDirectory, string filename)
+        /// <summary>
+        /// Finds all the subdirectories in <paramref name="warehousePath"/> and writes their names - one per line - to the 
+        /// provided directory <paramref name="destinationDirectory"/> with the provided name <paramref name="filename"/>.
+        /// </summary>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileExistsError"></exception>
+        public void ListAndPersist(string warehousePath, string destinationDirectory, string filename)
         {
             if (!this._fileSystemIOWrapper.DirectoryExists(destinationDirectory))
                 throw new DirectoryNotFoundException(destinationDirectory);
 
-            List<string> movieFiles = GetMovieFileNames(movieWarehousePath);
+            IEnumerable<string> movieFiles = GetMovieFileNames(warehousePath);
 
             string fileContents = String.Join("\n", movieFiles);
 
-            PersistFileNamesToTextFile(destinationDirectory, filename, fileContents);
-        }
-
-        public List<string> GetMovieFileNames(string movieWarehousePath)
-        {
-            if (!_fileSystemIOWrapper.DirectoryExists(movieWarehousePath)) throw new DirectoryNotFoundException(movieWarehousePath);
-
-            // movie rips are considered to be directories, not strict files
-            IEnumerable<string> allMoviePaths = this._fileSystemIOWrapper.GetSubdirectories(movieWarehousePath);
-            List<string> allFileNames = allMoviePaths.Select(m => Path.GetFileName(m)).ToList();
-
-            return allFileNames;
-        }
-
-        private void PersistFileNamesToTextFile(string destinationDirectory, string fileName, string fileContents)
-        {
-            if (!_fileSystemIOWrapper.DirectoryExists(destinationDirectory))
+            if (!this._fileSystemIOWrapper.DirectoryExists(destinationDirectory))
                 throw new DirectoryNotFoundException(destinationDirectory);
 
-            string filePath = Path.Combine(destinationDirectory, fileName);
+            string filePath = Path.Combine(destinationDirectory, filename);
 
-            if (_fileSystemIOWrapper.GetFiles(destinationDirectory).Contains(filePath))
+            if (this._fileSystemIOWrapper.GetFiles(destinationDirectory).Contains(filePath))
                 throw new FileExistsError(filePath);
 
-            _fileSystemIOWrapper.WriteAllText(filePath, fileContents);
+            this._fileSystemIOWrapper.WriteAllText(filePath, fileContents);
+        }
+
+        public IEnumerable<string> GetMovieFileNames(string movieWarehousePath)
+        {
+            if (!this._fileSystemIOWrapper.DirectoryExists(movieWarehousePath))
+                throw new DirectoryNotFoundException(movieWarehousePath);
+
+            // movie rips are considered to be directories, not strict files
+            IEnumerable<string> allSubdirs = this._fileSystemIOWrapper.GetSubdirectories(movieWarehousePath);
+            return allSubdirs.Select(m => Path.GetFileName(m));
         }
     }
 }
