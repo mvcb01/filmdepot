@@ -2,10 +2,8 @@ using System.IO;
 using Moq;
 using FluentAssertions;
 using Xunit;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using FilmCRUD.Helpers;
 using FilmCRUD.Interfaces;
 using FilmCRUD.CustomExceptions;
