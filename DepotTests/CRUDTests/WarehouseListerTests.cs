@@ -14,12 +14,12 @@ namespace DepotTests.CRUDTests
     {
         private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapper;
 
-        private readonly WarehouseLister _directoryFileLister;
+        private readonly WarehouseLister _warehouseLister;
 
         public WarehouseListerTests()
         {
             this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>(MockBehavior.Strict);
-            this._directoryFileLister = new WarehouseLister(this._fileSystemIOWrapper.Object);
+            this._warehouseLister = new WarehouseLister(this._fileSystemIOWrapper.Object);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace DepotTests.CRUDTests
             // nothing to do...
 
             // assert
-            _directoryFileLister
+            _warehouseLister
                 .Invoking(d => d.ListMoviesAndPersistToTextFile(inexistentMovieWarehousePath, existentDestinationDir, "movies_20220101.txt"))
                 .Should()
                 .Throw<DirectoryNotFoundException>()
@@ -59,7 +59,7 @@ namespace DepotTests.CRUDTests
             // nothing to do...
 
             // assert
-            _directoryFileLister
+            _warehouseLister
                 .Invoking(d => d.ListMoviesAndPersistToTextFile(existentMovieWarehousePath, inexistentDestinationDirectory, "movies_20220101.txt"))
                 .Should()
                 .Throw<DirectoryNotFoundException>()
@@ -87,7 +87,7 @@ namespace DepotTests.CRUDTests
             // nothing to do...
 
             // assert
-            _directoryFileLister
+            _warehouseLister
                 .Invoking(d => d.ListMoviesAndPersistToTextFile(existentMovieWarehousePath, existentDestinationDirectory, "movies_20220101.txt" ))
                 .Should()
                 .Throw<FileExistsError>()
@@ -108,7 +108,7 @@ namespace DepotTests.CRUDTests
             _fileSystemIOWrapper.Setup(f => f.GetSubdirectories(existentMovieWarehousePath)).Returns(warehouseContents);
 
             // act
-            List<string> result = _directoryFileLister.GetMovieFileNames(existentMovieWarehousePath);
+            List<string> result = _warehouseLister.GetMovieFileNames(existentMovieWarehousePath);
 
             // assert
             // from the official docs:
