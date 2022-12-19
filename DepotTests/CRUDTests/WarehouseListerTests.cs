@@ -26,13 +26,13 @@ namespace DepotTests.CRUDTests
         public void ListAndPersist_WithInexistantMovieWarehousePath_ShouldThrowDirectoryNotFoundException()
         {
             // arrange
-            string inexistentMovieWarehousePath = "Z:\\SomeDir";
+            string inexistentWarehousePath = "Z:\\SomeDir";
             string existentDestinationDir = "D:\\DoesNotMatter";
             this._fileSystemIOWrapper
                 .Setup(f => f.DirectoryExists(existentDestinationDir))
                 .Returns(true);
             this._fileSystemIOWrapper
-                .Setup(f => f.DirectoryExists(inexistentMovieWarehousePath))
+                .Setup(f => f.DirectoryExists(inexistentWarehousePath))
                 .Returns(false);
 
             // act
@@ -40,19 +40,19 @@ namespace DepotTests.CRUDTests
 
             // assert
             _warehouseLister
-                .Invoking(d => d.ListAndPersist(inexistentMovieWarehousePath, existentDestinationDir, "movies_20220101.txt"))
+                .Invoking(d => d.ListAndPersist(inexistentWarehousePath, existentDestinationDir, "movies_20220101.txt"))
                 .Should()
                 .Throw<DirectoryNotFoundException>()
-                .WithMessage(inexistentMovieWarehousePath);
+                .WithMessage(inexistentWarehousePath);
         }
 
         [Fact]
         public void ListAndPersist_WithInexistentDestinationDirectory_ShouldThrowDirectoryNotFoundException()
         {
             // arrange
-            string existentMovieWarehousePath = "Z:\\WarehouseDir";
+            string existentWarehousePath = "Z:\\WarehouseDir";
             string inexistentDestinationDirectory = "S:\\SomeDstDir";
-            _fileSystemIOWrapper.Setup(f => f.DirectoryExists(existentMovieWarehousePath)).Returns(true);
+            _fileSystemIOWrapper.Setup(f => f.DirectoryExists(existentWarehousePath)).Returns(true);
             _fileSystemIOWrapper.Setup(f => f.DirectoryExists(inexistentDestinationDirectory)).Returns(false);
 
             // act
@@ -60,7 +60,7 @@ namespace DepotTests.CRUDTests
 
             // assert
             _warehouseLister
-                .Invoking(d => d.ListAndPersist(existentMovieWarehousePath, inexistentDestinationDirectory, "movies_20220101.txt"))
+                .Invoking(d => d.ListAndPersist(existentWarehousePath, inexistentDestinationDirectory, "movies_20220101.txt"))
                 .Should()
                 .Throw<DirectoryNotFoundException>()
                 .WithMessage(inexistentDestinationDirectory);
@@ -70,17 +70,17 @@ namespace DepotTests.CRUDTests
         public void ListAndPersist_WithExistingFileName_ShouldThrowFileExistsError()
         {
             // arrange
-            string existentMovieWarehousePath = "Z:\\WarehouseDir";
+            string existentWarehousePath = "Z:\\WarehouseDir";
             string existentDestinationDirectory = "S:\\SomeDstDir";
             string existentFileName = "movies_20220101.txt";
             string existentFilePath = Path.Combine(existentDestinationDirectory, existentFileName);
-            _fileSystemIOWrapper.Setup(f => f.DirectoryExists(existentMovieWarehousePath)).Returns(true);
+            _fileSystemIOWrapper.Setup(f => f.DirectoryExists(existentWarehousePath)).Returns(true);
             _fileSystemIOWrapper.Setup(f => f.DirectoryExists(existentDestinationDirectory)).Returns(true);
             _fileSystemIOWrapper
                 .Setup(f => f.GetFiles(existentDestinationDirectory))
                 .Returns(new string[] { existentFilePath });
             this._fileSystemIOWrapper
-                .Setup(f => f.GetSubdirectories(existentMovieWarehousePath))
+                .Setup(f => f.GetSubdirectories(existentWarehousePath))
                 .Returns(Enumerable.Empty<string>());
 
             // act
@@ -88,7 +88,7 @@ namespace DepotTests.CRUDTests
 
             // assert
             _warehouseLister
-                .Invoking(d => d.ListAndPersist(existentMovieWarehousePath, existentDestinationDirectory, "movies_20220101.txt" ))
+                .Invoking(d => d.ListAndPersist(existentWarehousePath, existentDestinationDirectory, "movies_20220101.txt" ))
                 .Should()
                 .Throw<FileExistsError>()
                 .WithMessage(existentFilePath);
@@ -98,17 +98,17 @@ namespace DepotTests.CRUDTests
         public void GetMovieFileNames_WithExistingMovieWarehousePath_ShouldReturnCorrectDirectoryContents()
         {
             // arrange
-            string existentMovieWarehousePath = "Z:\\WarehouseDir";
+            string existentWarehousePath = "Z:\\WarehouseDir";
             string[] movieFileNames = {
                 "The.Lives.of.Others.2006.GERMAN.REMASTERED.1080p.BluRay.x264.DTS-NOGRP",
                 "Sicario 2015 1080p BluRay x264 AC3-JYK"
             };
-            IEnumerable<string> warehouseContents = movieFileNames.Select(s => Path.Combine(existentMovieWarehousePath, s));
-            _fileSystemIOWrapper.Setup(f => f.DirectoryExists(existentMovieWarehousePath)).Returns(true);
-            _fileSystemIOWrapper.Setup(f => f.GetSubdirectories(existentMovieWarehousePath)).Returns(warehouseContents);
+            IEnumerable<string> warehouseContents = movieFileNames.Select(s => Path.Combine(existentWarehousePath, s));
+            _fileSystemIOWrapper.Setup(f => f.DirectoryExists(existentWarehousePath)).Returns(true);
+            _fileSystemIOWrapper.Setup(f => f.GetSubdirectories(existentWarehousePath)).Returns(warehouseContents);
 
             // act
-            List<string> result = _warehouseLister.GetMovieFileNames(existentMovieWarehousePath);
+            List<string> result = _warehouseLister.GetMovieFileNames(existentWarehousePath);
 
             // assert
             // from the official docs:
