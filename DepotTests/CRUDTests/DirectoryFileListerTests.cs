@@ -8,11 +8,11 @@ using FilmCRUD.Helpers;
 using FilmCRUD.Interfaces;
 using FilmCRUD.CustomExceptions;
 
-
 namespace DepotTests.CRUDTests
 {
     public class DirectoryFileListerTests
     {
+        
         private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapper;
 
         private readonly DirectoryFileLister _directoryFileLister;
