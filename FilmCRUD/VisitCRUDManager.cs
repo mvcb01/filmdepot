@@ -15,7 +15,6 @@ using FilmCRUD.Interfaces;
 
 namespace FilmCRUD
 {
-
     public class VisitCRUDManager
     {
         private readonly IUnitOfWork _unitOfWork;
