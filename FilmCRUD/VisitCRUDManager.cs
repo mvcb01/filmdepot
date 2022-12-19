@@ -65,7 +65,7 @@ namespace FilmCRUD
             }
             catch (Exception ex) when (ex is FileExistsError || ex is DirectoryNotFoundException)
             {
-                Log.Error(ex, ex.Message);
+                Log.Fatal(ex, ex.Message);
                 throw;
             }
             
@@ -77,7 +77,7 @@ namespace FilmCRUD
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
             if (this._unitOfWork.MovieWarehouseVisits.GetVisitDates().Contains(visitDate))
             {
-                Log.Error("There's already a visit for date {VisitDate}", visitDate.ToString("MMMM dd yyyy"));
+                Log.Fatal("There's already a visit for date {VisitDate}", visitDate.ToString("MMMM dd yyyy"));
                 throw new DoubleVisitError(fileDateString);
             }
 
@@ -250,7 +250,7 @@ namespace FilmCRUD
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, ex.Message);
+                    Log.Fatal(ex, ex.Message);
                     this._unitOfWork.Dispose();
                     throw;
                 }
@@ -329,7 +329,7 @@ namespace FilmCRUD
         {
             if (!this._fileSystemIOWrapper.DirectoryExists(WarehouseContentsTextFilesDirectory))
             {
-                Log.Error("Not a directory: {DirPath}", WarehouseContentsTextFilesDirectory);
+                Log.Fatal("Not a directory: {DirPath}", WarehouseContentsTextFilesDirectory);
                 throw new DirectoryNotFoundException(WarehouseContentsTextFilesDirectory);
             }
 
@@ -343,12 +343,12 @@ namespace FilmCRUD
 
             if (!filesWithDate.Any())
             {
-                Log.Error("No warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
+                Log.Fatal("No warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
                 throw new FileNotFoundException(fileDateString);
             }
             else if (filesWithDate.Count > 1)
             {
-                Log.Error("Several warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
+                Log.Fatal("Several warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
                 throw new FileNotFoundException(fileDateString);
             }
 
