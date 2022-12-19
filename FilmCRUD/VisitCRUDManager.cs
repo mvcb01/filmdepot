@@ -31,9 +31,9 @@ namespace FilmCRUD
         // to match filenames like "movies_20220321.txt"
         private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[0-9][0-3][0-9].txt$";
 
-        public string MovieWarehouseDirectory { get => _appSettingsManager.GetMovieWarehouseDirectory(); }
+        public string MovieWarehouseDirectory { get => this._appSettingsManager.GetMovieWarehouseDirectory(); }
 
-        public string WarehouseContentsTextFilesDirectory { get => _appSettingsManager.GetWarehouseContentsTextFilesDirectory(); }
+        public string WarehouseContentsTextFilesDirectory { get => this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(); }
 
         public VisitCRUDManager(
             IUnitOfWork unitOfWork,
