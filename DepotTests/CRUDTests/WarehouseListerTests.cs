@@ -23,7 +23,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void ListMoviesAndPersistToTextFile_WithInexistantMovieWarehousePath_ShouldThrowDirectoryNotFoundException()
+        public void ListAndPersist_WithInexistantMovieWarehousePath_ShouldThrowDirectoryNotFoundException()
         {
             // arrange
             string inexistentMovieWarehousePath = "Z:\\SomeDir";
@@ -40,14 +40,14 @@ namespace DepotTests.CRUDTests
 
             // assert
             _warehouseLister
-                .Invoking(d => d.ListMoviesAndPersistToTextFile(inexistentMovieWarehousePath, existentDestinationDir, "movies_20220101.txt"))
+                .Invoking(d => d.ListAndPersist(inexistentMovieWarehousePath, existentDestinationDir, "movies_20220101.txt"))
                 .Should()
                 .Throw<DirectoryNotFoundException>()
                 .WithMessage(inexistentMovieWarehousePath);
         }
 
         [Fact]
-        public void ListMoviesAndPersistToTextFile_WithInexistentDestinationDirectory_ShouldThrowDirectoryNotFoundException()
+        public void ListAndPersist_WithInexistentDestinationDirectory_ShouldThrowDirectoryNotFoundException()
         {
             // arrange
             string existentMovieWarehousePath = "Z:\\WarehouseDir";
@@ -60,14 +60,14 @@ namespace DepotTests.CRUDTests
 
             // assert
             _warehouseLister
-                .Invoking(d => d.ListMoviesAndPersistToTextFile(existentMovieWarehousePath, inexistentDestinationDirectory, "movies_20220101.txt"))
+                .Invoking(d => d.ListAndPersist(existentMovieWarehousePath, inexistentDestinationDirectory, "movies_20220101.txt"))
                 .Should()
                 .Throw<DirectoryNotFoundException>()
                 .WithMessage(inexistentDestinationDirectory);
         }
 
         [Fact]
-        public void ListMoviesAndPersistToTextFile_WithExistingFileName_ShouldThrowFileExistsError()
+        public void ListAndPersist_WithExistingFileName_ShouldThrowFileExistsError()
         {
             // arrange
             string existentMovieWarehousePath = "Z:\\WarehouseDir";
@@ -88,7 +88,7 @@ namespace DepotTests.CRUDTests
 
             // assert
             _warehouseLister
-                .Invoking(d => d.ListMoviesAndPersistToTextFile(existentMovieWarehousePath, existentDestinationDirectory, "movies_20220101.txt" ))
+                .Invoking(d => d.ListAndPersist(existentMovieWarehousePath, existentDestinationDirectory, "movies_20220101.txt" ))
                 .Should()
                 .Throw<FileExistsError>()
                 .WithMessage(existentFilePath);

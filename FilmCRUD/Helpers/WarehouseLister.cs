@@ -21,7 +21,7 @@ namespace FilmCRUD.Helpers
 
         public WarehouseLister(IFileSystemIOWrapper fileSystemIOWrapper) => this._fileSystemIOWrapper = fileSystemIOWrapper;
 
-        public void ListMoviesAndPersistToTextFile(string movieWarehousePath, string destinationDirectory, string filename)
+        public void ListAndPersist(string movieWarehousePath, string destinationDirectory, string filename)
         {
             if (!this._fileSystemIOWrapper.DirectoryExists(destinationDirectory))
                 throw new DirectoryNotFoundException(destinationDirectory);
