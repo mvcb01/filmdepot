@@ -346,7 +346,8 @@ namespace FilmCRUD
                 Log.Fatal("No warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
                 throw new FileNotFoundException(fileDateString);
             }
-            else if (filesWithDate.Count > 1)
+            
+            if (filesWithDate.Count > 1)
             {
                 Log.Fatal("Several warehouse contents files with suffix _{FileDateString}.txt; regex filter used: {Regex}", fileDateString, _txtFileRegex);
                 throw new FileNotFoundException(fileDateString);
