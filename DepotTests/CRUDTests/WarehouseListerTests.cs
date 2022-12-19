@@ -10,14 +10,13 @@ using FilmCRUD.CustomExceptions;
 
 namespace DepotTests.CRUDTests
 {
-    public class DirectoryFileListerTests
+    public class WarehouseListerTests
     {
-        
         private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapper;
 
         private readonly WarehouseLister _directoryFileLister;
 
-        public DirectoryFileListerTests()
+        public WarehouseListerTests()
         {
             this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>(MockBehavior.Strict);
             this._directoryFileLister = new WarehouseLister(this._fileSystemIOWrapper.Object);
