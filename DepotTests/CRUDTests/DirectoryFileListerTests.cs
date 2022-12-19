@@ -15,12 +15,12 @@ namespace DepotTests.CRUDTests
         
         private readonly Mock<IFileSystemIOWrapper> _fileSystemIOWrapper;
 
-        private readonly DirectoryFileLister _directoryFileLister;
+        private readonly WarehouseLister _directoryFileLister;
 
         public DirectoryFileListerTests()
         {
             this._fileSystemIOWrapper = new Mock<IFileSystemIOWrapper>(MockBehavior.Strict);
-            this._directoryFileLister = new DirectoryFileLister(this._fileSystemIOWrapper.Object);
+            this._directoryFileLister = new WarehouseLister(this._fileSystemIOWrapper.Object);
         }
 
         [Fact]

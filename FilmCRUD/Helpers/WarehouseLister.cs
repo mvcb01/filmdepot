@@ -12,14 +12,14 @@ namespace FilmCRUD.Helpers
     /// Class with utility methods to find and list movie files in a given directory. These movie files are expected to be directories
     /// and will later be converted to <see cref="MovieRip"/> entities.
     /// </summary>
-    public class DirectoryFileLister
+    public class WarehouseLister
     {
         /// <summary>
         /// Useful to have this field so that we can mock its behaviour in tests, all while avoiding IO
         /// </summary>
         private readonly IFileSystemIOWrapper _fileSystemIOWrapper;
 
-        public DirectoryFileLister(IFileSystemIOWrapper fileSystemIOWrapper) => this._fileSystemIOWrapper = fileSystemIOWrapper;
+        public WarehouseLister(IFileSystemIOWrapper fileSystemIOWrapper) => this._fileSystemIOWrapper = fileSystemIOWrapper;
 
         public void ListMoviesAndPersistToTextFile(string movieWarehousePath, string destinationDirectory, string filename)
         {

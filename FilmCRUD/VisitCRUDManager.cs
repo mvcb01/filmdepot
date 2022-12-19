@@ -26,7 +26,7 @@ namespace FilmCRUD
 
         private readonly ILogger _parsingErrorsLogger;
 
-        private readonly DirectoryFileLister _directoryFileLister;
+        private readonly WarehouseLister _directoryFileLister;
 
         // to match filenames like "movies_20220321.txt"
         private const string _txtFileRegex = @"^movies_20([0-9]{2})(0|1)[0-9][0-3][0-9].txt$";
@@ -42,7 +42,7 @@ namespace FilmCRUD
         {
             this._unitOfWork = unitOfWork;
             this._fileSystemIOWrapper = fileSystemIOWrapper;
-            this._directoryFileLister = new DirectoryFileLister(this._fileSystemIOWrapper);
+            this._directoryFileLister = new WarehouseLister(this._fileSystemIOWrapper);
             this._appSettingsManager = appSettingsManager;
         }
 
