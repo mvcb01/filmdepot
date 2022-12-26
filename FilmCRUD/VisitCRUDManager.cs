@@ -37,6 +37,8 @@ namespace FilmCRUD
 
         public string WarehouseContentsTextFilesDirectory { get => this._appSettingsManager.GetWarehouseContentsTextFilesDirectory(); }
 
+        public IEnumerable<string> FilesToIgnore { get => this._appSettingsManager.GetFilesToIgnore(); }
+
         public VisitCRUDManager(
             IUnitOfWork unitOfWork,
             IFileSystemIOWrapper fileSystemIOWrapper,
@@ -55,7 +57,7 @@ namespace FilmCRUD
             ILogger parsingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager) => this._parsingErrorsLogger = parsingErrorsLogger;
 
         /// <summary>
-        /// Lists the contents of the warehouse directory - see property <see cref="MovieWarehouseDirectory"/> - and persists them into
+        /// Lists the contents of the warehouse directory - see instance property <see cref="MovieWarehouseDirectory"/> - and persists them into
         /// a text file with format <c>movies_YYYYMMDD.txt</c> for the runtime date. Destination directory is as in
         /// property <see cref="WarehouseContentsTextFilesDirectory"/>.
         /// </summary>
@@ -69,7 +71,7 @@ namespace FilmCRUD
 
             try
             {
-                this._directoryFileLister.ListAndPersist(MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory, filename);
+                this._directoryFileLister.ListAndPersist(this.MovieWarehouseDirectory, WarehouseContentsTextFilesDirectory, filename);
             }
             catch (Exception ex) when (ex is FileExistsError || ex is DirectoryNotFoundException)
             {
@@ -134,10 +136,10 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// 
+        /// Finds the <see cref="MovieRip"/> entities for a visit, creating new ones if they do not already exist in the repository
+        /// for another previous visit. Criteria to consider a new entity is simply the filename.
         /// </summary>
-        /// <param name="ripFileNamesInVisit"> cenas do crl</param>
-        /// <returns></returns>
+        /// <param name="ripFileNamesInVisit">The rip filenames in visit.</param>
         public (
             IEnumerable<MovieRip> OldMovieRips,
             IEnumerable<MovieRip> NewMovieRips,
@@ -181,12 +183,23 @@ namespace FilmCRUD
             return (oldMovieRips, newMovieRips, newMovieRipsManual, allParsingErrors);
         }
 
-
+        /// <summary>
+        /// Reads the contents of the text file in parameter <paramref name="filePath"/>, assuming there's one filename per
+        /// line. Empty lines or lines with only whitespaces are discarded, as well as all the filenames with a match
+        /// in instance property <see cref="FilesToIgnore"/>.
+        /// </summary>
+        /// <param name="filePath">The filepath with the warehouse contents for a visit.</param>
         public IEnumerable<string> GetMovieRipFileNamesInVisit(string filePath) => this._fileSystemIOWrapper
                 .ReadAllLines(filePath)
                 .Select(f => f.Trim())
-                .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!this._appSettingsManager.GetFilesToIgnore().Contains(f)));
+                .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!this.FilesToIgnore.Contains(f)));
 
+        /// <summary>
+        /// Creates or updates the <see cref="MovieRip"/> entities for a visit using the entity info provided
+        /// by the the manual configuration.
+        /// </summary>
+        /// <param name="visitDateString">The date string for the existing visit - should have format YYYYMMDD</param>
+        /// <exception cref="ArgumentException"></exception>
         public void ProcessManuallyProvidedMovieRipsForExistingVisit(string visitDateString)
         {
             DateTime visitDate = DateTime.ParseExact(visitDateString, "yyyyMMdd", null);
