@@ -83,6 +83,7 @@ namespace FilmCRUD
         /// format <c>movies_YYYYMMDD.txt</c>, where YYYYMMDD is as provided in param <paramref name="fileDateString"/>, and
         /// persist such contents in the <see cref="MovieWarehouseVisit"/> repository.
         /// </summary>
+        /// <param name="fileDateString">The date string for file movies_YYYYMMDD.txt </param>
         /// <exception cref="DoubleVisitError"></exception>
         public void ReadWarehouseContentsAndRegisterVisit(string fileDateString)
         {
@@ -132,6 +133,11 @@ namespace FilmCRUD
             this._unitOfWork.Complete();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ripFileNamesInVisit"> cenas do crl</param>
+        /// <returns></returns>
         public (
             IEnumerable<MovieRip> OldMovieRips,
             IEnumerable<MovieRip> NewMovieRips,

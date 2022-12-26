@@ -31,7 +31,7 @@ namespace FilmCRUD
 
         /// <summary>
         /// Handles the options defined in verbs <see cref="VisitOptions"/>, <see cref="ScanRipsOptions"/>, <see cref="ScanMoviesOptions"/>
-        /// <see cref="LinkOptions"/> or <see cref="FetchOptions"/>.
+        /// <see cref="LinkOptions"/> and <see cref="FetchOptions"/>.
         /// </summary>
         static async Task Main(string[] args)
         {
