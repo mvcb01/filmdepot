@@ -15,7 +15,7 @@ namespace FilmCRUD.Helpers
     public class WarehouseLister
     {
         /// <summary>
-        /// Useful to have this field so that we can mock its behaviour in tests, all while avoiding IO
+        /// Useful to have this field so that we can mock its behaviour in tests, all while avoiding IO.
         /// </summary>
         private readonly IFileSystemIOWrapper _fileSystemIOWrapper;
 

@@ -15,6 +15,9 @@ using FilmCRUD.Interfaces;
 
 namespace FilmCRUD
 {
+    /// <summary>
+    /// To list warehouse contents and persist such contents to the <see cref="MovieWarehouseVisit"/> repository.
+    /// </summary>
     public class VisitCRUDManager
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -51,7 +54,13 @@ namespace FilmCRUD
             IAppSettingsManager appSettingsManager,
             ILogger parsingErrorsLogger) : this(unitOfWork, fileSystemIOWrapper, appSettingsManager) => this._parsingErrorsLogger = parsingErrorsLogger;
 
-
+        /// <summary>
+        /// Lists the contents of the warehouse directory - see property <see cref="MovieWarehouseDirectory"/> - and persists them into
+        /// a text file with format <c>movies_YYYYMMDD.txt</c> for the runtime date. Destination directory is as in
+        /// property <see cref="WarehouseContentsTextFilesDirectory"/>.
+        /// </summary>
+        /// <exception cref="FileExistsError"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
         public void WriteMovieWarehouseContentsToTextFile()
         {
             string filename = $"movies_{DateTime.Now:yyyyMMdd}.txt";
@@ -67,10 +76,14 @@ namespace FilmCRUD
                 Log.Fatal(ex, ex.Message);
                 throw;
             }
-            
         }
 
-
+        /// <summary>
+        /// Searches the directory in <see cref="WarehouseContentsTextFilesDirectory"/> for the text file with
+        /// format <c>movies_YYYYMMDD.txt</c>, where YYYYMMDD is as provided in param <paramref name="fileDateString"/>, and
+        /// persist such contents in the <see cref="MovieWarehouseVisit"/> repository.
+        /// </summary>
+        /// <exception cref="DoubleVisitError"></exception>
         public void ReadWarehouseContentsAndRegisterVisit(string fileDateString)
         {
             DateTime visitDate = DateTime.ParseExact(fileDateString, "yyyyMMdd", null);
@@ -111,13 +124,12 @@ namespace FilmCRUD
             Log.Information("New rips with manual info: {NewRipsManual}", newMovieRipsManual.Count());
 
             // persisting changes
-            _unitOfWork.MovieWarehouseVisits.Add(new MovieWarehouseVisit() {
+            this._unitOfWork.MovieWarehouseVisits.Add(new MovieWarehouseVisit() {
                 VisitDateTime = visitDate,
                 MovieRips = allMovieRipsInVisit
                 });
-            _unitOfWork.MovieRips.AddRange(newMovieRips);
-            _unitOfWork.Complete();
-
+            this._unitOfWork.MovieRips.AddRange(newMovieRips);
+            this._unitOfWork.Complete();
         }
 
         public (
@@ -164,12 +176,10 @@ namespace FilmCRUD
         }
 
 
-        public IEnumerable<string> GetMovieRipFileNamesInVisit(string filePath)
-        {
-            return this._fileSystemIOWrapper.ReadAllLines(filePath)
+        public IEnumerable<string> GetMovieRipFileNamesInVisit(string filePath) => this._fileSystemIOWrapper
+                .ReadAllLines(filePath)
                 .Select(f => f.Trim())
                 .Where(f => (!string.IsNullOrWhiteSpace(f)) & (!this._appSettingsManager.GetFilesToIgnore().Contains(f)));
-        }
 
         public void ProcessManuallyProvidedMovieRipsForExistingVisit(string visitDateString)
         {
@@ -219,7 +229,7 @@ namespace FilmCRUD
                     // updates the MovieRip entity if it already exists in the repo, otherwise points to the instance
                     // created from the manual configs
                     MovieRip targetMovieRip = allMovieRips.Where(r => r.FileName == movieRip.FileName).FirstOrDefault();
-                    if (targetMovieRip != null)
+                    if (targetMovieRip is not null)
                     {
                         // not too many files are expected to be manually configured so we use Information level
                         Log.Information("Updating movie rip: {FileName}", targetMovieRip.FileName);
@@ -238,7 +248,6 @@ namespace FilmCRUD
                     // not too many files are expected to be manually configured so we use the log Information level
                     if (!filenamesForMovieRipsInVisit.Contains(targetMovieRip.FileName))
                     {
-
                         Log.Information("Adding movie rip to visit {VisitDateString}: {FileName}", visitDateString, targetMovieRip.FileName);
                         visit.MovieRips.Add(targetMovieRip);
                     }
@@ -256,7 +265,7 @@ namespace FilmCRUD
             }
 
             this._unitOfWork.Complete();
-            }
+        }
 
         private static IEnumerable<MovieRip> GetManualMovieRipsFromDictionaries(
             IEnumerable<KeyValuePair<string, Dictionary<string, string>>> manualMovieRipDictionaries,
