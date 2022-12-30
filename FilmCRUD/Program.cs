@@ -297,7 +297,7 @@ namespace FilmCRUD
             }
             else if (opts.WithActors.Any())
             {
-                // finds the Actor entities for each string in opts.WithActors, then flattens
+                // finds the CastMember entities for each string in opts.CastMembers, then flattens
                 IEnumerable<Actor> actors = opts.WithActors
                     .Select(name => scanMoviesManager.GetActorsFromName(name))
                     .SelectMany(a => a);
