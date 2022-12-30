@@ -22,12 +22,12 @@ namespace FilmDataAccess.EFCore.UnitOfWork
         public SQLiteUnitOfWork(SQLiteAppContext context)
         {
             this._context = context;
-            Movies = new MovieRepository(this._context);
-            Directors = new DirectorRepository(this._context);
-            Genres = new GenreRepository(this._context);
-            MovieRips = new MovieRipRepository(this._context);
-            MovieWarehouseVisits = new MovieWarehouseVisitRepository(this._context);
-            Actors = new ActorRepository(this._context);
+            this.Movies = new MovieRepository(this._context);
+            this.Directors = new DirectorRepository(this._context);
+            this.Genres = new GenreRepository(this._context);
+            this.MovieRips = new MovieRipRepository(this._context);
+            this.MovieWarehouseVisits = new MovieWarehouseVisitRepository(this._context);
+            this.Actors = new ActorRepository(this._context);
         }
 
         public int Complete() => this._context.SaveChanges();
