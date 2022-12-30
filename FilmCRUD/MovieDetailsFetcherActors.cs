@@ -34,7 +34,7 @@ namespace FilmCRUD
 
         public override IEnumerable<Movie> GetMoviesWithoutDetails() => this._unitOfWork.Movies.GetMoviesWithoutActors();
 
-        // explicit cast is defined in MovieActorResult
+        // explicit cast is defined in MovieCastMemberResult
         public override Actor CastApiResultToDetailEntity(MovieActorResult apiresult) => (Actor)apiresult;
 
         public override void AddDetailsToMovieEntity(Movie movie, IEnumerable<Actor> details)
