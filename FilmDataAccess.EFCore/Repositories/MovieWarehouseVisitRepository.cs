@@ -31,7 +31,8 @@ namespace FilmDataAccess.EFCore.Repositories
 
         private static DateTime GetClosestDatetime(IEnumerable<DateTime> allDateTimes, DateTime dt)
         {
-            if (!allDateTimes.Any()) throw new ArgumentException("Argument is empty", nameof(allDateTimes));
+            if (!allDateTimes.Any())
+                throw new ArgumentException("Argument is empty", nameof(allDateTimes));
             return allDateTimes.OrderBy(_dt => Math.Abs((_dt - dt).Ticks)).First();
         }
     }
