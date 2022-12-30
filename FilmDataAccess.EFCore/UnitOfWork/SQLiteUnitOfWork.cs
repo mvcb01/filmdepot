@@ -30,14 +30,8 @@ namespace FilmDataAccess.EFCore.UnitOfWork
             Actors = new ActorRepository(this._context);
         }
 
-        public int Complete()
-        {
-            return this._context.SaveChanges();
-        }
+        public int Complete() => this._context.SaveChanges();
 
-        public void Dispose()
-        {
-            this._context.Dispose();
-        }
+        public void Dispose() => this._context.Dispose();
     }
 }
