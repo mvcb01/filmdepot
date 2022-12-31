@@ -8,7 +8,6 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmCRUD;
 using FluentAssertions.Execution;
-using Microsoft.VisualBasic;
 
 namespace DepotTests.CRUDTests
 {
