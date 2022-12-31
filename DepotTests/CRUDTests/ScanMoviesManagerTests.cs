@@ -100,7 +100,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void GetMoviesWithDirectors_WithProvidedActors_ShouldReturnCorrectMovies()
+        public void GetMoviesWithDirectors_WithProvidedDirectors_ShouldReturnCorrectMovies()
         {
             // arrange
             var firstDirector = new Director() { Name = "benny safdie" };
