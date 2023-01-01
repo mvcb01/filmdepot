@@ -13,7 +13,7 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public Movie FindByExternalId(int externalId) => this._context.Movies.Where(m => m.ExternalId == externalId).FirstOrDefault();
 
-        public IEnumerable<Movie> GetMoviesWithoutActors() => this._context.Movies.Where(m => !m.Actors.Any());
+        public IEnumerable<Movie> GetMoviesWithoutActors() => this._context.Movies.Where(m => !m.CastMembers.Any());
 
         public IEnumerable<Movie> GetMoviesWithoutDirectors() => this._context.Movies.Where(m => !m.Directors.Any());
 

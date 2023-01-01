@@ -40,7 +40,7 @@ namespace FilmCRUD
             // ICollection does not necessarily have the AddRange method
             foreach (var actor in details)
             {
-                movie.Actors.Add(actor);
+                movie.CastMembers.Add(actor);
             }
         }
 

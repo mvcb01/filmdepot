@@ -77,13 +77,13 @@ namespace DepotTests.CRUDTests
             var thirdActor = new CastMember() { Name = "jim carrey" };
 
             var firstMovie = new Movie() {
-                Title = "the fly", ReleaseDate = 1986, Actors = new CastMember[] { firstActor }
+                Title = "the fly", ReleaseDate = 1986, CastMembers = new CastMember[] { firstActor }
             };
             var secondMovie = new Movie() {
-                Title = "independence day", ReleaseDate = 1996, Actors = new CastMember[] { firstActor, secondActor }
+                Title = "independence day", ReleaseDate = 1996, CastMembers = new CastMember[] { firstActor, secondActor }
             };
             var thirdMovie = new Movie() {
-                Title = "dumb and dumber", ReleaseDate = 1994, Actors = new CastMember[] { thirdActor }
+                Title = "dumb and dumber", ReleaseDate = 1994, CastMembers = new CastMember[] { thirdActor }
             };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
@@ -196,11 +196,11 @@ namespace DepotTests.CRUDTests
             var secondActor = new CastMember() { Name = "bill pullman" };
             var thirdActor = new CastMember() { Name = "jim carrey" };
 
-            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Actors = new CastMember[] { firstActor, secondActor } };
-            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, Actors = new CastMember[] { firstActor } };
-            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Actors = new CastMember[] { thirdActor } };
-            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Actors = Array.Empty<CastMember>() };
-            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Actors = Array.Empty<CastMember>() };
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, CastMembers = new CastMember[] { firstActor, secondActor } };
+            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, CastMembers = new CastMember[] { firstActor } };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, CastMembers = new CastMember[] { thirdActor } };
+            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, CastMembers = Array.Empty<CastMember>() };
+            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, CastMembers = Array.Empty<CastMember>() };
 
             var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie, fifthMovie };
 
@@ -223,7 +223,7 @@ namespace DepotTests.CRUDTests
             using (new AssertionScope())
             {
                 actual.Should().BeEquivalentTo(expected);
-                withoutActors.Should().Be(moviesInVisit.Where(m => !m.Actors.Any()).Count());
+                withoutActors.Should().Be(moviesInVisit.Where(m => !m.CastMembers.Any()).Count());
             }
         }
 

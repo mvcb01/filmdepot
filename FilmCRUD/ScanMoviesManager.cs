@@ -34,7 +34,7 @@ namespace FilmCRUD
         public IEnumerable<Movie> GetMoviesWithActors(MovieWarehouseVisit visit, params CastMember[] actors)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
-            return moviesInVisit.Where(m => actors.Intersect(m.Actors).Any());
+            return moviesInVisit.Where(m => actors.Intersect(m.CastMembers).Any());
         }
 
         /// <summary>
@@ -78,10 +78,10 @@ namespace FilmCRUD
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
 
-            withoutActors = moviesInVisit.Where(m => !m.Actors.Any()).Count();
+            withoutActors = moviesInVisit.Where(m => !m.CastMembers.Any()).Count();
 
             // flatten -> group by Actor and count
-            IEnumerable<IGrouping<CastMember, CastMember>> grouped = moviesInVisit.SelectMany(m => m.Actors).GroupBy(a => a);
+            IEnumerable<IGrouping<CastMember, CastMember>> grouped = moviesInVisit.SelectMany(m => m.CastMembers).GroupBy(a => a);
             return grouped.Select(group => new KeyValuePair<CastMember, int>(group.Key, group.Count()));
         }
 
