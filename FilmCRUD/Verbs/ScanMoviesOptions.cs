@@ -44,8 +44,8 @@ namespace FilmCRUD.Verbs
         [Option('v', "visit", HelpText = "warehouse visit date (YYYYMMDD) to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
 
-        // can be used with any set, only relevant for GetCountByGenre/Actor/Director
-        [Option('t', "top", HelpText = "integer to limit output count of bygenre/byactor/bydirector and get only the top N")]
+        // can be used with any set, only relevant for GetCountByGenre/CastMember/Director
+        [Option('t', "top", HelpText = "integer to limit output count of bygenre/bycastmember/bydirector and get only the top N")]
         public int? Top { get; set; }
 
 
