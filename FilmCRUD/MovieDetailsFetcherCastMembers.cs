@@ -10,15 +10,15 @@ using MovieAPIClients.Interfaces;
 
 namespace FilmCRUD
 {
-    public class MovieDetailsFetcherActors : MovieDetailsFetcherAbstract<CastMember, MovieCastMemberResult>
+    public class MovieDetailsFetcherCastMembers : MovieDetailsFetcherAbstract<CastMember, MovieCastMemberResult>
     {
-        public MovieDetailsFetcherActors(
+        public MovieDetailsFetcherCastMembers(
             IUnitOfWork unitOfWork,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient)
             : base(unitOfWork, appSettingsManager, movieAPIClient) { }
 
-        public MovieDetailsFetcherActors(
+        public MovieDetailsFetcherCastMembers(
             IUnitOfWork unitOfWork,
             IAppSettingsManager appSettingsManager,
             IMovieAPIClient movieAPIClient,

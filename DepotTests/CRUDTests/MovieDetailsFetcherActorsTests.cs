@@ -33,7 +33,7 @@ namespace DepotTests.CRUDTests
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
-        private readonly MovieDetailsFetcherActors _movieDetailsFetcherActors;
+        private readonly MovieDetailsFetcherCastMembers _movieDetailsFetcherActors;
 
         public MovieDetailsFetcherActorsTests()
         {
@@ -65,7 +65,7 @@ namespace DepotTests.CRUDTests
 
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
-            this._movieDetailsFetcherActors = new MovieDetailsFetcherActors(
+            this._movieDetailsFetcherActors = new MovieDetailsFetcherCastMembers(
                 this._unitOfWorkMock.Object,
                 this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);

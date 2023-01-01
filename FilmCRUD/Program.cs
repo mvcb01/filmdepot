@@ -481,7 +481,7 @@ namespace FilmCRUD
             else if (opts.CastMembers)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_actors_.txt");
-                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
+                var actorsFetcher = new MovieDetailsFetcherCastMembers(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
                 Log.Information("Fetching actors for movies...");
                 await actorsFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
