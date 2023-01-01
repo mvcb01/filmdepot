@@ -298,13 +298,13 @@ namespace FilmCRUD
             else if (opts.WithCast.Any())
             {
                 // finds the CastMember entities for each string in opts.CastMembers, then flattens
-                IEnumerable<CastMember> actors = opts.WithCast
+                IEnumerable<CastMember> castMembers = opts.WithCast
                     .Select(name => scanMoviesManager.GetCastMembersFromName(name))
                     .SelectMany(a => a);
-                IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithCastMembers(visit, actors.ToArray());
-                string actorNames = string.Join(" | ", actors.Select(a => a.Name));
-                Console.WriteLine($"Movies with actors: {actorNames} \n");
-                moviesWithActors.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
+                IEnumerable<Movie> moviesWithCastMembers = scanMoviesManager.GetMoviesWithCastMembers(visit, castMembers.ToArray());
+                string actorNames = string.Join(" | ", castMembers.Select(a => a.Name));
+                Console.WriteLine($"Movies with cast: {actorNames} \n");
+                moviesWithCastMembers.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
             else if (opts.WithDirectors.Any())
             {
@@ -337,14 +337,14 @@ namespace FilmCRUD
             }
             else if (opts.ByCastMember)
             {
-                Console.WriteLine("Count by actor:\n");
-                IEnumerable<KeyValuePair<CastMember, int>> actorCount = scanMoviesManager.GetCountByCastMember(visit, out int withoutActors);
-                int toTake = opts.Top ?? actorCount.Count();
-                actorCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
+                Console.WriteLine("Count by cast member:\n");
+                IEnumerable<KeyValuePair<CastMember, int>> castMemberCount = scanMoviesManager.GetCountByCastMember(visit, out int withoutCastMembers);
+                int toTake = opts.Top ?? castMemberCount.Count();
+                castMemberCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
-                Console.WriteLine($"<empty>: {withoutActors}");
+                Console.WriteLine($"<empty>: {withoutCastMembers}");
             }
             else if (opts.ByDirector)
             {
