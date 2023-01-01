@@ -25,7 +25,7 @@ namespace FilmCRUD
             ILogger fetchingErrorsLogger)
             : base(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger) { }
 
-        public override IEnumerable<CastMember> GetExistingDetailEntitiesInRepo() => this._unitOfWork.Actors.GetAll();
+        public override IEnumerable<CastMember> GetExistingDetailEntitiesInRepo() => this._unitOfWork.CastMembers.GetAll();
 
         public override async Task<IEnumerable<MovieActorResult>> GetMovieDetailsFromApiAsync(int externalId)
             => await this._movieAPIClient.GetMovieActorsAsync(externalId);

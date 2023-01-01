@@ -45,7 +45,7 @@ namespace DepotTests.CRUDTests
                 .SetupGet(u => u.Movies)
                 .Returns(this._movieRepositoryMock.Object);
             this._unitOfWorkMock
-                .SetupGet(u => u.Actors)
+                .SetupGet(u => u.CastMembers)
                 .Returns(this._actorRepositoryMock.Object);
 
             this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
