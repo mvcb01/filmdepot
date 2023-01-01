@@ -14,7 +14,7 @@ namespace FilmDomain.Interfaces
 
         IMovieWarehouseVisitRepository MovieWarehouseVisits { get; }
 
-        IActorRepository Actors { get; }
+        ICastMemberRepository Actors { get; }
 
         int Complete();
     }

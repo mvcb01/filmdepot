@@ -17,7 +17,7 @@ namespace FilmDataAccess.EFCore.UnitOfWork
 
         public IMovieWarehouseVisitRepository MovieWarehouseVisits { get; init; }
 
-        public IActorRepository Actors { get; init; }
+        public ICastMemberRepository Actors { get; init; }
 
         public SQLiteUnitOfWork(SQLiteAppContext context)
         {

@@ -3,11 +3,10 @@ using FilmDomain.Entities;
 
 namespace FilmDomain.Interfaces
 {
-    public interface IActorRepository : IEntityRepository<CastMember>
+    public interface ICastMemberRepository : IEntityRepository<CastMember>
     {
         IEnumerable<CastMember> GetActorsFromName(string name);
 
         CastMember FindByExternalId(int externalId);
-
     }
 }

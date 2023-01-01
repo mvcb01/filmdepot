@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FilmDataAccess.EFCore.Repositories
 {
-    public class ActorRepository : GenericRepository<CastMember>, IActorRepository
+    public class ActorRepository : GenericRepository<CastMember>, ICastMemberRepository
     {
         public ActorRepository(SQLiteAppContext context) : base(context) { }
 

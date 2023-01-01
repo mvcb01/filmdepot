@@ -21,7 +21,7 @@ namespace DepotTests.CRUDTests
     {
         private readonly Mock<IMovieRepository> _movieRepositoryMock;
 
-        private readonly Mock<IActorRepository> _actorRepositoryMock;
+        private readonly Mock<ICastMemberRepository> _actorRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
@@ -38,7 +38,7 @@ namespace DepotTests.CRUDTests
         public MovieDetailsFetcherActorsTests()
         {
             this._movieRepositoryMock = new Mock<IMovieRepository>(MockBehavior.Strict);
-            this._actorRepositoryMock = new Mock<IActorRepository>(MockBehavior.Strict);
+            this._actorRepositoryMock = new Mock<ICastMemberRepository>(MockBehavior.Strict);
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
             this._unitOfWorkMock
