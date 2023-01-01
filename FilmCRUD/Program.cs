@@ -301,7 +301,7 @@ namespace FilmCRUD
                 IEnumerable<CastMember> actors = opts.WithCast
                     .Select(name => scanMoviesManager.GetActorsFromName(name))
                     .SelectMany(a => a);
-                IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithActors(visit, actors.ToArray());
+                IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithCastMembers(visit, actors.ToArray());
                 string actorNames = string.Join(" | ", actors.Select(a => a.Name));
                 Console.WriteLine($"Movies with actors: {actorNames} \n");
                 moviesWithActors.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));

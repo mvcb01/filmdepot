@@ -93,7 +93,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
-            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithActors(visit, firstActor, secondActor);
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithCastMembers(visit, firstActor, secondActor);
 
             // assert
             actual.Should().BeEquivalentTo(new Movie[] { firstMovie, secondMovie });

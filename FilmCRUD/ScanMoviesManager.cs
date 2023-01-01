@@ -29,12 +29,12 @@ namespace FilmCRUD
 
         /// <summary>
         /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/> that have at least
-        /// one actor in param <paramref name="actors"/>.
+        /// one cast member in param <paramref name="castMembers"/>.
         /// </summary>
-        public IEnumerable<Movie> GetMoviesWithActors(MovieWarehouseVisit visit, params CastMember[] actors)
+        public IEnumerable<Movie> GetMoviesWithCastMembers(MovieWarehouseVisit visit, params CastMember[] castMembers)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
-            return moviesInVisit.Where(m => actors.Intersect(m.CastMembers).Any());
+            return moviesInVisit.Where(m => castMembers.Intersect(m.CastMembers).Any());
         }
 
         /// <summary>
