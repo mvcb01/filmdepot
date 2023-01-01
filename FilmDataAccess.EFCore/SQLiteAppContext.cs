@@ -33,7 +33,7 @@ namespace FilmDataAccess.EFCore
             modelBuilder.ApplyConfiguration<Genre>(new GenreEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration<MovieRip>(new MovieRipEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration<MovieWarehouseVisit>(new MovieWarehouseVisitEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration<CastMember>(new ActorEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration<CastMember>(new CastMemberEntityTypeConfiguration());
         }
 
     }

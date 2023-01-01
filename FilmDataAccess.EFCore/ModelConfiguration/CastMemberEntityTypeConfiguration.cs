@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace FilmDataAccess.EFCore.ModelConfiguration
 {
-    public class ActorEntityTypeConfiguration : IEntityTypeConfiguration<CastMember>
+    public class CastMemberEntityTypeConfiguration : IEntityTypeConfiguration<CastMember>
     {
         public void Configure(EntityTypeBuilder<CastMember> builder)
         {
