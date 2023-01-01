@@ -14,9 +14,9 @@ namespace MovieAPIClients.TheMovieDb
         // for explicit casts:
         //    var objTmdb = new CastResultTMDB();
         //    var obj = (MovieActorResult)objTmdb;
-        public static explicit operator MovieActorResult(CastResultTMDB castResultTMDB)
+        public static explicit operator MovieCastMemberResult(CastResultTMDB castResultTMDB)
         {
-            return new MovieActorResult() { ExternalId = castResultTMDB.ExternalId, Name = castResultTMDB.Name };
+            return new MovieCastMemberResult() { ExternalId = castResultTMDB.ExternalId, Name = castResultTMDB.Name };
         }
     }
 }

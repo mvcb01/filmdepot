@@ -10,7 +10,7 @@ using MovieAPIClients.Interfaces;
 
 namespace FilmCRUD
 {
-    public class MovieDetailsFetcherActors : MovieDetailsFetcherAbstract<CastMember, MovieActorResult>
+    public class MovieDetailsFetcherActors : MovieDetailsFetcherAbstract<CastMember, MovieCastMemberResult>
     {
         public MovieDetailsFetcherActors(
             IUnitOfWork unitOfWork,
@@ -27,13 +27,13 @@ namespace FilmCRUD
 
         public override IEnumerable<CastMember> GetExistingDetailEntitiesInRepo() => this._unitOfWork.CastMembers.GetAll();
 
-        public override async Task<IEnumerable<MovieActorResult>> GetMovieDetailsFromApiAsync(int externalId)
+        public override async Task<IEnumerable<MovieCastMemberResult>> GetMovieDetailsFromApiAsync(int externalId)
             => await this._movieAPIClient.GetMovieActorsAsync(externalId);
 
         public override IEnumerable<Movie> GetMoviesWithoutDetails() => this._unitOfWork.Movies.GetMoviesWithoutCastMembers();
 
         // explicit cast is defined in MovieCastMemberResult
-        public override CastMember CastApiResultToDetailEntity(MovieActorResult apiresult) => (CastMember)apiresult;
+        public override CastMember CastApiResultToDetailEntity(MovieCastMemberResult apiresult) => (CastMember)apiresult;
 
         public override void AddDetailsToMovieEntity(Movie movie, IEnumerable<CastMember> details)
         {

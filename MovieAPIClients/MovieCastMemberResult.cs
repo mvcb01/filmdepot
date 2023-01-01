@@ -3,13 +3,13 @@ using FilmDomain.Interfaces;
 
 namespace MovieAPIClients
 {
-    public class MovieActorResult : IExternalEntity
+    public class MovieCastMemberResult : IExternalEntity
     {
         public int ExternalId { get; set; }
 
         public string Name { get; set; }
 
-        public static explicit operator CastMember(MovieActorResult movieActorResult)
+        public static explicit operator CastMember(MovieCastMemberResult movieActorResult)
         {
             return new CastMember() {
                 ExternalId = movieActorResult.ExternalId,
