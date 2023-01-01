@@ -75,7 +75,7 @@ namespace DepotTests.CRUDTests
         public async Task PopulateDetails_WithoutMoviesMissingActors_ShouldNotCallApiClient()
         {
             // arrange
-            this._movieRepositoryMock.Setup(m => m.GetMoviesWithoutActors()).Returns(Enumerable.Empty<Movie>());
+            this._movieRepositoryMock.Setup(m => m.GetMoviesWithoutCastMembers()).Returns(Enumerable.Empty<Movie>());
 
             // act
             await this._movieDetailsFetcherActors.PopulateDetails();
@@ -100,7 +100,7 @@ namespace DepotTests.CRUDTests
                 .Setup(a => a.GetAll())
                 .Returns(new List<CastMember>());
             this._movieRepositoryMock
-                .Setup(m => m.GetMoviesWithoutActors())
+                .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new Movie[] { movieWithoutActors });
             this._movieAPIClientMock
                 .Setup(m => m.GetMovieActorsAsync(It.IsAny<int>()))
@@ -140,7 +140,7 @@ namespace DepotTests.CRUDTests
                 .Setup(a => a.GetAll())
                 .Returns(new List<CastMember>() { actor });
             this._movieRepositoryMock
-                .Setup(m => m.GetMoviesWithoutActors())
+                .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new Movie[] { firstMovieWithoutActors, secondMovieWithoutActors });
             this._movieAPIClientMock
                 .Setup(cl => cl.GetMovieActorsAsync(It.Is<int>(i => i == firstExternalId | i == secondExternalId)))
@@ -188,7 +188,7 @@ namespace DepotTests.CRUDTests
                 .Setup(a => a.GetAll())
                 .Returns(Enumerable.Empty<CastMember>());
             this._movieRepositoryMock
-                .Setup(m => m.GetMoviesWithoutActors())
+                .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new Movie[] { firstMovieWithoutActors, secondMovieWithoutActors });
             this._movieAPIClientMock
                 .Setup(cl => cl.GetMovieActorsAsync(firstExternalId))
@@ -236,7 +236,7 @@ namespace DepotTests.CRUDTests
                 .Setup(a => a.GetAll())
                 .Returns(Enumerable.Empty<CastMember>());
             this._movieRepositoryMock
-                .Setup(m => m.GetMoviesWithoutActors())
+                .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new Movie[] { firstMovieWithoutActors, secondMovieWithoutActors });
             this._movieAPIClientMock
                 .Setup(cl => cl.GetMovieActorsAsync(firstExternalId))
@@ -266,7 +266,7 @@ namespace DepotTests.CRUDTests
             var thirdMovie = new Movie() { Title = "Office Space", ReleaseDate = 1999, ExternalId = 103, CastMembers = new List<CastMember>() };
 
             this._movieRepositoryMock
-                .Setup(m => m.GetMoviesWithoutActors())
+                .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new[] { firstMovie, secondMovie, thirdMovie });
 
             this._actorRepositoryMock.Setup(d => d.GetAll()).Returns(Enumerable.Empty<CastMember>());

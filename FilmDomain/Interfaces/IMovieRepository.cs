@@ -11,7 +11,7 @@ namespace FilmDomain.Interfaces
 
         IEnumerable<Movie> GetMoviesWithoutGenres();
 
-        IEnumerable<Movie> GetMoviesWithoutActors();
+        IEnumerable<Movie> GetMoviesWithoutCastMembers();
 
         IEnumerable<Movie> GetMoviesWithoutDirectors();
 

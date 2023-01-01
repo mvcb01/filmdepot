@@ -30,7 +30,7 @@ namespace FilmCRUD
         public override async Task<IEnumerable<MovieActorResult>> GetMovieDetailsFromApiAsync(int externalId)
             => await this._movieAPIClient.GetMovieActorsAsync(externalId);
 
-        public override IEnumerable<Movie> GetMoviesWithoutDetails() => this._unitOfWork.Movies.GetMoviesWithoutActors();
+        public override IEnumerable<Movie> GetMoviesWithoutDetails() => this._unitOfWork.Movies.GetMoviesWithoutCastMembers();
 
         // explicit cast is defined in MovieCastMemberResult
         public override CastMember CastApiResultToDetailEntity(MovieActorResult apiresult) => (CastMember)apiresult;
