@@ -211,7 +211,7 @@ namespace DepotTests.CRUDTests
                 .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<CastMember, int>> actual = this._scanMoviesManager.GetCountByActor(visit, out int withoutActors);
+            IEnumerable<KeyValuePair<CastMember, int>> actual = this._scanMoviesManager.GetCountByCastMember(visit, out int withoutActors);
 
             // assert
             var expected = new List<KeyValuePair<CastMember, int>>() {

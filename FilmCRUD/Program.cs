@@ -338,7 +338,7 @@ namespace FilmCRUD
             else if (opts.ByCastMember)
             {
                 Console.WriteLine("Count by actor:\n");
-                IEnumerable<KeyValuePair<CastMember, int>> actorCount = scanMoviesManager.GetCountByActor(visit, out int withoutActors);
+                IEnumerable<KeyValuePair<CastMember, int>> actorCount = scanMoviesManager.GetCountByCastMember(visit, out int withoutActors);
                 int toTake = opts.Top ?? actorCount.Count();
                 actorCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
