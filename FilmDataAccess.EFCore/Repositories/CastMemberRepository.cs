@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FilmDataAccess.EFCore.Repositories
 {
-    public class ActorRepository : GenericRepository<CastMember>, ICastMemberRepository
+    public class CastMemberRepository : GenericRepository<CastMember>, ICastMemberRepository
     {
-        public ActorRepository(SQLiteAppContext context) : base(context) { }
+        public CastMemberRepository(SQLiteAppContext context) : base(context) { }
 
         public CastMember FindByExternalId(int externalId) => this._context.CastMembers.Where(m => m.ExternalId == externalId).FirstOrDefault();
 

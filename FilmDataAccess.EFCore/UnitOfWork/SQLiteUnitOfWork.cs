@@ -27,7 +27,7 @@ namespace FilmDataAccess.EFCore.UnitOfWork
             this.Genres = new GenreRepository(this._context);
             this.MovieRips = new MovieRipRepository(this._context);
             this.MovieWarehouseVisits = new MovieWarehouseVisitRepository(this._context);
-            this.CastMembers = new ActorRepository(this._context);
+            this.CastMembers = new CastMemberRepository(this._context);
         }
 
         public int Complete() => this._context.SaveChanges();
