@@ -295,10 +295,10 @@ namespace FilmCRUD
                 Console.WriteLine($"Movies with genres: {genreNames} \n");
                 moviesWithGenres.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
-            else if (opts.WithActors.Any())
+            else if (opts.WithCast.Any())
             {
                 // finds the CastMember entities for each string in opts.CastMembers, then flattens
-                IEnumerable<CastMember> actors = opts.WithActors
+                IEnumerable<CastMember> actors = opts.WithCast
                     .Select(name => scanMoviesManager.GetActorsFromName(name))
                     .SelectMany(a => a);
                 IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithActors(visit, actors.ToArray());
