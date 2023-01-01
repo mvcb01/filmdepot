@@ -11,19 +11,19 @@ namespace FilmDataAccess.EFCore.Repositories
     {
         public ActorRepository(SQLiteAppContext context) : base(context) { }
 
-        public CastMember FindByExternalId(int externalId) => this._context.Actors.Where(m => m.ExternalId == externalId).FirstOrDefault();
+        public CastMember FindByExternalId(int externalId) => this._context.CastMembers.Where(m => m.ExternalId == externalId).FirstOrDefault();
 
         public IEnumerable<CastMember> GetCastMembersFromName(string name)
         {
             IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation(removeDiacritics: false);
             string nameLike = "%" + string.Join('%', nameTokens) + "%";
 
-            IEnumerable<CastMember> result =  this._context.Actors.Where(a => EF.Functions.Like(a.Name, nameLike));
+            IEnumerable<CastMember> result =  this._context.CastMembers.Where(a => EF.Functions.Like(a.Name, nameLike));
 
             // searches again without diacritics if no results are found
             if (!result.Any())
             {
-                result = _context.Actors.GetEntitiesFromNameFuzzyMatching(name, removeDiacritics: true);
+                result = _context.CastMembers.GetEntitiesFromNameFuzzyMatching(name, removeDiacritics: true);
             }
             return result;
         }

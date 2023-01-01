@@ -13,7 +13,7 @@ namespace FilmDataAccess.EFCore
 
         public DbSet<Director> Directors { get; set; }
 
-        public DbSet<CastMember> Actors { get; set; }
+        public DbSet<CastMember> CastMembers { get; set; }
 
         public DbSet<MovieRip> MovieRips { get; set; }
 
