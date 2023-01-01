@@ -9,9 +9,9 @@ namespace MovieAPIClients
 
         public string Name { get; set; }
 
-        public static explicit operator Actor(MovieActorResult movieActorResult)
+        public static explicit operator CastMember(MovieActorResult movieActorResult)
         {
-            return new Actor() {
+            return new CastMember() {
                 ExternalId = movieActorResult.ExternalId,
                 Name = movieActorResult.Name
             };

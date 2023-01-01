@@ -72,18 +72,18 @@ namespace DepotTests.CRUDTests
         public void GetMoviesWithActors_WithProvidedActors_ShouldReturnCorrectMovies()
         {
             // arrange
-            var firstActor = new Actor() { Name = "jeff goldblum" };
-            var secondActor = new Actor() { Name = "bill pullman" };
-            var thirdActor = new Actor() { Name = "jim carrey" };
+            var firstActor = new CastMember() { Name = "jeff goldblum" };
+            var secondActor = new CastMember() { Name = "bill pullman" };
+            var thirdActor = new CastMember() { Name = "jim carrey" };
 
             var firstMovie = new Movie() {
-                Title = "the fly", ReleaseDate = 1986, Actors = new Actor[] { firstActor }
+                Title = "the fly", ReleaseDate = 1986, Actors = new CastMember[] { firstActor }
             };
             var secondMovie = new Movie() {
-                Title = "independence day", ReleaseDate = 1996, Actors = new Actor[] { firstActor, secondActor }
+                Title = "independence day", ReleaseDate = 1996, Actors = new CastMember[] { firstActor, secondActor }
             };
             var thirdMovie = new Movie() {
-                Title = "dumb and dumber", ReleaseDate = 1994, Actors = new Actor[] { thirdActor }
+                Title = "dumb and dumber", ReleaseDate = 1994, Actors = new CastMember[] { thirdActor }
             };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
@@ -192,15 +192,15 @@ namespace DepotTests.CRUDTests
         public void GetCountByActor_ShouldReturnCorrectCount()
         {
             // arrange
-            var firstActor = new Actor() { Name = "jeff goldblum" };
-            var secondActor = new Actor() { Name = "bill pullman" };
-            var thirdActor = new Actor() { Name = "jim carrey" };
+            var firstActor = new CastMember() { Name = "jeff goldblum" };
+            var secondActor = new CastMember() { Name = "bill pullman" };
+            var thirdActor = new CastMember() { Name = "jim carrey" };
 
-            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Actors = new Actor[] { firstActor, secondActor } };
-            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, Actors = new Actor[] { firstActor } };
-            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Actors = new Actor[] { thirdActor } };
-            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Actors = Array.Empty<Actor>() };
-            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Actors = Array.Empty<Actor>() };
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Actors = new CastMember[] { firstActor, secondActor } };
+            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, Actors = new CastMember[] { firstActor } };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Actors = new CastMember[] { thirdActor } };
+            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Actors = Array.Empty<CastMember>() };
+            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Actors = Array.Empty<CastMember>() };
 
             var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie, fifthMovie };
 
@@ -211,13 +211,13 @@ namespace DepotTests.CRUDTests
                 .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<Actor, int>> actual = this._scanMoviesManager.GetCountByActor(visit, out int withoutActors);
+            IEnumerable<KeyValuePair<CastMember, int>> actual = this._scanMoviesManager.GetCountByActor(visit, out int withoutActors);
 
             // assert
-            var expected = new List<KeyValuePair<Actor, int>>() {
-                new KeyValuePair<Actor, int>(firstActor, 2),
-                new KeyValuePair<Actor, int>(secondActor, 1),
-                new KeyValuePair<Actor, int>(thirdActor, 1)
+            var expected = new List<KeyValuePair<CastMember, int>>() {
+                new KeyValuePair<CastMember, int>(firstActor, 2),
+                new KeyValuePair<CastMember, int>(secondActor, 1),
+                new KeyValuePair<CastMember, int>(thirdActor, 1)
             };
 
             using (new AssertionScope())

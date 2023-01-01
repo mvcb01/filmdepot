@@ -31,7 +31,7 @@ namespace FilmCRUD
         /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/> that have at least
         /// one actor in param <paramref name="actors"/>.
         /// </summary>
-        public IEnumerable<Movie> GetMoviesWithActors(MovieWarehouseVisit visit, params Actor[] actors)
+        public IEnumerable<Movie> GetMoviesWithActors(MovieWarehouseVisit visit, params CastMember[] actors)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
             return moviesInVisit.Where(m => actors.Intersect(m.Actors).Any());
@@ -74,15 +74,15 @@ namespace FilmCRUD
         /// <summary>
         /// Group by and count by actor in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
         /// </summary>
-        public IEnumerable<KeyValuePair<Actor, int>> GetCountByActor(MovieWarehouseVisit visit, out int withoutActors)
+        public IEnumerable<KeyValuePair<CastMember, int>> GetCountByActor(MovieWarehouseVisit visit, out int withoutActors)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
 
             withoutActors = moviesInVisit.Where(m => !m.Actors.Any()).Count();
 
             // flatten -> group by Actor and count
-            IEnumerable<IGrouping<Actor, Actor>> grouped = moviesInVisit.SelectMany(m => m.Actors).GroupBy(a => a);
-            return grouped.Select(group => new KeyValuePair<Actor, int>(group.Key, group.Count()));
+            IEnumerable<IGrouping<CastMember, CastMember>> grouped = moviesInVisit.SelectMany(m => m.Actors).GroupBy(a => a);
+            return grouped.Select(group => new KeyValuePair<CastMember, int>(group.Key, group.Count()));
         }
 
         /// <summary>
@@ -114,9 +114,9 @@ namespace FilmCRUD
         public IEnumerable<Genre> GenresFromName(string name) => this.UnitOfWork.Genres.GetGenresFromName(name);
 
         /// <summary>
-        /// Returns all <see cref="Actor"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.
+        /// Returns all <see cref="CastMember"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.
         /// </summary>
-        public IEnumerable<Actor> GetActorsFromName(string name) => this.UnitOfWork.Actors.GetActorsFromName(name);
+        public IEnumerable<CastMember> GetActorsFromName(string name) => this.UnitOfWork.Actors.GetActorsFromName(name);
 
         /// <summary>
         /// Returns all <see cref="Director"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.

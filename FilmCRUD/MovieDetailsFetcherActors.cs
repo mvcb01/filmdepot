@@ -10,7 +10,7 @@ using MovieAPIClients.Interfaces;
 
 namespace FilmCRUD
 {
-    public class MovieDetailsFetcherActors : MovieDetailsFetcherAbstract<Actor, MovieActorResult>
+    public class MovieDetailsFetcherActors : MovieDetailsFetcherAbstract<CastMember, MovieActorResult>
     {
         public MovieDetailsFetcherActors(
             IUnitOfWork unitOfWork,
@@ -25,7 +25,7 @@ namespace FilmCRUD
             ILogger fetchingErrorsLogger)
             : base(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger) { }
 
-        public override IEnumerable<Actor> GetExistingDetailEntitiesInRepo() => this._unitOfWork.Actors.GetAll();
+        public override IEnumerable<CastMember> GetExistingDetailEntitiesInRepo() => this._unitOfWork.Actors.GetAll();
 
         public override async Task<IEnumerable<MovieActorResult>> GetMovieDetailsFromApiAsync(int externalId)
             => await this._movieAPIClient.GetMovieActorsAsync(externalId);
@@ -33,9 +33,9 @@ namespace FilmCRUD
         public override IEnumerable<Movie> GetMoviesWithoutDetails() => this._unitOfWork.Movies.GetMoviesWithoutActors();
 
         // explicit cast is defined in MovieCastMemberResult
-        public override Actor CastApiResultToDetailEntity(MovieActorResult apiresult) => (Actor)apiresult;
+        public override CastMember CastApiResultToDetailEntity(MovieActorResult apiresult) => (CastMember)apiresult;
 
-        public override void AddDetailsToMovieEntity(Movie movie, IEnumerable<Actor> details)
+        public override void AddDetailsToMovieEntity(Movie movie, IEnumerable<CastMember> details)
         {
             // ICollection does not necessarily have the AddRange method
             foreach (var actor in details)

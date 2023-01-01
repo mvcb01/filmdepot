@@ -298,7 +298,7 @@ namespace FilmCRUD
             else if (opts.WithActors.Any())
             {
                 // finds the CastMember entities for each string in opts.CastMembers, then flattens
-                IEnumerable<Actor> actors = opts.WithActors
+                IEnumerable<CastMember> actors = opts.WithActors
                     .Select(name => scanMoviesManager.GetActorsFromName(name))
                     .SelectMany(a => a);
                 IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithActors(visit, actors.ToArray());
@@ -338,7 +338,7 @@ namespace FilmCRUD
             else if (opts.ByActor)
             {
                 Console.WriteLine("Count by actor:\n");
-                IEnumerable<KeyValuePair<Actor, int>> actorCount = scanMoviesManager.GetCountByActor(visit, out int withoutActors);
+                IEnumerable<KeyValuePair<CastMember, int>> actorCount = scanMoviesManager.GetCountByActor(visit, out int withoutActors);
                 int toTake = opts.Top ?? actorCount.Count();
                 actorCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
