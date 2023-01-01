@@ -5,7 +5,7 @@ namespace FilmDomain.Interfaces
 {
     public interface ICastMemberRepository : IEntityRepository<CastMember>
     {
-        IEnumerable<CastMember> GetActorsFromName(string name);
+        IEnumerable<CastMember> GetCastMembersFromName(string name);
 
         CastMember FindByExternalId(int externalId);
     }

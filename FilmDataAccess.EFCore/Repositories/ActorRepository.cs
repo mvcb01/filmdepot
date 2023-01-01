@@ -13,7 +13,7 @@ namespace FilmDataAccess.EFCore.Repositories
 
         public CastMember FindByExternalId(int externalId) => this._context.Actors.Where(m => m.ExternalId == externalId).FirstOrDefault();
 
-        public IEnumerable<CastMember> GetActorsFromName(string name)
+        public IEnumerable<CastMember> GetCastMembersFromName(string name)
         {
             IEnumerable<string> nameTokens = name.GetStringTokensWithoutPunctuation(removeDiacritics: false);
             string nameLike = "%" + string.Join('%', nameTokens) + "%";
