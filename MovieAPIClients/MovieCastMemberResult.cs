@@ -9,11 +9,11 @@ namespace MovieAPIClients
 
         public string Name { get; set; }
 
-        public static explicit operator CastMember(MovieCastMemberResult movieActorResult)
+        public static explicit operator CastMember(MovieCastMemberResult movieCastMemberResult)
         {
             return new CastMember() {
-                ExternalId = movieActorResult.ExternalId,
-                Name = movieActorResult.Name
+                ExternalId = movieCastMemberResult.ExternalId,
+                Name = movieCastMemberResult.Name
             };
         }
     }
