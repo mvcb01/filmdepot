@@ -116,7 +116,7 @@ namespace FilmCRUD
         /// <summary>
         /// Returns all <see cref="CastMember"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.
         /// </summary>
-        public IEnumerable<CastMember> GetActorsFromName(string name) => this.UnitOfWork.CastMembers.GetCastMembersFromName(name);
+        public IEnumerable<CastMember> GetCastMembersFromName(string name) => this.UnitOfWork.CastMembers.GetCastMembersFromName(name);
 
         /// <summary>
         /// Returns all <see cref="Director"/> entities in the repository that fuzzy match parameter <paramref name="name"/>.

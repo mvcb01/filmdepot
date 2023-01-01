@@ -299,7 +299,7 @@ namespace FilmCRUD
             {
                 // finds the CastMember entities for each string in opts.CastMembers, then flattens
                 IEnumerable<CastMember> actors = opts.WithCast
-                    .Select(name => scanMoviesManager.GetActorsFromName(name))
+                    .Select(name => scanMoviesManager.GetCastMembersFromName(name))
                     .SelectMany(a => a);
                 IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithCastMembers(visit, actors.ToArray());
                 string actorNames = string.Join(" | ", actors.Select(a => a.Name));
