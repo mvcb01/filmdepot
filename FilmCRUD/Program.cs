@@ -478,7 +478,7 @@ namespace FilmCRUD
                 Log.Information("Fetching genres for movies...");
                 await genresFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
-            else if (opts.Actors)
+            else if (opts.CastMembers)
             {
                 ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_actors_.txt");
                 var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
