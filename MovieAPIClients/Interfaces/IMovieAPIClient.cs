@@ -27,7 +27,7 @@ namespace MovieAPIClients.Interfaces
 
         Task<IEnumerable<MovieGenreResult>> GetMovieGenresAsync(int externalId);
 
-        Task<IEnumerable<MovieCastMemberResult>> GetMovieActorsAsync(int externalId);
+        Task<IEnumerable<MovieCastMemberResult>> GetMovieCastMembersAsync(int externalId);
 
         Task<IEnumerable<MovieDirectorResult>> GetMovieDirectorsAsync(int externalId);
     }

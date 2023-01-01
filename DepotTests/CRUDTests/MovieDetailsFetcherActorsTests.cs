@@ -81,7 +81,7 @@ namespace DepotTests.CRUDTests
             await this._movieDetailsFetcherActors.PopulateDetails();
 
             // assert
-            this._movieAPIClientMock.Verify(cl => cl.GetMovieActorsAsync(It.IsAny<int>()), Times.Never);
+            this._movieAPIClientMock.Verify(cl => cl.GetMovieCastMembersAsync(It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
@@ -103,14 +103,14 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new Movie[] { movieWithoutActors });
             this._movieAPIClientMock
-                .Setup(m => m.GetMovieActorsAsync(It.IsAny<int>()))
+                .Setup(m => m.GetMovieCastMembersAsync(It.IsAny<int>()))
                 .ReturnsAsync(Enumerable.Empty<MovieCastMemberResult>());
 
             // act
             await this._movieDetailsFetcherActors.PopulateDetails();
 
             // assert
-            this._movieAPIClientMock.Verify(cl => cl.GetMovieActorsAsync(externalId), Times.Once);
+            this._movieAPIClientMock.Verify(cl => cl.GetMovieCastMembersAsync(externalId), Times.Once);
         }
 
         [Fact]
@@ -143,7 +143,7 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new Movie[] { firstMovieWithoutActors, secondMovieWithoutActors });
             this._movieAPIClientMock
-                .Setup(cl => cl.GetMovieActorsAsync(It.Is<int>(i => i == firstExternalId | i == secondExternalId)))
+                .Setup(cl => cl.GetMovieCastMembersAsync(It.Is<int>(i => i == firstExternalId | i == secondExternalId)))
                 .ReturnsAsync(new MovieCastMemberResult[] { actorResult });
 
             // act
@@ -191,10 +191,10 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new Movie[] { firstMovieWithoutActors, secondMovieWithoutActors });
             this._movieAPIClientMock
-                .Setup(cl => cl.GetMovieActorsAsync(firstExternalId))
+                .Setup(cl => cl.GetMovieCastMembersAsync(firstExternalId))
                 .ReturnsAsync(new MovieCastMemberResult[] { firstActorResult });
             this._movieAPIClientMock
-                .Setup(cl => cl.GetMovieActorsAsync(secondExternalId))
+                .Setup(cl => cl.GetMovieCastMembersAsync(secondExternalId))
                 .ReturnsAsync(new MovieCastMemberResult[] { firstActorResult, secondActorResult });
 
             // act
@@ -239,10 +239,10 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new Movie[] { firstMovieWithoutActors, secondMovieWithoutActors });
             this._movieAPIClientMock
-                .Setup(cl => cl.GetMovieActorsAsync(firstExternalId))
+                .Setup(cl => cl.GetMovieCastMembersAsync(firstExternalId))
                 .ReturnsAsync(new MovieCastMemberResult[] { firstActorResult });
             this._movieAPIClientMock
-                .Setup(cl => cl.GetMovieActorsAsync(secondExternalId))
+                .Setup(cl => cl.GetMovieCastMembersAsync(secondExternalId))
                 .ReturnsAsync(new MovieCastMemberResult[] { firstActorResult, secondActorResult });
 
             // act
@@ -272,14 +272,14 @@ namespace DepotTests.CRUDTests
             this._actorRepositoryMock.Setup(d => d.GetAll()).Returns(Enumerable.Empty<CastMember>());
 
             this._movieAPIClientMock
-                .Setup(m => m.GetMovieActorsAsync(It.IsAny<int>()))
+                .Setup(m => m.GetMovieCastMembersAsync(It.IsAny<int>()))
                 .ReturnsAsync(new MovieCastMemberResult[] { new MovieCastMemberResult() });
 
             // act
             await this._movieDetailsFetcherActors.PopulateDetails(maxApiCalls);
 
             // assert
-            this._movieAPIClientMock.Verify(m => m.GetMovieActorsAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
+            this._movieAPIClientMock.Verify(m => m.GetMovieCastMembersAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
         }
 
     }
