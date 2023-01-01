@@ -38,9 +38,9 @@ namespace FilmCRUD
         public override void AddDetailsToMovieEntity(Movie movie, IEnumerable<CastMember> details)
         {
             // ICollection does not necessarily have the AddRange method
-            foreach (var actor in details)
+            foreach (var castMember in details)
             {
-                movie.CastMembers.Add(actor);
+                movie.CastMembers.Add(castMember);
             }
         }
 
