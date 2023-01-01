@@ -21,8 +21,8 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "ByGenreOptions", HelpText = "get descending movie count by genre")]
         public bool ByGenre { get; set; }
 
-        [Option(SetName = "ByActorOptions", HelpText = "get descending movie count by actor")]
-        public bool ByActor { get; set; }
+        [Option(SetName = "ByCastMemberOptions", HelpText = "get descending movie count by cast member")]
+        public bool ByCastMember { get; set; }
 
         [Option(SetName = "SearchOptions", HelpText = "search movies by title")]
         public string Search { get; set; }

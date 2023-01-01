@@ -335,7 +335,7 @@ namespace FilmCRUD
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
                 Console.WriteLine($"<empty>: {withoutGenres}");
             }
-            else if (opts.ByActor)
+            else if (opts.ByCastMember)
             {
                 Console.WriteLine("Count by actor:\n");
                 IEnumerable<KeyValuePair<CastMember, int>> actorCount = scanMoviesManager.GetCountByActor(visit, out int withoutActors);
