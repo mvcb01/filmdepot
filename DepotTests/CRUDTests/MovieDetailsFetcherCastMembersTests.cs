@@ -19,7 +19,7 @@ namespace DepotTests.CRUDTests
     {
         private readonly Mock<IMovieRepository> _movieRepositoryMock;
 
-        private readonly Mock<ICastMemberRepository> _actorRepositoryMock;
+        private readonly Mock<ICastMemberRepository> _castMemberRepositoryMock;
 
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
@@ -31,12 +31,12 @@ namespace DepotTests.CRUDTests
 
         private readonly Mock<IMovieAPIClient> _movieAPIClientMock;
 
-        private readonly MovieDetailsFetcherCastMembers _movieDetailsFetcherActors;
+        private readonly MovieDetailsFetcherCastMembers _movieDetailsFetcherCastMembers;
 
         public MovieDetailsFetcherCastMembersTests()
         {
             this._movieRepositoryMock = new Mock<IMovieRepository>(MockBehavior.Strict);
-            this._actorRepositoryMock = new Mock<ICastMemberRepository>(MockBehavior.Strict);
+            this._castMemberRepositoryMock = new Mock<ICastMemberRepository>(MockBehavior.Strict);
 
             this._unitOfWorkMock = new Mock<IUnitOfWork>();
             this._unitOfWorkMock
@@ -44,7 +44,7 @@ namespace DepotTests.CRUDTests
                 .Returns(this._movieRepositoryMock.Object);
             this._unitOfWorkMock
                 .SetupGet(u => u.CastMembers)
-                .Returns(this._actorRepositoryMock.Object);
+                .Returns(this._castMemberRepositoryMock.Object);
 
             this._rateLimitConfigMock = new Mock<IRateLimitPolicyConfig>();
             this._retryConfigMock = new Mock<IRetryPolicyConfig>();
@@ -63,7 +63,7 @@ namespace DepotTests.CRUDTests
 
             this._movieAPIClientMock = new Mock<IMovieAPIClient>();
 
-            this._movieDetailsFetcherActors = new MovieDetailsFetcherCastMembers(
+            this._movieDetailsFetcherCastMembers = new MovieDetailsFetcherCastMembers(
                 this._unitOfWorkMock.Object,
                 this._appSettingsManagerMock.Object,
                 this._movieAPIClientMock.Object);
@@ -76,7 +76,7 @@ namespace DepotTests.CRUDTests
             this._movieRepositoryMock.Setup(m => m.GetMoviesWithoutCastMembers()).Returns(Enumerable.Empty<Movie>());
 
             // act
-            await this._movieDetailsFetcherActors.PopulateDetails();
+            await this._movieDetailsFetcherCastMembers.PopulateDetails();
 
             // assert
             this._movieAPIClientMock.Verify(cl => cl.GetMovieCastMembersAsync(It.IsAny<int>()), Times.Never);
@@ -94,7 +94,7 @@ namespace DepotTests.CRUDTests
                 ExternalId = externalId,
                 CastMembers = new List<CastMember>()
             };
-            this._actorRepositoryMock
+            this._castMemberRepositoryMock
                 .Setup(a => a.GetAll())
                 .Returns(new List<CastMember>());
             this._movieRepositoryMock
@@ -105,7 +105,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(Enumerable.Empty<MovieCastMemberResult>());
 
             // act
-            await this._movieDetailsFetcherActors.PopulateDetails();
+            await this._movieDetailsFetcherCastMembers.PopulateDetails();
 
             // assert
             this._movieAPIClientMock.Verify(cl => cl.GetMovieCastMembersAsync(externalId), Times.Once);
@@ -134,7 +134,7 @@ namespace DepotTests.CRUDTests
                 ExternalId = secondExternalId,
                 CastMembers = new List<CastMember>()
             };
-            this._actorRepositoryMock
+            this._castMemberRepositoryMock
                 .Setup(a => a.GetAll())
                 .Returns(new List<CastMember>() { actor });
             this._movieRepositoryMock
@@ -145,7 +145,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(new MovieCastMemberResult[] { actorResult });
 
             // act
-            await this._movieDetailsFetcherActors.PopulateDetails();
+            await this._movieDetailsFetcherCastMembers.PopulateDetails();
 
             // assert
             using (new AssertionScope())
@@ -182,7 +182,7 @@ namespace DepotTests.CRUDTests
                 CastMembers = new List<CastMember>()
             };
 
-            this._actorRepositoryMock
+            this._castMemberRepositoryMock
                 .Setup(a => a.GetAll())
                 .Returns(Enumerable.Empty<CastMember>());
             this._movieRepositoryMock
@@ -196,7 +196,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(new MovieCastMemberResult[] { firstActorResult, secondActorResult });
 
             // act
-            await this._movieDetailsFetcherActors.PopulateDetails();
+            await this._movieDetailsFetcherCastMembers.PopulateDetails();
 
             // assert
             using (new AssertionScope())
@@ -230,7 +230,7 @@ namespace DepotTests.CRUDTests
                 CastMembers = new List<CastMember>()
             };
 
-            this._actorRepositoryMock
+            this._castMemberRepositoryMock
                 .Setup(a => a.GetAll())
                 .Returns(Enumerable.Empty<CastMember>());
             this._movieRepositoryMock
@@ -244,7 +244,7 @@ namespace DepotTests.CRUDTests
                 .ReturnsAsync(new MovieCastMemberResult[] { firstActorResult, secondActorResult });
 
             // act
-            await this._movieDetailsFetcherActors.PopulateDetails();
+            await this._movieDetailsFetcherCastMembers.PopulateDetails();
 
             // assert
             firstMovieWithoutActors.CastMembers
@@ -267,14 +267,14 @@ namespace DepotTests.CRUDTests
                 .Setup(m => m.GetMoviesWithoutCastMembers())
                 .Returns(new[] { firstMovie, secondMovie, thirdMovie });
 
-            this._actorRepositoryMock.Setup(d => d.GetAll()).Returns(Enumerable.Empty<CastMember>());
+            this._castMemberRepositoryMock.Setup(d => d.GetAll()).Returns(Enumerable.Empty<CastMember>());
 
             this._movieAPIClientMock
                 .Setup(m => m.GetMovieCastMembersAsync(It.IsAny<int>()))
                 .ReturnsAsync(new MovieCastMemberResult[] { new MovieCastMemberResult() });
 
             // act
-            await this._movieDetailsFetcherActors.PopulateDetails(maxApiCalls);
+            await this._movieDetailsFetcherCastMembers.PopulateDetails(maxApiCalls);
 
             // assert
             this._movieAPIClientMock.Verify(m => m.GetMovieCastMembersAsync(It.IsAny<int>()), Times.Exactly(maxApiCalls));
