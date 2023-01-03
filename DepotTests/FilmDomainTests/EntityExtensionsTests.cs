@@ -63,16 +63,16 @@ namespace DepotTests.FilmDomainTests
         public void GetEntitiesFromNameFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string nameToSearch)
         {
             // arrange
-            var firstActor = new Actor() { Name = "!~~Benoît Pöelvóorde", Id = 0};
-            var secondActor = new Actor() { Name = " ([]) - benoit -^^ PoeLVOOrdE *+", Id = 1 };
-            var thirdActor = new Actor() { Name = "Zbigniew Zamachowski", Id = 2 };
-            var allActors = new Actor[] { firstActor, secondActor, thirdActor };
+            var firstCastMember = new CastMember() { Name = "!~~Benoît Pöelvóorde", Id = 0};
+            var secondCastMember = new CastMember() { Name = " ([]) - benoit -^^ PoeLVOOrdE *+", Id = 1 };
+            var thirdCastMember = new CastMember() { Name = "Zbigniew Zamachowski", Id = 2 };
+            var allCastMembers = new CastMember[] { firstCastMember, secondCastMember, thirdCastMember };
 
             // act
-            IEnumerable<Actor> searchResult = allActors.GetEntitiesFromNameFuzzyMatching(nameToSearch, removeDiacritics: true);
+            IEnumerable<CastMember> searchResult = allCastMembers.GetEntitiesFromNameFuzzyMatching(nameToSearch, removeDiacritics: true);
 
             // assert
-            searchResult.Should().BeEquivalentTo(new Actor[] { firstActor, secondActor });
+            searchResult.Should().BeEquivalentTo(new CastMember[] { firstCastMember, secondCastMember });
         }
 
         [Theory]
@@ -83,16 +83,16 @@ namespace DepotTests.FilmDomainTests
         public void GetEntitiesFromNameFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches(string nameToSearch)
         {
             // arrange
-            var firstActor = new Actor() { Name = "{/% Benoît Pöelvóorde", Id = 0};
-            var secondActor = new Actor() { Name = ":!!  benoit /& PoeLVOOrdE ", Id = 1 };
-            var thirdActor = new Actor() { Name = "Zbigniew Zamachowski", Id = 2 };
-            var allActors = new Actor[] { firstActor, secondActor, thirdActor };
+            var firstCastMember = new CastMember() { Name = "{/% Benoît Pöelvóorde", Id = 0};
+            var secondCastMember = new CastMember() { Name = ":!!  benoit /& PoeLVOOrdE ", Id = 1 };
+            var thirdCastMember = new CastMember() { Name = "Zbigniew Zamachowski", Id = 2 };
+            var allCastMembers = new CastMember[] { firstCastMember, secondCastMember, thirdCastMember };
 
             // act
-            IEnumerable<Actor> searchResult = allActors.GetEntitiesFromNameFuzzyMatching(nameToSearch, removeDiacritics: false);
+            IEnumerable<CastMember> searchResult = allCastMembers.GetEntitiesFromNameFuzzyMatching(nameToSearch, removeDiacritics: false);
 
             // assert
-            searchResult.Should().BeEquivalentTo(new Actor[] { secondActor });
+            searchResult.Should().BeEquivalentTo(new CastMember[] { secondCastMember });
 
         }
 

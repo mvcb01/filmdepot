@@ -9,8 +9,6 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
         public void Configure(EntityTypeBuilder<MovieWarehouseVisit> builder)
         {
             builder.Property(v => v.VisitDateTime).IsRequired();
-
-            // os objectos MovieWarehouseVisit incluem sempre os MovieRips associados
             builder.Navigation(v => v.MovieRips).AutoInclude();
         }
     }

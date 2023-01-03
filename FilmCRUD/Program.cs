@@ -295,16 +295,16 @@ namespace FilmCRUD
                 Console.WriteLine($"Movies with genres: {genreNames} \n");
                 moviesWithGenres.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
-            else if (opts.WithActors.Any())
+            else if (opts.WithCast.Any())
             {
-                // finds the Actor entities for each string in opts.WithActors, then flattens
-                IEnumerable<Actor> actors = opts.WithActors
-                    .Select(name => scanMoviesManager.GetActorsFromName(name))
+                // finds the CastMember entities for each string in opts.CastMembers, then flattens
+                IEnumerable<CastMember> castMembers = opts.WithCast
+                    .Select(name => scanMoviesManager.GetCastMembersFromName(name))
                     .SelectMany(a => a);
-                IEnumerable<Movie> moviesWithActors = scanMoviesManager.GetMoviesWithActors(visit, actors.ToArray());
-                string actorNames = string.Join(" | ", actors.Select(a => a.Name));
-                Console.WriteLine($"Movies with actors: {actorNames} \n");
-                moviesWithActors.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
+                IEnumerable<Movie> moviesWithCastMembers = scanMoviesManager.GetMoviesWithCastMembers(visit, castMembers.ToArray());
+                string castMemberNames = string.Join(" | ", castMembers.Select(a => a.Name));
+                Console.WriteLine($"Movies with cast: {castMemberNames} \n");
+                moviesWithCastMembers.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
             else if (opts.WithDirectors.Any())
             {
@@ -335,16 +335,16 @@ namespace FilmCRUD
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
                 Console.WriteLine($"<empty>: {withoutGenres}");
             }
-            else if (opts.ByActor)
+            else if (opts.ByCastMember)
             {
-                Console.WriteLine("Count by actor:\n");
-                IEnumerable<KeyValuePair<Actor, int>> actorCount = scanMoviesManager.GetCountByActor(visit, out int withoutActors);
-                int toTake = opts.Top ?? actorCount.Count();
-                actorCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
+                Console.WriteLine("Count by cast member:\n");
+                IEnumerable<KeyValuePair<CastMember, int>> castMemberCount = scanMoviesManager.GetCountByCastMember(visit, out int withoutCastMembers);
+                int toTake = opts.Top ?? castMemberCount.Count();
+                castMemberCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
-                Console.WriteLine($"<empty>: {withoutActors}");
+                Console.WriteLine($"<empty>: {withoutCastMembers}");
             }
             else if (opts.ByDirector)
             {
@@ -478,12 +478,12 @@ namespace FilmCRUD
                 Log.Information("Fetching genres for movies...");
                 await genresFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
-            else if (opts.Actors)
+            else if (opts.CastMembers)
             {
-                ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_actors_.txt");
-                var actorsFetcher = new MovieDetailsFetcherActors(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
-                Log.Information("Fetching actors for movies...");
-                await actorsFetcher.PopulateDetails(opts.MaxCalls ?? -1);
+                ILogger fetchingErrorsLogger = GetLoggerForFetchingErrors("logs/fetching_errors_castmembers_.txt");
+                var castMembersFetcher = new MovieDetailsFetcherCastMembers(unitOfWork, appSettingsManager, movieAPIClient, fetchingErrorsLogger);
+                Log.Information("Fetching cast members for movies...");
+                await castMembersFetcher.PopulateDetails(opts.MaxCalls ?? -1);
             }
             else if (opts.Directors)
             {

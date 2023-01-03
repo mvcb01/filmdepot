@@ -28,9 +28,7 @@ namespace FilmCRUD
         public override IEnumerable<Director> GetExistingDetailEntitiesInRepo() => this._unitOfWork.Directors.GetAll();
 
         public override async Task<IEnumerable<MovieDirectorResult>> GetMovieDetailsFromApiAsync(int externalId)
-        {
-            return await this._movieAPIClient.GetMovieDirectorsAsync(externalId);
-        }
+            => await this._movieAPIClient.GetMovieDirectorsAsync(externalId);
 
         public override IEnumerable<Movie> GetMoviesWithoutDetails() => this._unitOfWork.Movies.GetMoviesWithoutDirectors();
 

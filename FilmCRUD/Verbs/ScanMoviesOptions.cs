@@ -9,8 +9,8 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "WithGenreOptions", HelpText = "list movies with genres")]
         public IEnumerable<string> WithGenres { get; set; }
 
-        [Option(SetName = "WithActorOptions", HelpText = "list movies with actors")]
-        public IEnumerable<string> WithActors { get; set; }
+        [Option(SetName = "WithCastOptions", HelpText = "list movies with cast members")]
+        public IEnumerable<string> WithCast { get; set; }
 
         [Option(SetName = "WithDirectorOptions", HelpText = "list movies with directors")]
         public IEnumerable<string> WithDirectors { get; set; }
@@ -21,8 +21,8 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "ByGenreOptions", HelpText = "get descending movie count by genre")]
         public bool ByGenre { get; set; }
 
-        [Option(SetName = "ByActorOptions", HelpText = "get descending movie count by actor")]
-        public bool ByActor { get; set; }
+        [Option(SetName = "ByCastMemberOptions", HelpText = "get descending movie count by cast member")]
+        public bool ByCastMember { get; set; }
 
         [Option(SetName = "SearchOptions", HelpText = "search movies by title")]
         public string Search { get; set; }
@@ -44,8 +44,8 @@ namespace FilmCRUD.Verbs
         [Option('v', "visit", HelpText = "warehouse visit date (YYYYMMDD) to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
 
-        // can be used with any set, only relevant for GetCountByGenre/Actor/Director
-        [Option('t', "top", HelpText = "integer to limit output count of bygenre/byactor/bydirector and get only the top N")]
+        // can be used with any set, only relevant for GetCountByGenre/CastMember/Director
+        [Option('t', "top", HelpText = "integer to limit output count of bygenre/bycastmember/bydirector and get only the top N")]
         public int? Top { get; set; }
 
 

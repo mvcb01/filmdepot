@@ -21,7 +21,7 @@ namespace FilmDataAccess.EFCore.ModelConfiguration
                     k => JsonSerializer.Serialize(k, (JsonSerializerOptions)null),
                     k => JsonSerializer.Deserialize<ICollection<string>>(k, (JsonSerializerOptions)null));
 
-            builder.Navigation(m => m.Actors).AutoInclude();
+            builder.Navigation(m => m.CastMembers).AutoInclude();
             builder.Navigation(m => m.Directors).AutoInclude();
             builder.Navigation(m => m.Genres).AutoInclude();
             builder.Navigation(m => m.MovieRips).AutoInclude();

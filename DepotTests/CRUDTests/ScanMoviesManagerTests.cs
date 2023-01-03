@@ -8,7 +8,6 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmCRUD;
 using FluentAssertions.Execution;
-using Microsoft.VisualBasic;
 
 namespace DepotTests.CRUDTests
 {
@@ -70,21 +69,21 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void GetMoviesWithActors_WithProvidedActors_ShouldReturnCorrectMovies()
+        public void GetMoviesWithCastMembers_WithProvidedCastMembers_ShouldReturnCorrectMovies()
         {
             // arrange
-            var firstActor = new Actor() { Name = "jeff goldblum" };
-            var secondActor = new Actor() { Name = "bill pullman" };
-            var thirdActor = new Actor() { Name = "jim carrey" };
+            var firstCastMember = new CastMember() { Name = "jeff goldblum" };
+            var secondCastMember = new CastMember() { Name = "bill pullman" };
+            var thirdCastMember = new CastMember() { Name = "jim carrey" };
 
             var firstMovie = new Movie() {
-                Title = "the fly", ReleaseDate = 1986, Actors = new Actor[] { firstActor }
+                Title = "the fly", ReleaseDate = 1986, CastMembers = new CastMember[] { firstCastMember }
             };
             var secondMovie = new Movie() {
-                Title = "independence day", ReleaseDate = 1996, Actors = new Actor[] { firstActor, secondActor }
+                Title = "independence day", ReleaseDate = 1996, CastMembers = new CastMember[] { firstCastMember, secondCastMember }
             };
             var thirdMovie = new Movie() {
-                Title = "dumb and dumber", ReleaseDate = 1994, Actors = new Actor[] { thirdActor }
+                Title = "dumb and dumber", ReleaseDate = 1994, CastMembers = new CastMember[] { thirdCastMember }
             };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
@@ -94,14 +93,14 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
-            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithActors(visit, firstActor, secondActor);
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithCastMembers(visit, firstCastMember, secondCastMember);
 
             // assert
             actual.Should().BeEquivalentTo(new Movie[] { firstMovie, secondMovie });
         }
 
         [Fact]
-        public void GetMoviesWithDirectors_WithProvidedActors_ShouldReturnCorrectMovies()
+        public void GetMoviesWithDirectors_WithProvidedDirectors_ShouldReturnCorrectMovies()
         {
             // arrange
             var firstDirector = new Director() { Name = "benny safdie" };
@@ -190,18 +189,18 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void GetCountByActor_ShouldReturnCorrectCount()
+        public void GetCountByCastMember_ShouldReturnCorrectCount()
         {
             // arrange
-            var firstActor = new Actor() { Name = "jeff goldblum" };
-            var secondActor = new Actor() { Name = "bill pullman" };
-            var thirdActor = new Actor() { Name = "jim carrey" };
+            var firstCastMember = new CastMember() { Name = "jeff goldblum" };
+            var secondCastMember = new CastMember() { Name = "bill pullman" };
+            var thirdCastMember = new CastMember() { Name = "jim carrey" };
 
-            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, Actors = new Actor[] { firstActor, secondActor } };
-            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, Actors = new Actor[] { firstActor } };
-            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Actors = new Actor[] { thirdActor } };
-            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, Actors = Array.Empty<Actor>() };
-            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, Actors = Array.Empty<Actor>() };
+            var firstMovie = new Movie() { Title = "the fly", ReleaseDate = 1986, CastMembers = new CastMember[] { firstCastMember, secondCastMember } };
+            var secondMovie = new Movie() { Title = "independence day", ReleaseDate = 1996, CastMembers = new CastMember[] { firstCastMember } };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, CastMembers = new CastMember[] { thirdCastMember } };
+            var fourthMovie = new Movie() { Title = "begotten", ReleaseDate = 1989, CastMembers = Array.Empty<CastMember>() };
+            var fifthMovie = new Movie() { Title = "gummo", ReleaseDate = 1997, CastMembers = Array.Empty<CastMember>() };
 
             var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie, fifthMovie };
 
@@ -212,19 +211,19 @@ namespace DepotTests.CRUDTests
                 .Returns(moviesInVisit);
 
             // act
-            IEnumerable<KeyValuePair<Actor, int>> actual = this._scanMoviesManager.GetCountByActor(visit, out int withoutActors);
+            IEnumerable<KeyValuePair<CastMember, int>> actual = this._scanMoviesManager.GetCountByCastMember(visit, out int withoutCastMembers);
 
             // assert
-            var expected = new List<KeyValuePair<Actor, int>>() {
-                new KeyValuePair<Actor, int>(firstActor, 2),
-                new KeyValuePair<Actor, int>(secondActor, 1),
-                new KeyValuePair<Actor, int>(thirdActor, 1)
+            var expected = new List<KeyValuePair<CastMember, int>>() {
+                new KeyValuePair<CastMember, int>(firstCastMember, 2),
+                new KeyValuePair<CastMember, int>(secondCastMember, 1),
+                new KeyValuePair<CastMember, int>(thirdCastMember, 1)
             };
 
             using (new AssertionScope())
             {
                 actual.Should().BeEquivalentTo(expected);
-                withoutActors.Should().Be(moviesInVisit.Where(m => !m.Actors.Any()).Count());
+                withoutCastMembers.Should().Be(moviesInVisit.Where(m => !m.CastMembers.Any()).Count());
             }
         }
 

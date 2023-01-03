@@ -13,7 +13,7 @@ namespace FilmDataAccess.EFCore
 
         public DbSet<Director> Directors { get; set; }
 
-        public DbSet<Actor> Actors { get; set; }
+        public DbSet<CastMember> CastMembers { get; set; }
 
         public DbSet<MovieRip> MovieRips { get; set; }
 
@@ -33,7 +33,7 @@ namespace FilmDataAccess.EFCore
             modelBuilder.ApplyConfiguration<Genre>(new GenreEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration<MovieRip>(new MovieRipEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration<MovieWarehouseVisit>(new MovieWarehouseVisitEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration<Actor>(new ActorEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration<CastMember>(new CastMemberEntityTypeConfiguration());
         }
 
     }

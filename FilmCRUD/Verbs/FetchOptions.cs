@@ -8,8 +8,8 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "FetchGenres", HelpText = "fetch genres for movies")]
         public bool Genres { get; set; }
 
-        [Option(SetName = "FetchActors", HelpText = "fetch actors for movies")]
-        public bool Actors { get; set; }
+        [Option(SetName = "FetchCastMembers", HelpText = "fetch cast members for movies")]
+        public bool CastMembers { get; set; }
 
         [Option(SetName = "FetchDirectors", HelpText = "fetch directors for movies")]
         public bool Directors { get; set; }

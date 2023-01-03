@@ -3,7 +3,8 @@ using FilmDomain.Interfaces;
 
 namespace FilmDomain.Entities
 {
-    public class Actor : IExternalEntity, INamedEntityWithId
+
+    public class CastMember : IExternalEntity, INamedEntityWithId
     {
         public int Id { get; set; }
 

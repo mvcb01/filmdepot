@@ -119,10 +119,10 @@ namespace MovieAPIClients.TheMovieDb
             return resultObj.Genres.Select(g => (MovieGenreResult)g);
         }
 
-        public async Task<IEnumerable<MovieActorResult>> GetMovieActorsAsync(int externalId)
+        public async Task<IEnumerable<MovieCastMemberResult>> GetMovieCastMembersAsync(int externalId)
         {
             MovieCreditsResultTMDB resultObj = await GetMovieCreditsFromExternalIdAsync(externalId);
-            return resultObj.Cast.Select(c => (MovieActorResult)c);
+            return resultObj.Cast.Select(c => (MovieCastMemberResult)c);
         }
 
         public async Task<IEnumerable<MovieDirectorResult>> GetMovieDirectorsAsync(int externalId)

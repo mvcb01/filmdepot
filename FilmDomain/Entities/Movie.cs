@@ -26,7 +26,7 @@ namespace FilmDomain.Entities
 
         public ICollection<MovieRip> MovieRips { get; set; }
 
-        public ICollection<Actor> Actors { get; set; }
+        public ICollection<CastMember> CastMembers { get; set; }
 
         public override string ToString()
         {
