@@ -8,12 +8,6 @@ namespace FilmDataAccess.EFCore.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ActorMovie");
-
-            migrationBuilder.DropTable(
-                name: "Actors");
-
             migrationBuilder.CreateTable(
                 name: "CastMembers",
                 columns: table => new
@@ -57,16 +51,26 @@ namespace FilmDataAccess.EFCore.Migrations
                 name: "IX_CastMemberMovie_MoviesId",
                 table: "CastMemberMovie",
                 column: "MoviesId");
+
+            // ------------
+            // CUSTOM STEP
+
+            // migrating the previously existing data into thew new tables
+            //   - Actors -> CastMembers (all the known cast members)
+            //   - ActorMovie -> CastMemberMovie (all the known cast members for every movie)
+            migrationBuilder.Sql("insert into CastMembers(Id, Name) select Id, Name from Actors;");
+            migrationBuilder.Sql("insert into CastMemberMovie(CastMembersId, MoviesId) select ActorsId, MoviesId from ActorMovie;");
+
+            // this step was originally in the beginning of the method
+            migrationBuilder.DropTable(
+                name: "ActorMovie");
+
+            migrationBuilder.DropTable(
+                name: "Actors");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "CastMemberMovie");
-
-            migrationBuilder.DropTable(
-                name: "CastMembers");
-
             migrationBuilder.CreateTable(
                 name: "Actors",
                 columns: table => new
@@ -110,6 +114,20 @@ namespace FilmDataAccess.EFCore.Migrations
                 name: "IX_ActorMovie_MoviesId",
                 table: "ActorMovie",
                 column: "MoviesId");
+
+            // ------------
+            // CUSTOM STEP
+
+            // inverse operations of the CUSTOM STEP in the Up method 
+
+            migrationBuilder.Sql("insert into Actors(Id, Name) select Id, Name from CastMembers;");
+            migrationBuilder.Sql("insert into ActorMovie(ActorsId, MoviesId) select CastMembersId, MoviesId from CastMemberMovie;");
+
+            migrationBuilder.DropTable(
+                name: "CastMemberMovie");
+
+            migrationBuilder.DropTable(
+                name: "CastMembers");
         }
     }
 }
