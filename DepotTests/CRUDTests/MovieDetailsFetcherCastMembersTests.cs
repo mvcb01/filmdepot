@@ -5,13 +5,11 @@ using FluentAssertions.Execution;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
-
 using FilmCRUD;
 using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using MovieAPIClients;
 using MovieAPIClients.Interfaces;
-using FilmCRUD.Interfaces;
 using ConfigUtils.Interfaces;
 using System;
 
