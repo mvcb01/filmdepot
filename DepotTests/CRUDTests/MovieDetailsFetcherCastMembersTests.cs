@@ -70,7 +70,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task PopulateDetails_WithoutMoviesMissingActors_ShouldNotCallApiClient()
+        public async Task PopulateDetails_WithoutMoviesMissingCastMembers_ShouldNotCallApiClient()
         {
             // arrange
             this._movieRepositoryMock.Setup(m => m.GetMoviesWithoutCastMembers()).Returns(Enumerable.Empty<Movie>());
