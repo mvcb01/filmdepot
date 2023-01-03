@@ -69,7 +69,7 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void GetMoviesWithActors_WithProvidedCastMembers_ShouldReturnCorrectMovies()
+        public void GetMoviesWithCastMembers_WithProvidedCastMembers_ShouldReturnCorrectMovies()
         {
             // arrange
             var firstCastMember = new CastMember() { Name = "jeff goldblum" };
