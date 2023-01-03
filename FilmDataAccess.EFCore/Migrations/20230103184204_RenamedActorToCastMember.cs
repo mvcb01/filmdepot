@@ -58,7 +58,7 @@ namespace FilmDataAccess.EFCore.Migrations
             // migrating the previously existing data into thew new tables
             //   - Actors -> CastMembers (all the known cast members)
             //   - ActorMovie -> CastMemberMovie (all the known cast members for every movie)
-            migrationBuilder.Sql("insert into CastMembers(Id, Name) select Id, Name from Actors;");
+            migrationBuilder.Sql("insert into CastMembers(Id, ExternalId, Name) select Id, ExternalId, Name from Actors;");
             migrationBuilder.Sql("insert into CastMemberMovie(CastMembersId, MoviesId) select ActorsId, MoviesId from ActorMovie;");
 
             // this step was originally in the beginning of the method
@@ -120,7 +120,7 @@ namespace FilmDataAccess.EFCore.Migrations
 
             // inverse operations of the CUSTOM STEP in the Up method 
 
-            migrationBuilder.Sql("insert into Actors(Id, Name) select Id, Name from CastMembers;");
+            migrationBuilder.Sql("insert into Actors(Id, ExternalId, Name) select Id, ExternalId, Name from CastMembers;");
             migrationBuilder.Sql("insert into ActorMovie(ActorsId, MoviesId) select CastMembersId, MoviesId from CastMemberMovie;");
 
             migrationBuilder.DropTable(
