@@ -17,7 +17,7 @@ using System;
 
 namespace DepotTests.CRUDTests
 {
-    public class MovieDetailsFetcherActorsTests
+    public class MovieDetailsFetcherCastMembersTests
     {
         private readonly Mock<IMovieRepository> _movieRepositoryMock;
 
@@ -35,7 +35,7 @@ namespace DepotTests.CRUDTests
 
         private readonly MovieDetailsFetcherCastMembers _movieDetailsFetcherActors;
 
-        public MovieDetailsFetcherActorsTests()
+        public MovieDetailsFetcherCastMembersTests()
         {
             this._movieRepositoryMock = new Mock<IMovieRepository>(MockBehavior.Strict);
             this._actorRepositoryMock = new Mock<ICastMemberRepository>(MockBehavior.Strict);
