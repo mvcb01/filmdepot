@@ -207,22 +207,22 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public async Task PopulateDetails_WithMoviesMissingActors_WithoutSuchActorsInRepo_WithSameActorForAllMovies_ShouldBePopulatedWithTheSameActorEntity()
+        public async Task PopulateDetails_WithMoviesMissingCastMembers_WithoutSuchCastMembersInRepo_WithSameCastMemberForAllMovies_ShouldBePopulatedWithTheSameCastMemberEntity()
         {
             // arrange
-            var firstActorResult = new MovieCastMemberResult() { Name = "joaquin phoenix", ExternalId = 201 };
-            var secondActorResult = new MovieCastMemberResult() { Name = "adrien brody", ExternalId = 202 };
+            var firstCastMemberResult = new MovieCastMemberResult() { Name = "joaquin phoenix", ExternalId = 201 };
+            var secondCastMemberResult = new MovieCastMemberResult() { Name = "adrien brody", ExternalId = 202 };
 
             int firstExternalId = 101;
             int secondExternalId = 102;
-            var firstMovieWithoutActors = new Movie()
+            var firstMovieWithoutCastMembers = new Movie()
             {
                 Title = "i'm still here",
                 ReleaseDate = 2010,
                 ExternalId = firstExternalId,
                 CastMembers = new List<CastMember>()
             };
-            var secondMovieWithoutActors = new Movie()
+            var secondMovieWithoutCastMembers = new Movie()
             {
                 Title = "the village",
                 ReleaseDate = 2004,
@@ -235,22 +235,22 @@ namespace DepotTests.CRUDTests
                 .Returns(Enumerable.Empty<CastMember>());
             this._movieRepositoryMock
                 .Setup(m => m.GetMoviesWithoutCastMembers())
-                .Returns(new Movie[] { firstMovieWithoutActors, secondMovieWithoutActors });
+                .Returns(new Movie[] { firstMovieWithoutCastMembers, secondMovieWithoutCastMembers });
             this._movieAPIClientMock
                 .Setup(cl => cl.GetMovieCastMembersAsync(firstExternalId))
-                .ReturnsAsync(new MovieCastMemberResult[] { firstActorResult });
+                .ReturnsAsync(new MovieCastMemberResult[] { firstCastMemberResult });
             this._movieAPIClientMock
                 .Setup(cl => cl.GetMovieCastMembersAsync(secondExternalId))
-                .ReturnsAsync(new MovieCastMemberResult[] { firstActorResult, secondActorResult });
+                .ReturnsAsync(new MovieCastMemberResult[] { firstCastMemberResult, secondCastMemberResult });
 
             // act
             await this._movieDetailsFetcherCastMembers.PopulateDetails();
 
             // assert
-            firstMovieWithoutActors.CastMembers
-                .First(a => a.ExternalId == firstActorResult.ExternalId)
+            firstMovieWithoutCastMembers.CastMembers
+                .First(a => a.ExternalId == firstCastMemberResult.ExternalId)
                 .Should()
-                .BeSameAs(secondMovieWithoutActors.CastMembers.First(a => a.ExternalId == firstActorResult.ExternalId));
+                .BeSameAs(secondMovieWithoutCastMembers.CastMembers.First(a => a.ExternalId == firstCastMemberResult.ExternalId));
         }
 
         [Theory]
