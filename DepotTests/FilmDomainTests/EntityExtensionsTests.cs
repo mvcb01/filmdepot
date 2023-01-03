@@ -83,16 +83,16 @@ namespace DepotTests.FilmDomainTests
         public void GetEntitiesFromNameFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches(string nameToSearch)
         {
             // arrange
-            var firstActor = new CastMember() { Name = "{/% Benoît Pöelvóorde", Id = 0};
-            var secondActor = new CastMember() { Name = ":!!  benoit /& PoeLVOOrdE ", Id = 1 };
-            var thirdActor = new CastMember() { Name = "Zbigniew Zamachowski", Id = 2 };
-            var allActors = new CastMember[] { firstActor, secondActor, thirdActor };
+            var firstCastMember = new CastMember() { Name = "{/% Benoît Pöelvóorde", Id = 0};
+            var secondCastMember = new CastMember() { Name = ":!!  benoit /& PoeLVOOrdE ", Id = 1 };
+            var thirdCastMember = new CastMember() { Name = "Zbigniew Zamachowski", Id = 2 };
+            var allCastMembers = new CastMember[] { firstCastMember, secondCastMember, thirdCastMember };
 
             // act
-            IEnumerable<CastMember> searchResult = allActors.GetEntitiesFromNameFuzzyMatching(nameToSearch, removeDiacritics: false);
+            IEnumerable<CastMember> searchResult = allCastMembers.GetEntitiesFromNameFuzzyMatching(nameToSearch, removeDiacritics: false);
 
             // assert
-            searchResult.Should().BeEquivalentTo(new CastMember[] { secondActor });
+            searchResult.Should().BeEquivalentTo(new CastMember[] { secondCastMember });
 
         }
 
