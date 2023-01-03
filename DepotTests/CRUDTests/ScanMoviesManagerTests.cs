@@ -69,21 +69,21 @@ namespace DepotTests.CRUDTests
         }
 
         [Fact]
-        public void GetMoviesWithActors_WithProvidedActors_ShouldReturnCorrectMovies()
+        public void GetMoviesWithActors_WithProvidedCastMembers_ShouldReturnCorrectMovies()
         {
             // arrange
-            var firstActor = new CastMember() { Name = "jeff goldblum" };
-            var secondActor = new CastMember() { Name = "bill pullman" };
-            var thirdActor = new CastMember() { Name = "jim carrey" };
+            var firstCastMember = new CastMember() { Name = "jeff goldblum" };
+            var secondCastMember = new CastMember() { Name = "bill pullman" };
+            var thirdCastMember = new CastMember() { Name = "jim carrey" };
 
             var firstMovie = new Movie() {
-                Title = "the fly", ReleaseDate = 1986, CastMembers = new CastMember[] { firstActor }
+                Title = "the fly", ReleaseDate = 1986, CastMembers = new CastMember[] { firstCastMember }
             };
             var secondMovie = new Movie() {
-                Title = "independence day", ReleaseDate = 1996, CastMembers = new CastMember[] { firstActor, secondActor }
+                Title = "independence day", ReleaseDate = 1996, CastMembers = new CastMember[] { firstCastMember, secondCastMember }
             };
             var thirdMovie = new Movie() {
-                Title = "dumb and dumber", ReleaseDate = 1994, CastMembers = new CastMember[] { thirdActor }
+                Title = "dumb and dumber", ReleaseDate = 1994, CastMembers = new CastMember[] { thirdCastMember }
             };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
@@ -93,7 +93,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
-            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithCastMembers(visit, firstActor, secondActor);
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithCastMembers(visit, firstCastMember, secondCastMember);
 
             // assert
             actual.Should().BeEquivalentTo(new Movie[] { firstMovie, secondMovie });
