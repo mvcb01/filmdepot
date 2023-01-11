@@ -61,6 +61,14 @@ namespace FilmDomain.Extensions
                 RegexOptions.IgnoreCase));
         }
 
+        /// <summary>
+        /// Searches the provided <see cref="Movie"/> entities and returns the ones that have a property <see cref="Movie.Title"/>
+        /// fuzzy matching parameter <paramref name="title"/>.
+        /// </summary>
+        /// <param name="allMovies">The entities to search</param>
+        /// <param name="title">The title to search</param>
+        /// <param name="removeDiacritics">Whether or no to remove diacritics when comparing <paramref name="title"/> and <see cref="Movie.Title"/>.</param>
+        /// <returns></returns>
         public static IEnumerable<Movie> GetMovieEntitiesFromTitleFuzzyMatching(
             this IEnumerable<Movie> allMovies,
             string title,
@@ -152,6 +160,15 @@ namespace FilmDomain.Extensions
                 _id, _filename, _parsedTitle, _parsedReleaseDate,
                 _parsedRipQuality, _parsedRipInfo, _parsedRipGroup,
                 _linkedMovie });
+        }
+
+        private static IEnumerable<Movie> GetMovieEntitiesFromTitleFuzzyMatching(
+            IEnumerable<Movie> allMovies,
+            string title,
+            bool removeDiacritics,
+            Func<Movie, string> propertyGetter)
+        {
+            throw new NotImplementedException();
         }
     }
 }
