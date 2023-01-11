@@ -72,10 +72,7 @@ namespace FilmDomain.Extensions
         public static IEnumerable<Movie> GetMovieEntitiesFromTitleFuzzyMatching(
             this IEnumerable<Movie> allMovies,
             string title,
-            bool removeDiacritics = false)
-        {
-            return SearchMovieEntitiesByFuzzyMatching(allMovies, title, removeDiacritics, m => m.Title);
-        }
+            bool removeDiacritics = false) => SearchMovieEntitiesByFuzzyMatching(allMovies, title, removeDiacritics, m => m.Title);
 
         /// <summary>
         /// Searches the provided entities <see cref="Movie"/> and returns the entities such that property <see cref="Movie.OriginalTitle"/>
