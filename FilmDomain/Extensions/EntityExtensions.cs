@@ -136,6 +136,12 @@ namespace FilmDomain.Extensions
                 _linkedMovie });
         }
 
+        /// <summary>
+        /// Implements the logic behind extensions <see cref="GetMovieEntitiesFromTitleFuzzyMatching"/> and
+        /// <see cref="GetMovieEntitiesFromOriginalTitleFuzzyMatching"/>, while allowing client code to pass parameter
+        /// <paramref name="propertyGetter"/> in order to choose the <see cref="Movie"/> property to use on fuzzy
+        /// matching.
+        /// </summary>
         private static IEnumerable<Movie> SearchMovieEntitiesByFuzzyMatching(
             IEnumerable<Movie> allMovies,
             string title,
