@@ -62,8 +62,8 @@ namespace FilmDomain.Extensions
         }
 
         /// <summary>
-        /// Searches the provided <see cref="Movie"/> entities and returns the ones that have a property <see cref="Movie.Title"/>
-        /// fuzzy matching parameter <paramref name="title"/>.
+        /// Searches the provided entities <see cref="Movie"/> and returns the entities such that property <see cref="Movie.Title"/>
+        /// fuzzy matches provided parameter <paramref name="title"/>.
         /// </summary>
         /// <param name="allMovies">The entities to search</param>
         /// <param name="title">The title to search</param>
