@@ -68,7 +68,7 @@ namespace FilmDomain.Extensions
         /// <param name="allMovies">The entities to search</param>
         /// <param name="title">The title to search</param>
         /// <param name="removeDiacritics">Whether or no to remove diacritics when comparing <paramref name="title"/> and <see cref="Movie.Title"/>.</param>
-        /// <returns></returns>
+        /// <returns>The search result</returns>
         public static IEnumerable<Movie> GetMovieEntitiesFromTitleFuzzyMatching(
             this IEnumerable<Movie> allMovies,
             string title,
@@ -117,6 +117,22 @@ namespace FilmDomain.Extensions
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Searches the provided entities <see cref="Movie"/> and returns the entities such that property <see cref="Movie.Title"/>
+        /// fuzzy matches provided parameter <paramref name="title"/>.
+        /// </summary>
+        /// <param name="allMovies">The entities to search</param>
+        /// <param name="title">The title to search</param>
+        /// <param name="removeDiacritics">Whether or no to remove diacritics when comparing <paramref name="title"/> and <see cref="Movie.Title"/>.</param>
+        /// <returns>The search result</returns>
+        public static IEnumerable<Movie> GetMovieEntitiesFromOriginalTitleFuzzyMatching(
+            this IEnumerable<Movie> allMovies,
+            string title,
+            bool removeDiacritics = false)
+        {
+            throw new NotImplementedException();
         }
 
         // taken from
