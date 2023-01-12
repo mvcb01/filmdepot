@@ -276,7 +276,7 @@ namespace DepotTests.CRUDTests
         [InlineData(" licorice   piZZa")]
         [InlineData(" licorice ! piZZa 2021 -->")]
         [InlineData("??? licorice ==> piZZa (2021)%%$$##")]
-        public void SearchMovieEntitiesByTitle_ShouldReturnCorrectMatches(string title)
+        public void SearchMovieEntities_WithTitleMatch_ShouldReturnCorrectMatches(string title)
         {
             // arrange
             var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019 };
