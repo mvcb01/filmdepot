@@ -310,7 +310,7 @@ namespace DepotTests.CRUDTests
         public void SearchMovieEntities_WithOriginalTitleMatch_ShouldReturnCorrectMatches(string title)
         {
             // arrange
-            var firstMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007 };
+            var firstMovie = new Movie() { Title = "there will be blood", OriginalTitle = "there will be blood",  ReleaseDate = 2007 };
             var secondMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021 };
             var thirdMovie = new Movie() { Title = "Fire Will Come", OriginalTitle = "O que Arde", ReleaseDate = 2019 };
 
@@ -325,6 +325,28 @@ namespace DepotTests.CRUDTests
 
             // assert
             var expected = new Movie[] { thirdMovie };
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
+        public void SearchMovieEntities_WithBothTitleAndOriginalTitleMatch_ShouldNotReturnDuplicates()
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007 };
+            var secondMovie = new Movie() { Title = "Licorice Pizza", OriginalTitle = "Licorice Pizza", ReleaseDate = 2021 };
+            var thirdMovie = new Movie() { Title = "Fire Will Come", OriginalTitle = "O que Arde", ReleaseDate = 2019 };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.SearchMovieEntities(visit, "«»}}} licorice ==> piZZa (2021)*+-^```");
+
+            // assert
+            var expected = new Movie[] { secondMovie };
             actual.Should().BeEquivalentTo(expected);
         }
 

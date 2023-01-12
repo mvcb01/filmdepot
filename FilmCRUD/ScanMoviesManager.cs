@@ -108,7 +108,7 @@ namespace FilmCRUD
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
             IEnumerable<Movie> fuzzyMatchTitle = moviesInVisit.GetMovieEntitiesFromTitleFuzzyMatching(title, removeDiacritics: true);
             IEnumerable<Movie> fuzzyMatchOriginalTitle = moviesInVisit.GetMovieEntitiesFromOriginalTitleFuzzyMatching(title, removeDiacritics: true);
-            return fuzzyMatchTitle.Concat(fuzzyMatchOriginalTitle);
+            return fuzzyMatchTitle.Concat(fuzzyMatchOriginalTitle).Distinct(); 
         }
 
         /// <summary>
