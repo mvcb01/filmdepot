@@ -142,6 +142,16 @@ namespace FilmDomain.Extensions
             bool removeDiacritics,
             Func<Movie, string> propertyGetter)
         {
+            // local func; null safety refers to the movie property getter;
+            // not a static func since it uses the containing method params propertyGetter and removeDiacritics
+            string RemovePunctuationFromMoviePropertyNullSafe(Movie movie, bool removeSingleQuotes)
+            {
+                string movieProperty = propertyGetter(movie) ?? string.Empty;
+                if (removeSingleQuotes)
+                    movieProperty = movieProperty.Replace("\'", string.Empty);
+                return string.Join(' ', movieProperty.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics));
+            }
+
             var titleTokensWithoutPunctuation = title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
 
             if (!titleTokensWithoutPunctuation.Any())
@@ -150,7 +160,7 @@ namespace FilmDomain.Extensions
             string titleRegex = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuation) + @")(\s*)";
 
             IEnumerable<Movie> result = allMovies.Where(m => Regex.IsMatch(
-                string.Join(' ', propertyGetter(m).GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                RemovePunctuationFromMoviePropertyNullSafe(m, removeSingleQuotes: false),
                 titleRegex,
                 RegexOptions.IgnoreCase));
 
@@ -158,7 +168,7 @@ namespace FilmDomain.Extensions
             if (!result.Any())
             {
                 result = allMovies.Where(m => Regex.IsMatch(
-                    string.Join(' ', propertyGetter(m).Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                    RemovePunctuationFromMoviePropertyNullSafe(m, removeSingleQuotes: true),
                     titleRegex,
                     RegexOptions.IgnoreCase));
             }
@@ -174,11 +184,11 @@ namespace FilmDomain.Extensions
                 IEnumerable<Movie> extraResults = allMovies.Where(
                     m => m.ReleaseDate == parsedReleaseDate
                         && (Regex.IsMatch(
-                                string.Join(' ', propertyGetter(m).GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                                RemovePunctuationFromMoviePropertyNullSafe(m, removeSingleQuotes: false),
                                 titleRegexNoDate,
                                 RegexOptions.IgnoreCase)
                             || Regex.IsMatch(
-                                string.Join(' ', propertyGetter(m).Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
+                                RemovePunctuationFromMoviePropertyNullSafe(m, removeSingleQuotes: true),
                                 titleRegexNoDate,
                                 RegexOptions.IgnoreCase)));
                 result = result.Concat(extraResults);

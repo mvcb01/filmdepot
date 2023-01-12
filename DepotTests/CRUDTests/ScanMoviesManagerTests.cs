@@ -303,7 +303,7 @@ namespace DepotTests.CRUDTests
         [InlineData("O Que Arde (2019)")]
         [InlineData("o que arde")]
         [InlineData("o que arde 2019")]
-        [InlineData("o que arde pizza (2019)")]
+        [InlineData("o que arde (2019)")]
         [InlineData("  o   qUe arDE  ")]
         [InlineData(" O ! QuE   #( arDe 2019 -->")]
         [InlineData("!!== o // que aRDE (2019)€€**««»")]
