@@ -111,7 +111,14 @@ namespace FilmDomain.Extensions
             string _genres = movie.Genres == null ? string.Empty : string.Join(" | ", movie.Genres.Select(g => g.Name));
             string _directors = movie.Directors == null ? string.Empty : string.Join(", ", movie.Directors.Select(d => d.Name));
             string _kwds = movie.Keywords == null ? string.Empty : string.Join(", ", movie.Keywords);
-            return string.Join('\n', new string[] {movie.ToString(), _genres, $"Directors: {_directors}", $"IMDB id: {movie.IMDBId}", $"Keywords: {_kwds}" });
+            string _originalTitle = movie.OriginalTitle ?? "-";
+            return string.Join('\n', new string[] {
+                movie.ToString(),
+                _genres,
+                $"Original title: {_originalTitle}",
+                $"Directors: {_directors}",
+                $"IMDB id: {movie.IMDBId}",
+                $"Keywords: {_kwds}" });
         }
 
         public static string PrettyFormat(this MovieRip movieRip)
