@@ -290,7 +290,7 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
-            IEnumerable<Movie> actual = this._scanMoviesManager.SearchMovieEntitiesByTitle(visit, title);
+            IEnumerable<Movie> actual = this._scanMoviesManager.SearchMovieEntities(visit, title);
 
             // assert
             var expected = new Movie[] { thirdMovie };
