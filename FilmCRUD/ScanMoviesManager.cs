@@ -100,7 +100,8 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Title fuzzy match search on all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// Fuzzy match search on all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>. Both
+        /// properties <see cref="Movie.Title"/> and <see cref="Movie.OriginalTitle"/> are used in the search.
         /// </summary>
         public IEnumerable<Movie> SearchMovieEntitiesByTitle(MovieWarehouseVisit visit, string title)
         {
