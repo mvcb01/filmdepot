@@ -160,5 +160,71 @@ namespace DepotTests.FilmDomainTests
             // assert
             searchResult.Should().BeEquivalentTo(new[] { firstMovie });
         }
+
+        [Theory]
+        [InlineData("$$#!(!)  A canÇÃo de  !!!$$lisbOA")]
+        [InlineData("a canção    de lisboa ")]
+        [InlineData("a canção de lisboa (1933)")]
+        [InlineData("a cancao de lisboa (1933)")]
+        [InlineData("canção de lisboa 1933")]
+        [InlineData("cancao de lisboa 1933")]
+        public void GetMovieEntitiesFromOriginalTitleFuzzyMatching_WithRemoveDiacritics_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { OriginalTitle = "The Turin Horse", ReleaseDate = 2011 };
+            var secondMovie = new Movie() { OriginalTitle = "A Canção de Lisboa", ReleaseDate = 1933 };
+            var thirdMovie = new Movie() { OriginalTitle = "Natural Born Killers", ReleaseDate = 1994 };
+
+            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie };
+
+            // act
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromOriginalTitleFuzzyMatching(title, removeDiacritics: true);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new[] { secondMovie });
+        }
+
+        [Theory]
+        [InlineData("$$#!(!)  A canCao de  !!!$$lisbOA")]
+        [InlineData("a cancao de lisboa (1933)")]
+        [InlineData("cancao de lisboa 1933")]
+        public void GetMovieEntitiesFromOriginalTitleFuzzyMatching_WithoutRemoveDiacritics_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { OriginalTitle = "The Turin Horse", ReleaseDate = 2011 };
+            var secondMovie = new Movie() { OriginalTitle = "A Cancao de Lisboa", ReleaseDate = 1933 };
+            var thirdMovie = new Movie() { OriginalTitle = "Natural Born Killers", ReleaseDate = 1994 };
+            var fourthMovie = new Movie() { OriginalTitle = "A Canção de Lisboa", ReleaseDate = 1933 };
+
+            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie };
+
+            // act
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromOriginalTitleFuzzyMatching(title, removeDiacritics: false);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new[] { secondMovie });
+        }
+
+        [Theory]
+        [InlineData("dead man's shoes")]
+        [InlineData("dead mans shoes")]
+        [InlineData("dead man's shoes (2004)")]
+        [InlineData("dead mans shoes (2004)")]
+        public void GetMovieEntitiesFromOriginalTitleFuzzyMatching_WithRemoveDiacritics_WithSingleQuotesInMovieTitle_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { OriginalTitle = "Dead Man's Shoes", ReleaseDate = 2004 };
+            var secondMovie = new Movie() { OriginalTitle = "The Turin Horse", ReleaseDate = 2011 };
+            var thirdMovie = new Movie() { OriginalTitle = "Natural Born Killers", ReleaseDate = 1994 };
+            var fourthMovie = new Movie() { OriginalTitle = "Sátántangó", ReleaseDate = 1994 };
+
+            var allMovies = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie };
+
+            // act
+            IEnumerable<Movie> searchResult = allMovies.GetMovieEntitiesFromOriginalTitleFuzzyMatching(title, removeDiacritics: false);
+
+            // assert
+            searchResult.Should().BeEquivalentTo(new[] { firstMovie });
+        }
     }
 }

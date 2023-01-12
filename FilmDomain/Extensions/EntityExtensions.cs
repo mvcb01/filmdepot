@@ -61,55 +61,31 @@ namespace FilmDomain.Extensions
                 RegexOptions.IgnoreCase));
         }
 
+        /// <summary>
+        /// Searches the provided entities <see cref="Movie"/> and returns the entities such that property <see cref="Movie.Title"/>
+        /// fuzzy matches the provided parameter <paramref name="title"/>.
+        /// </summary>
+        /// <param name="allMovies">The entities to search</param>
+        /// <param name="title">The title to search</param>
+        /// <param name="removeDiacritics">Whether or no to remove diacritics when comparing <paramref name="title"/> and <see cref="Movie.Title"/>.</param>
+        /// <returns>The search result</returns>
         public static IEnumerable<Movie> GetMovieEntitiesFromTitleFuzzyMatching(
             this IEnumerable<Movie> allMovies,
             string title,
-            bool removeDiacritics = false)
-        {
-            var titleTokensWithoutPunctuation = title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
+            bool removeDiacritics = false) => SearchMovieEntitiesByFuzzyMatching(allMovies, title, removeDiacritics, m => m.Title);
 
-            if (!titleTokensWithoutPunctuation.Any())
-                return Enumerable.Empty<Movie>();
-
-            string titleRegex = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuation) + @")(\s*)";
-
-            IEnumerable<Movie> result = allMovies.Where(m => Regex.IsMatch(
-                string.Join(' ', m.Title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
-                titleRegex,
-                RegexOptions.IgnoreCase));
-
-            // trying matches after removing single quotes
-            if (!result.Any())
-            {
-                result = allMovies.Where(m => Regex.IsMatch(
-                    string.Join(' ', m.Title.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
-                    titleRegex,
-                    RegexOptions.IgnoreCase));
-            }
-
-            // if the last token looks like a date that starts with "1" or "2" then we also search
-            // for movie entities with such release date
-            var lastToken = titleTokensWithoutPunctuation.Last();
-            if (Regex.IsMatch(lastToken, "(1|2)([0-9]{3})"))
-            {
-                IEnumerable<string> titleTokensWithoutPunctuationNoDate = titleTokensWithoutPunctuation.SkipLast(1);
-                string titleRegexNoDate = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuationNoDate) + @")(\s*)";
-                int parsedReleaseDate = int.Parse(lastToken);
-                IEnumerable<Movie> extraResults = allMovies.Where(
-                    m => m.ReleaseDate == parsedReleaseDate
-                        && (Regex.IsMatch(
-                                string.Join(' ', m.Title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
-                                titleRegexNoDate,
-                                RegexOptions.IgnoreCase)
-                            || Regex.IsMatch(
-                                string.Join(' ', m.Title.Replace("\'", string.Empty).GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics)),
-                                titleRegexNoDate,
-                                RegexOptions.IgnoreCase)));
-                result = result.Concat(extraResults);
-            }
-
-            return result;
-        }
+        /// <summary>
+        /// Searches the provided entities <see cref="Movie"/> and returns the entities such that property <see cref="Movie.OriginalTitle"/>
+        /// fuzzy matches the provided parameter <paramref name="title"/>.
+        /// </summary>
+        /// <param name="allMovies">The entities to search</param>
+        /// <param name="title">The original title to search</param>
+        /// <param name="removeDiacritics">Whether or no to remove diacritics when comparing <paramref name="title"/> and <see cref="Movie.OriginalTitle"/>.</param>
+        /// <returns>The search result</returns>
+        public static IEnumerable<Movie> GetMovieEntitiesFromOriginalTitleFuzzyMatching(
+            this IEnumerable<Movie> allMovies,
+            string title,
+            bool removeDiacritics = false) => SearchMovieEntitiesByFuzzyMatching(allMovies, title, removeDiacritics, m => m.OriginalTitle);
 
         // taken from
         // https://stackoverflow.com/questions/249087/how-do-i-remove-diacritics-accents-from-a-string-in-net/249126#249126
@@ -135,7 +111,14 @@ namespace FilmDomain.Extensions
             string _genres = movie.Genres == null ? string.Empty : string.Join(" | ", movie.Genres.Select(g => g.Name));
             string _directors = movie.Directors == null ? string.Empty : string.Join(", ", movie.Directors.Select(d => d.Name));
             string _kwds = movie.Keywords == null ? string.Empty : string.Join(", ", movie.Keywords);
-            return string.Join('\n', new string[] {movie.ToString(), _genres, $"Directors: {_directors}", $"IMDB id: {movie.IMDBId}", $"Keywords: {_kwds}" });
+            string _originalTitle = movie.OriginalTitle ?? "-";
+            return string.Join('\n', new string[] {
+                movie.ToString(),
+                _genres,
+                $"Original title: {_originalTitle}",
+                $"Directors: {_directors}",
+                $"IMDB id: {movie.IMDBId}",
+                $"Keywords: {_kwds}" });
         }
 
         public static string PrettyFormat(this MovieRip movieRip)
@@ -152,6 +135,73 @@ namespace FilmDomain.Extensions
                 _id, _filename, _parsedTitle, _parsedReleaseDate,
                 _parsedRipQuality, _parsedRipInfo, _parsedRipGroup,
                 _linkedMovie });
+        }
+
+        /// <summary>
+        /// Implements the logic behind extensions <see cref="GetMovieEntitiesFromTitleFuzzyMatching"/> and
+        /// <see cref="GetMovieEntitiesFromOriginalTitleFuzzyMatching"/>, while allowing client code to pass parameter
+        /// <paramref name="propertyGetter"/> in order to choose the <see cref="Movie"/> property to use on fuzzy
+        /// matching.
+        /// </summary>
+        private static IEnumerable<Movie> SearchMovieEntitiesByFuzzyMatching(
+            IEnumerable<Movie> allMovies,
+            string title,
+            bool removeDiacritics,
+            Func<Movie, string> propertyGetter)
+        {
+            // local func; null safety refers to the movie property getter;
+            // not a static func since it uses the containing method params propertyGetter and removeDiacritics
+            string RemovePunctuationFromMoviePropertyNullSafe(Movie movie, bool removeSingleQuotes)
+            {
+                string movieProperty = propertyGetter(movie) ?? string.Empty;
+                if (removeSingleQuotes)
+                    movieProperty = movieProperty.Replace("\'", string.Empty);
+                return string.Join(' ', movieProperty.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics));
+            }
+
+            var titleTokensWithoutPunctuation = title.GetStringTokensWithoutPunctuation(removeDiacritics: removeDiacritics);
+
+            if (!titleTokensWithoutPunctuation.Any())
+                return Enumerable.Empty<Movie>();
+
+            string titleRegex = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuation) + @")(\s*)";
+
+            IEnumerable<Movie> result = allMovies.Where(m => Regex.IsMatch(
+                RemovePunctuationFromMoviePropertyNullSafe(m, removeSingleQuotes: false),
+                titleRegex,
+                RegexOptions.IgnoreCase));
+
+            // trying matches after removing single quotes
+            if (!result.Any())
+            {
+                result = allMovies.Where(m => Regex.IsMatch(
+                    RemovePunctuationFromMoviePropertyNullSafe(m, removeSingleQuotes: true),
+                    titleRegex,
+                    RegexOptions.IgnoreCase));
+            }
+
+            // if the last token looks like a date that starts with "1" or "2" then we also search
+            // for movie entities with such release date
+            var lastToken = titleTokensWithoutPunctuation.Last();
+            if (Regex.IsMatch(lastToken, "(1|2)([0-9]{3})"))
+            {
+                IEnumerable<string> titleTokensWithoutPunctuationNoDate = titleTokensWithoutPunctuation.SkipLast(1);
+                string titleRegexNoDate = @"(\s*)(" + string.Join(@")(\s*)(", titleTokensWithoutPunctuationNoDate) + @")(\s*)";
+                int parsedReleaseDate = int.Parse(lastToken);
+                IEnumerable<Movie> extraResults = allMovies.Where(
+                    m => m.ReleaseDate == parsedReleaseDate
+                        && (Regex.IsMatch(
+                                RemovePunctuationFromMoviePropertyNullSafe(m, removeSingleQuotes: false),
+                                titleRegexNoDate,
+                                RegexOptions.IgnoreCase)
+                            || Regex.IsMatch(
+                                RemovePunctuationFromMoviePropertyNullSafe(m, removeSingleQuotes: true),
+                                titleRegexNoDate,
+                                RegexOptions.IgnoreCase)));
+                result = result.Concat(extraResults);
+            }
+
+            return result;
         }
     }
 }

@@ -361,7 +361,7 @@ namespace FilmCRUD
             {
                 string toSearch = opts.Search;
                 Console.WriteLine($"Search by title: \"{toSearch}\" \n");
-                IEnumerable<Movie> searchResult = scanMoviesManager.SearchMovieEntitiesByTitle(visit, toSearch);
+                IEnumerable<Movie> searchResult = scanMoviesManager.SearchMovieEntities(visit, toSearch);
                 if (!searchResult.Any())
                 {
                     Console.WriteLine("No matches...");

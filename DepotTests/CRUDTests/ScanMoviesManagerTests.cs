@@ -276,7 +276,7 @@ namespace DepotTests.CRUDTests
         [InlineData(" licorice   piZZa")]
         [InlineData(" licorice ! piZZa 2021 -->")]
         [InlineData("??? licorice ==> piZZa (2021)%%$$##")]
-        public void SearchMovieEntitiesByTitle_ShouldReturnCorrectMatches(string title)
+        public void SearchMovieEntities_WithTitleMatch_ShouldReturnCorrectMatches(string title)
         {
             // arrange
             var firstMovie = new Movie() { Title = "uncut gems", ReleaseDate = 2019 };
@@ -290,7 +290,38 @@ namespace DepotTests.CRUDTests
                 .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
 
             // act
-            IEnumerable<Movie> actual = this._scanMoviesManager.SearchMovieEntitiesByTitle(visit, title);
+            IEnumerable<Movie> actual = this._scanMoviesManager.SearchMovieEntities(visit, title);
+
+            // assert
+            var expected = new Movie[] { thirdMovie };
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Theory]
+        [InlineData("O Que Arde")]
+        [InlineData("O Que Arde 2019")]
+        [InlineData("O Que Arde (2019)")]
+        [InlineData("o que arde")]
+        [InlineData("o que arde 2019")]
+        [InlineData("o que arde (2019)")]
+        [InlineData("  o   qUe arDE  ")]
+        [InlineData(" O ! QuE   #( arDe 2019 -->")]
+        [InlineData("!!== o // que aRDE (2019)€€**««»")]
+        public void SearchMovieEntities_WithOriginalTitleMatch_ShouldReturnCorrectMatches(string title)
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "there will be blood", ReleaseDate = 2007 };
+            var secondMovie = new Movie() { Title = "Licorice Pizza", ReleaseDate = 2021 };
+            var thirdMovie = new Movie() { Title = "Fire Will Come", OriginalTitle = "O que Arde", ReleaseDate = 2019 };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.SearchMovieEntities(visit, title);
 
             // assert
             var expected = new Movie[] { thirdMovie };

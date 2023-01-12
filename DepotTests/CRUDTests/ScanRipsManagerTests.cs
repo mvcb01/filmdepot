@@ -342,5 +342,6 @@ namespace DepotTests.CRUDTests
             actualSearchResult.Should().BeEquivalentTo(
                 visit.MovieRips.Where(mr => idsForExpectedResult.Contains(mr.Id)));
         }
+
     }
 }
