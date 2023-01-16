@@ -48,6 +48,5 @@ namespace FilmCRUD.Verbs
         [Option('t', "top", HelpText = "integer to limit output count of bygenre/bycastmember/bydirector and get only the top N")]
         public int? Top { get; set; }
 
-
     }
 }
