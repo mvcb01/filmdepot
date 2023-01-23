@@ -10,7 +10,7 @@ if ($currentBranchName -ne "main" -And $currentBranchName -ne "master")
 $cwd = (Get-Item .).FullName
 
 $user = $env:USERPROFILE
-$deploymentDir = Join-Path -Path $user -ChildPath 'entertainmentdepot_PROD'
+$deploymentDir = Join-Path -Path $user -ChildPath 'filmdepot_PROD'
 
 $solutionRoot = (get-item $PSScriptRoot).parent.FullName
 
