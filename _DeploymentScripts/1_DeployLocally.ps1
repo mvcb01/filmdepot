@@ -10,7 +10,7 @@ if ($currentBranchName -ne "main" -And $currentBranchName -ne "master")
 $cwd = (Get-Item .).FullName
 
 $user = $env:USERPROFILE
-$deploymentDir = Join-Path -Path $user -ChildPath 'entertainmentdepot_PROD'
+$deploymentDir = Join-Path -Path $user -ChildPath 'filmdepot_PROD'
 
 $solutionRoot = (get-item $PSScriptRoot).parent.FullName
 
@@ -19,7 +19,7 @@ echo ("Deploying to {0}" -f $deploymentDir)
 echo " "
 
 cd $solutionRoot
-dotnet publish .\entertainmentdepot.sln -o $deploymentDir -c Release
+dotnet publish .\filmdepot.sln -o $deploymentDir -c Release
 
 # creates the warehouse contents dir if not exists
 $migrationsDir = Join-Path -Path $deploymentDir -ChildPath 'whcontents'
