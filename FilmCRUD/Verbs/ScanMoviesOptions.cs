@@ -47,7 +47,5 @@ namespace FilmCRUD.Verbs
         // can be used with any set, only relevant for GetCountByGenre/CastMember/Director
         [Option('t', "top", HelpText = "integer to limit output count of bygenre/bycastmember/bydirector and get only the top N")]
         public int? Top { get; set; }
-
-
     }
 }
