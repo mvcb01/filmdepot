@@ -9,10 +9,8 @@ using FluentAssertions.Execution;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
-using FilmCRUD.CustomExceptions;
 using FilmDomain.Entities;
 using MovieAPIClients;
-
 
 namespace DepotTests.CRUDTests
 {
