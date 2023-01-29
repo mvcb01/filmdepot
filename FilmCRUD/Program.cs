@@ -283,7 +283,7 @@ namespace FilmCRUD
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanMoviesManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
-            Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
+            Console.WriteLine($"Target visit: {visit.VisitDateTime.ToString(printDateFormat)}");
             if (opts.WithGenres.Any())
             {
                 // finds the Genre entities for each string in opts.WithGenres, then flattens
