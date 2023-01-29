@@ -149,6 +149,49 @@ namespace DepotTests.CRUDTests
             actual.Should().BeEquivalentTo(expected);
         }
 
+
+        [Fact]
+        public void GetMoviesWithKeywords_WithProvidedKeywords_ShouldReturnCorrectMovies()
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "wake in fright", ReleaseDate = 1971, Keywords = new[] { "beer", "australia" } };
+            var secondMovie = new Movie() { Title = "animal kingdom", ReleaseDate = 2010, Keywords = new[] { "drug dealer", "australia", "trial" } };
+            var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Keywords = new[] { "road trip", "limousine" } };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(new Movie[] { firstMovie, secondMovie, thirdMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithKeywords(visit, "  AUSTraLia", "bEEr  ");
+
+            // assert
+            var expected = new Movie[] { firstMovie, secondMovie };
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
+        public void GetMoviesWithKeywords_WithNullKeywordProperties_ShouldReturnEmptyEnumerable()
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "wake in fright", ReleaseDate = 1971 };
+            var secondMovie = new Movie() { Title = "animal kingdom", ReleaseDate = 2010 };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(new Movie[] { firstMovie, secondMovie });
+
+            // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithKeywords(visit, "  AUSTraLia", "bEEr  ");
+
+            // assert
+            actual.Should().BeEmpty();
+        }
+
         [Fact]
         public void GetCountByGenre_ShouldReturnCorrectCount()
         {

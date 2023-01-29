@@ -18,6 +18,9 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "WithDatesOptions", HelpText = "list movies with released dates")]
         public IEnumerable<int> WithDates { get; set; }
 
+        [Option(SetName = "WithKeywordsOptions", HelpText = "list movies with keywords")]
+        public IEnumerable<string> WithKeywords { get; set; }
+
         [Option(SetName = "ByGenreOptions", HelpText = "get descending movie count by genre")]
         public bool ByGenre { get; set; }
 
@@ -47,5 +50,6 @@ namespace FilmCRUD.Verbs
         // can be used with any set, only relevant for GetCountByGenre/CastMember/Director
         [Option('t', "top", HelpText = "integer to limit output count of bygenre/bycastmember/bydirector and get only the top N")]
         public int? Top { get; set; }
+
     }
 }

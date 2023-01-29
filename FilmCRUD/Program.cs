@@ -283,7 +283,7 @@ namespace FilmCRUD
             MovieWarehouseVisit visit = GetClosestMovieWarehouseVisit(scanMoviesManager, opts.Visit);
 
             string printDateFormat = "MMMM dd yyyy";
-            Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
+            Console.WriteLine($"Target visit: {visit.VisitDateTime.ToString(printDateFormat)}");
             if (opts.WithGenres.Any())
             {
                 // finds the Genre entities for each string in opts.WithGenres, then flattens
@@ -323,6 +323,13 @@ namespace FilmCRUD
                 string releaseDates = string.Join(" or ", opts.WithDates);
                 Console.WriteLine($"Movies with release date {releaseDates}: \n");
                 moviesWithDates.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
+            }
+            else if (opts.WithKeywords.Any())
+            {
+                IEnumerable<Movie> moviesWithKeywords = scanMoviesManager.GetMoviesWithKeywords(visit, opts.WithKeywords.ToArray());
+                string kwds = string.Join(" or ", opts.WithKeywords.Select(k => "\"" + k + "\""));
+                Console.WriteLine($"Movies with keywords {kwds}: \n");
+                moviesWithKeywords.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
             else if (opts.ByGenre)
             {
