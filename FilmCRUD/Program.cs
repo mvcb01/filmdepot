@@ -327,7 +327,7 @@ namespace FilmCRUD
             else if (opts.WithKeywords.Any())
             {
                 IEnumerable<Movie> moviesWithKeywords = scanMoviesManager.GetMoviesWithKeywords(visit, opts.WithKeywords.ToArray());
-                string kwds = string.Join(" or ", opts.WithKeywords);
+                string kwds = string.Join(" or ", opts.WithKeywords.Select(k => "\"" + k + "\""));
                 Console.WriteLine($"Movies with keywords {kwds}: \n");
                 moviesWithKeywords.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
