@@ -324,6 +324,13 @@ namespace FilmCRUD
                 Console.WriteLine($"Movies with release date {releaseDates}: \n");
                 moviesWithDates.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
             }
+            else if (opts.WithKeywords.Any())
+            {
+                IEnumerable<Movie> moviesWithKeywords = scanMoviesManager.GetMoviesWithKeywords(visit, opts.WithKeywords.ToArray());
+                string kwds = string.Join(" or ", opts.WithKeywords);
+                Console.WriteLine($"Movies with keywords {kwds}: \n");
+                moviesWithKeywords.ToList().ForEach(m => Console.WriteLine("-------------" + '\n' + m.PrettyFormat()));
+            }
             else if (opts.ByGenre)
             {
                 Console.WriteLine("Count by genre:\n");
