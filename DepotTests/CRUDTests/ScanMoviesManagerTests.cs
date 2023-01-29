@@ -154,8 +154,8 @@ namespace DepotTests.CRUDTests
         public void GetMoviesWithKeywords_WithProvidedKeywords_ShouldReturnCorrectMovies()
         {
             // arrange
-            var firstMovie = new Movie() { Title = "animal kingdom", ReleaseDate = 2010, Keywords = new[] { "drug dealer", "australia", "trial" } };
-            var secondMovie = new Movie() { Title = "wake in fright", ReleaseDate = 1971, Keywords = new[] { "beer", "australia" } };
+            var firstMovie = new Movie() { Title = "wake in fright", ReleaseDate = 1971, Keywords = new[] { "beer", "australia" } };
+            var secondMovie = new Movie() { Title = "animal kingdom", ReleaseDate = 2010, Keywords = new[] { "drug dealer", "australia", "trial" } };
             var thirdMovie = new Movie() { Title = "dumb and dumber", ReleaseDate = 1994, Keywords = new[] { "road trip", "limousine" } };
 
             var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
