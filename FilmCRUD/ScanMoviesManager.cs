@@ -64,7 +64,7 @@ namespace FilmCRUD
         public IEnumerable<Movie> GetMoviesWithKeywords(MovieWarehouseVisit visit, params string[] keywords)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
-            return moviesInVisit.Where(m => m.Keywords.Intersect(keywords).Any());
+            return moviesInVisit.Where(m => m.Keywords?.Intersect(keywords).Any() ?? false);
         }
 
         /// <summary>
