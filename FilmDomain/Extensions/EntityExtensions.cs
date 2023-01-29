@@ -114,7 +114,7 @@ namespace FilmDomain.Extensions
             string _originalTitle = movie.OriginalTitle ?? "-";
             return string.Join('\n', new string[] {
                 movie.ToString(),
-                _genres,
+                $"Genres: {_genres}",
                 $"Original title: {_originalTitle}",
                 $"Directors: {_directors}",
                 $"IMDB id: {movie.IMDBId}",
