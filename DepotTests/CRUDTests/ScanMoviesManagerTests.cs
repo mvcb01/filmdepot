@@ -176,10 +176,20 @@ namespace DepotTests.CRUDTests
         public void GetMoviesWithKeywords_WithNullKeywordProperties_ShouldReturnEmptyEnumerable()
         {
             // arrange
+            var firstMovie = new Movie() { Title = "wake in fright", ReleaseDate = 1971 };
+            var secondMovie = new Movie() { Title = "animal kingdom", ReleaseDate = 2010 };
+
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(new Movie[] { firstMovie, secondMovie });
 
             // act
+            IEnumerable<Movie> actual = this._scanMoviesManager.GetMoviesWithKeywords(visit, "  AUSTraLia", "bEEr  ");
 
             // assert
+            actual.Should().BeEmpty();
         }
 
         [Fact]
