@@ -58,6 +58,16 @@ namespace FilmCRUD
         }
 
         /// <summary>
+        /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>
+        /// with at least one keyword in param <paramref name="keywords"/>.
+        /// </summary>
+        public IEnumerable<Movie> GetMoviesWithKeywords(MovieWarehouseVisit visit, params string[] keywords)
+        {
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
+            return moviesInVisit.Where(m => m.Keywords.Intersect(keywords).Any());
+        }
+
+        /// <summary>
         /// Group by and count by genre in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
         /// </summary>
         public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit, out int withoutGenres)
