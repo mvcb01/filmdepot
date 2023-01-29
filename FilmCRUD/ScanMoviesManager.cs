@@ -59,11 +59,12 @@ namespace FilmCRUD
 
         /// <summary>
         /// Returns all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>
-        /// with at least one keyword in param <paramref name="keywords"/>.
+        /// with at least one keyword in param <paramref name="keywords"/>. Keywords are trimmed and comparison is case insensitive.
         /// </summary>
         public IEnumerable<Movie> GetMoviesWithKeywords(MovieWarehouseVisit visit, params string[] keywords)
         {
             IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
+            keywords = keywords.Select(k => k.Trim().ToLower()).ToArray();
             return moviesInVisit.Where(m => m.Keywords?.Intersect(keywords).Any() ?? false);
         }
 
