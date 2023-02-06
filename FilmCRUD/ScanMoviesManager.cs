@@ -180,5 +180,6 @@ namespace FilmCRUD
                 ["added"] = visitRightMovies.Except(visitLeftMovies).Select(m => m.ToString())
             };
         }
+
     }
 }
