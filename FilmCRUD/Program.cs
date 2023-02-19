@@ -376,8 +376,7 @@ namespace FilmCRUD
                 IEnumerable<KeyValuePair<int, int>> releaseDateCount = scanMoviesManager.GetCountbyReleaseDate(visit, out int withoutReleaseDateCount);
                 int toTake = opts.Top ?? releaseDateCount.Count();
                 releaseDateCount
-                    .OrderByDescending(kvp => kvp.Value)
-                    .ThenBy(kvp => kvp.Key)
+                    .OrderBy(kvp => kvp.Key) // console prints are ordered by release date ascending
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key}: {kvp.Value}"));
