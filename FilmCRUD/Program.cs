@@ -336,7 +336,9 @@ namespace FilmCRUD
                 Console.WriteLine("Count by genre:\n");
                 IEnumerable<KeyValuePair<Genre, int>> genreCount = scanMoviesManager.GetCountByGenre(visit, out int withoutGenres);
                 int toTake = opts.Top ?? genreCount.Count();
-                genreCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
+                genreCount
+                    .OrderByDescending(kvp => kvp.Value)
+                    .ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
@@ -347,7 +349,9 @@ namespace FilmCRUD
                 Console.WriteLine("Count by cast member:\n");
                 IEnumerable<KeyValuePair<CastMember, int>> castMemberCount = scanMoviesManager.GetCountByCastMember(visit, out int withoutCastMembers);
                 int toTake = opts.Top ?? castMemberCount.Count();
-                castMemberCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
+                castMemberCount
+                    .OrderByDescending(kvp => kvp.Value)
+                    .ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
@@ -358,11 +362,26 @@ namespace FilmCRUD
                 Console.WriteLine("Count by director:\n");
                 IEnumerable<KeyValuePair<Director, int>> directorCount = scanMoviesManager.GetCountByDirector(visit, out int withoutDirectors);
                 int toTake = opts.Top ?? directorCount.Count();
-                directorCount.OrderByDescending(kvp => kvp.Value).ThenBy(kvp => kvp.Key.Name)
+                directorCount
+                    .OrderByDescending(kvp => kvp.Value)
+                    .ThenBy(kvp => kvp.Key.Name)
                     .Take(toTake)
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key.Name}: {kvp.Value}"));
                 Console.WriteLine($"<empty>: {withoutDirectors}");
+            }
+            else if (opts.ByReleaseDate)
+            {
+                Console.WriteLine("Count by release date:\n");
+                IEnumerable<KeyValuePair<int, int>> releaseDateCount = scanMoviesManager.GetCountbyReleaseDate(visit, out int withoutReleaseDateCount);
+                int toTake = opts.Top ?? releaseDateCount.Count();
+                releaseDateCount
+                    .OrderByDescending(kvp => kvp.Value)
+                    .ThenBy(kvp => kvp.Key)
+                    .Take(toTake)
+                    .ToList()
+                    .ForEach(kvp => Console.WriteLine($"{kvp.Key}: {kvp.Value}"));
+                Console.WriteLine($"<empty>: {withoutReleaseDateCount}");
             }
             else if (opts.Search is not null)
             {
