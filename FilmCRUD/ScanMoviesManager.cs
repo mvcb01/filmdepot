@@ -115,7 +115,15 @@ namespace FilmCRUD
         /// </summary>
         public IEnumerable<KeyValuePair<int, int>> GetCountbyReleaseDate(MovieWarehouseVisit visit, out int withoutReleaseDate)
         {
-            throw new NotImplementedException();
+            IEnumerable<Movie> moviesInVisit = this.UnitOfWork.Movies.GetAllMoviesInVisit(visit);
+
+            withoutReleaseDate = moviesInVisit.Where(m => m.ReleaseDate == default).Count();
+
+            IEnumerable<IGrouping<int, Movie>> grouped = moviesInVisit
+                .Where(m => m.ReleaseDate != default)
+                .GroupBy(m => m.ReleaseDate);
+                
+            return grouped.Select(group => new KeyValuePair<int, int>(group.Key, group.Count()));
         }
 
         /// <summary>
