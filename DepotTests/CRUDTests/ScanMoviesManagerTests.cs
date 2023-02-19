@@ -309,7 +309,38 @@ namespace DepotTests.CRUDTests
             }
         }
 
-        [Theory]
+        [Fact]
+        public void GetCountByReleaseDate_ShouldReturnCorrectCount()
+        {
+            // arrange
+            var firstMovie = new Movie() { Title = "possession", ReleaseDate = 1981 };
+            var secondMovie = new Movie() { Title = "excalibur", ReleaseDate = 1981 };
+            var thirdMovie = new Movie() { Title = "once upon a time in the west", ReleaseDate = 1968 };
+            var fourthMovie = new Movie() { Title = "mad max" };
+
+            var moviesInVisit = new Movie[] { firstMovie, secondMovie, thirdMovie, fourthMovie };
+            var visit = new MovieWarehouseVisit() { VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null) };
+
+            this._movieRepositoryMock
+                .Setup(m => m.GetAllMoviesInVisit(It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime)))
+                .Returns(moviesInVisit);
+
+            // act
+            IEnumerable<KeyValuePair<int, int>> actual = this._scanMoviesManager.GetCountbyReleaseDate(visit, out int withoutReleaseDate);
+
+            // assert
+            var expected = new List<KeyValuePair<int, int>>() {
+                new KeyValuePair<int, int>(1981, 2),
+                new KeyValuePair<int, int>(1968, 1)
+            };
+            using (new AssertionScope())
+            {
+                actual.Should().BeEquivalentTo(expected);
+                withoutReleaseDate.Should().Be(1);
+            }
+        }
+
+            [Theory]
         [InlineData("Licorice Pizza")]
         [InlineData("Licorice Pizza 2021")]
         [InlineData("Licorice Pizza (2021)")]
