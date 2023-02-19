@@ -69,7 +69,7 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Group by and count by genre in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// Group by and count by genre considering all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
         /// </summary>
         public IEnumerable<KeyValuePair<Genre, int>> GetCountByGenre(MovieWarehouseVisit visit, out int withoutGenres)
         {
@@ -83,7 +83,7 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Group by and count by cast member in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// Group by and count by cast member considering all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
         /// </summary>
         public IEnumerable<KeyValuePair<CastMember, int>> GetCountByCastMember(MovieWarehouseVisit visit, out int withoutCastMembers)
         {
@@ -97,7 +97,7 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Group by and count by director in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// Group by and count by director considering all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
         /// </summary>
         public IEnumerable<KeyValuePair<Director, int>> GetCountByDirector(MovieWarehouseVisit visit, out int withoutDirectors)
         {
@@ -111,7 +111,7 @@ namespace FilmCRUD
         }
 
         /// <summary>
-        /// Group by and count by release date in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// Group by and count by release date considering all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
         /// </summary>
         public IEnumerable<KeyValuePair<int, int>> GetCountbyReleaseDate(MovieWarehouseVisit visit, out int withoutReleaseDate)
         {
