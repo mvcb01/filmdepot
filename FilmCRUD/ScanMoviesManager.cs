@@ -111,6 +111,14 @@ namespace FilmCRUD
         }
 
         /// <summary>
+        /// Group by and count by release date in all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>.
+        /// </summary>
+        public IEnumerable<KeyValuePair<int, int>> GetCountbyReleaseDate(MovieWarehouseVisit visit, out int withoutReleaseDate)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Fuzzy match search on all the <see cref="Movie"/> entities linked to some movie rip in <paramref name="visit"/>. Both
         /// properties <see cref="Movie.Title"/> and <see cref="Movie.OriginalTitle"/> are used in the search.
         /// </summary>
