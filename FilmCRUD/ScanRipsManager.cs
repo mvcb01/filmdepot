@@ -4,11 +4,15 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
 using System;
+using System.Text.RegularExpressions;
 
 namespace FilmCRUD
 {
     public class ScanRipsManager : GeneralScanManager
     {
+        // for method GetRipsWithRipGroup
+        private const string _squareBracketsSuffix = @"\[[a-z0-9]+\]";
+
         public ScanRipsManager(IUnitOfWork unitOfWork) : base(unitOfWork)
         { }
 
@@ -100,7 +104,17 @@ namespace FilmCRUD
 
         public IEnumerable<MovieRip> GetRipsWithRipGroup(MovieWarehouseVisit visit, string ripGroup)
         {
-            return new MovieRip[] { };
+            string ripGroupWithoutSuffix = ripGroup.Trim();
+
+            if (Regex.IsMatch(ripGroup, $"{_squareBracketsSuffix}$", RegexOptions.IgnoreCase))
+                ripGroupWithoutSuffix = Regex.Replace(ripGroup, _squareBracketsSuffix, string.Empty, RegexOptions.IgnoreCase);
+
+            var ripGroupRegex = new Regex($"{ripGroupWithoutSuffix}({_squareBracketsSuffix})*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+            // ToList forces execution
+            IEnumerable<MovieRip> ripsInVisit = this.UnitOfWork.MovieRips.GetAllRipsInVisit(visit).ToList();
+
+            return ripsInVisit.Where(mr => ripGroupRegex.IsMatch(mr.ParsedRipGroup));
         }
 
     }
