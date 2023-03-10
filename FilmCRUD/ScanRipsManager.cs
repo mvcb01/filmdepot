@@ -98,5 +98,10 @@ namespace FilmCRUD
             return ripsInVisit.Where(mr => ripFileNameTokensIntersection[mr.Id].Any());
         }
 
+        public IEnumerable<MovieRip> GetRipsWithRipGroup(MovieWarehouseVisit visit, string ripGroup)
+        {
+            return new MovieRip[] { };
+        }
+
     }
 }

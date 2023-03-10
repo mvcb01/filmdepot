@@ -310,7 +310,7 @@ namespace DepotTests.CRUDTests
         [InlineData("  petriFIED", 1, 2)]
         [InlineData("     ")]
         [InlineData(".")]
-        public void SearchFromFileNameTokens_ShouldReturnExpectedFiles(string fileNameSearch, params int[] idsForExpectedResult)
+        public void SearchFromFileNameTokens_ShouldReturnExpectedEntities(string fileNameSearch, params int[] idsForExpectedResult)
         {
             // arrange
             var movieRip0 = new MovieRip()
@@ -341,6 +341,67 @@ namespace DepotTests.CRUDTests
             // assert
             actualSearchResult.Should().BeEquivalentTo(
                 visit.MovieRips.Where(mr => idsForExpectedResult.Contains(mr.Id)));
+        }
+
+
+        [Theory]
+        [InlineData("iSOMORFiSMO", new[] { 0, 1 })]
+        [InlineData(" isomorfismo  ", new[] { 0, 1 })]
+        [InlineData("isomorfismo[rarbg]", new[] { 0, 1 })]
+        [InlineData("FGT", new[] { 2, 3 })]
+        [InlineData("FGT[EtHD]", new[] { 2, 3 })]
+        [InlineData("FGT[rarbg]", new[] { 2, 3 })]
+        [InlineData("psychd", new[] { 4 })]
+        [InlineData("CiNEFiLE", new int[] { })]
+        public void GetRipsWithRipGroup_ShouldReturnExpectedEntities(string ripGroup, int[] expectedIds)
+        {
+            // arrange
+            var movieRip0 = new MovieRip()
+            {
+                Id = 0,
+                FileName = "Terra.de.Abril.1977.DVDRip.x264-iSOMORFiSMO",
+                ParsedRipGroup = "iSOMORFiSMO"
+            };
+            var movieRip1 = new MovieRip()
+            {
+                Id = 1,
+                FileName = "Pedras.da.Saudade.1989.DVDRip.x264-iSOMORFiSMO",
+                ParsedRipGroup = "iSOMORFiSMO"
+            };
+            var movieRip2 = new MovieRip()
+            {
+                Id = 2,
+                FileName = "Possum.2018.1080p.WEB-DL.DD5.1.H264-FGT[EtHD]",
+                ParsedRipGroup = "FGT[EtHD]"
+            };
+            var movieRip3 = new MovieRip()
+            {
+                Id = 3,
+                FileName = "Stroszek.1977.GERMAN.1080p.BluRay.x264.DTS-FGT",
+                ParsedRipGroup = "FGT"
+            };
+            var movieRip4 = new MovieRip()
+            {
+                Id = 4,
+                FileName = "Cobra.Verde.1987.GERMAN.1080p.BluRay.x264.PSYCHD",
+                ParsedRipGroup = "PSYCHD"
+            };
+
+            var visit = new MovieWarehouseVisit()
+            {
+                MovieRips = new List<MovieRip>() { movieRip0, movieRip1, movieRip2, movieRip3, movieRip4 },
+                VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
+            };
+            this._movieRipRepositoryMock
+                .Setup(m => m.GetAllRipsInVisit((It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime))))
+                .Returns(visit.MovieRips);
+
+            // act
+            IEnumerable<MovieRip> actual = this._scanRipsManager.GetRipsWithRipGroup(visit, ripGroup);
+
+            // assert
+            IEnumerable<MovieRip> expected = visit.MovieRips.Where(mr => expectedIds.Contains(mr.Id));
+            actual.Should().BeEquivalentTo(expected);
         }
 
     }
