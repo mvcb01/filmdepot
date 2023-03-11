@@ -228,7 +228,7 @@ namespace FilmCRUD
                 Console.WriteLine($"ScanRips: rips with release group {opts.WithGroup}\n");
                 ripsWithGroup.OrderBy(mr => mr.FileName).ToList().ForEach(mr => Console.WriteLine(mr.FileName));
             }
-            else if (opts.CountByVisit)
+            else if (opts.ByVisit)
             {
                 Console.WriteLine("ScanRips: count by visit \n");
                 Dictionary<DateTime, int> countByVisit = scanRipsManager.GetRipCountByVisit();

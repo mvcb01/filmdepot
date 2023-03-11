@@ -16,11 +16,11 @@ namespace FilmCRUD.Verbs
         [Option(SetName = "GetRipsWithReleaseDates", HelpText = "list movies with parsed released dates YYYY")]
         public IEnumerable<int> WithDates { get; set; }
 
-        [Option(SetName = "GetRipsGroup", HelpText = "list movies with parsed parsed release group")]
+        [Option(SetName = "GetRipsWithGroup", HelpText = "list movies with parsed parsed release group")]
         public string WithGroup { get; set; }
 
         [Option(SetName = "CountRipsByVisit", HelpText = "rip count by visit")]
-        public bool CountByVisit { get; set; }
+        public bool ByVisit { get; set; }
 
         [Option(SetName = "LastVisitRipDifference", HelpText = "movie rip difference from last two visits: added and removed movie rips")]
         public bool LastVisitDiff { get; set; }
