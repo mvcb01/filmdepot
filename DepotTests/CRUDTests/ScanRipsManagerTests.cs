@@ -386,10 +386,16 @@ namespace DepotTests.CRUDTests
                 FileName = "Cobra.Verde.1987.GERMAN.1080p.BluRay.x264.PSYCHD",
                 ParsedRipGroup = "PSYCHD"
             };
+            var movieRip5 = new MovieRip()
+            {
+                Id = 5,
+                FileName = "Taxidermia.2006",
+                ParsedRipGroup = null
+            };
 
             var visit = new MovieWarehouseVisit()
             {
-                MovieRips = new List<MovieRip>() { movieRip0, movieRip1, movieRip2, movieRip3, movieRip4 },
+                MovieRips = new List<MovieRip>() { movieRip0, movieRip1, movieRip2, movieRip3, movieRip4, movieRip5 },
                 VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
             };
             this._movieRipRepositoryMock
