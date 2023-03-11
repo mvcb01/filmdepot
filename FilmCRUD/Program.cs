@@ -219,6 +219,15 @@ namespace FilmCRUD
                     Console.WriteLine(fileName);
                 }
             }
+            else if (opts.WithGroup is not null)
+            {
+                Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
+
+                IEnumerable<MovieRip> ripsWithGroup = scanRipsManager.GetRipsWithRipGroup(visit, opts.WithGroup);
+
+                Console.WriteLine($"ScanRips: rips with release group {opts.WithGroup}\n");
+                ripsWithGroup.OrderBy(mr => mr.FileName).ToList().ForEach(mr => Console.WriteLine(mr.FileName));
+            }
             else if (opts.CountByVisit)
             {
                 Console.WriteLine("ScanRips: count by visit \n");
