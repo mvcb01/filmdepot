@@ -219,7 +219,16 @@ namespace FilmCRUD
                     Console.WriteLine(fileName);
                 }
             }
-            else if (opts.CountByVisit)
+            else if (opts.WithGroup is not null)
+            {
+                Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
+
+                IEnumerable<MovieRip> ripsWithGroup = scanRipsManager.GetRipsWithRipGroup(visit, opts.WithGroup);
+
+                Console.WriteLine($"ScanRips: rips with release group {opts.WithGroup}\n");
+                ripsWithGroup.OrderBy(mr => mr.FileName).ToList().ForEach(mr => Console.WriteLine(mr.FileName));
+            }
+            else if (opts.ByVisit)
             {
                 Console.WriteLine("ScanRips: count by visit \n");
                 Dictionary<DateTime, int> countByVisit = scanRipsManager.GetRipCountByVisit();
@@ -228,6 +237,17 @@ namespace FilmCRUD
                     string visitStr = item.Key.ToString("MMMM dd yyyy");
                     Console.WriteLine($"{visitStr} : {item.Value}");
                 }
+            }
+            else if (opts.ByGroup)
+            {
+                Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
+
+                IEnumerable<KeyValuePair<string, int>> countByGroup = scanRipsManager.GetRipCountByRipGroup(visit);
+                Console.WriteLine("ScanRips: count by release group \n");
+                countByGroup
+                    .OrderByDescending(kvp => kvp.Value)
+                    .ToList()
+                    .ForEach(kvp => Console.WriteLine($"{kvp.Key}: {kvp.Value}"));
             }
             else if (opts.VisitDiff.Any())
             {

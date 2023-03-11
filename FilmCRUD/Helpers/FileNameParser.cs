@@ -59,19 +59,23 @@ namespace FilmCRUD.Helpers
         {
             RipQualityRegex = new Regex(
                 $"(({_parenthesesOrBrackets_Left})*){_ripQualitySplitter}(({_parenthesesOrBrackets_Right})*)",
-                RegexOptions.IgnoreCase);
+                RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
             ReleaseTypeRegex = new Regex(
                 $"(({_parenthesesOrBrackets_Left})*){_ripReleaseTypeSplitter}(({_parenthesesOrBrackets_Right})*)",
-                RegexOptions.IgnoreCase);
+                RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-            ParenthesesOrBrackets_LeftRegex = new Regex(_parenthesesOrBrackets_Left);
+            ParenthesesOrBrackets_LeftRegex = new Regex(_parenthesesOrBrackets_Left, RegexOptions.Compiled);
 
-            ParenthesesOrBrackets_RightRegex = new Regex(_parenthesesOrBrackets_Right);
+            ParenthesesOrBrackets_RightRegex = new Regex(_parenthesesOrBrackets_Right, RegexOptions.Compiled);
 
-            ReleaseDateSplitterRegex = new Regex($"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)");
+            ReleaseDateSplitterRegex = new Regex(
+                $"(({_parenthesesOrBrackets_Left})*){_releaseDateSplitter}(({_parenthesesOrBrackets_Right})*)",
+                RegexOptions.Compiled);
 
-            AbsentReleaseDateRegex = new Regex($"^([a-z0-9]|{_tokenSplitter})*$", RegexOptions.IgnoreCase);
+            AbsentReleaseDateRegex = new Regex(
+                $"^([a-z0-9]|{_tokenSplitter})*$",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
             string _bracesLeft = @"\{";
             string _bracesRight = @"\}";
