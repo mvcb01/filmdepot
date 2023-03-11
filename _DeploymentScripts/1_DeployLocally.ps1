@@ -19,7 +19,7 @@ echo ("Deploying to {0}" -f $deploymentDir)
 echo " "
 
 cd $solutionRoot
-dotnet publish .\filmdepot.sln -o $deploymentDir -c Release
+dotnet publish .\filmdepot.sln --property:PublishDir=$deploymentDir -c Release
 
 # creates the warehouse contents dir if not exists
 $migrationsDir = Join-Path -Path $deploymentDir -ChildPath 'whcontents'
