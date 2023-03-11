@@ -4,11 +4,15 @@ using FilmDomain.Entities;
 using FilmDomain.Interfaces;
 using FilmDomain.Extensions;
 using System;
+using System.Text.RegularExpressions;
 
 namespace FilmCRUD
 {
     public class ScanRipsManager : GeneralScanManager
     {
+        // for method GetRipsWithRipGroup
+        private const string _squareBracketsSuffix = @"\[[a-z0-9]+\]";
+
         public ScanRipsManager(IUnitOfWork unitOfWork) : base(unitOfWork)
         { }
 
@@ -96,6 +100,39 @@ namespace FilmCRUD
                 mr => mr.FileName.GetStringTokensWithoutPunctuation(removeDiacritics: true).Intersect(tokensToSearch)
             );
             return ripsInVisit.Where(mr => ripFileNameTokensIntersection[mr.Id].Any());
+        }
+
+        public IEnumerable<MovieRip> GetRipsWithRipGroup(MovieWarehouseVisit visit, string ripGroup)
+        {
+            string ripGroupWithoutSuffix = RemoveSuffixFromRipGroup(ripGroup, toLower: true);
+
+            var ripGroupRegex = new Regex($"{ripGroupWithoutSuffix}({_squareBracketsSuffix})*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+            // ToList forces execution
+            IEnumerable<MovieRip> ripsInVisit = this.UnitOfWork.MovieRips.GetAllRipsInVisit(visit).ToList();
+
+            return ripsInVisit.Where(mr => ripGroupRegex.IsMatch(mr.ParsedRipGroup));
+        }
+
+        public IEnumerable<KeyValuePair<string, int>> GetRipCountByRipGroup(MovieWarehouseVisit visit)
+        {
+            // ToList forces execution
+            IEnumerable<MovieRip> ripsInVisit = this.UnitOfWork.MovieRips.GetAllRipsInVisit(visit).ToList();
+
+            IEnumerable<IGrouping<string, MovieRip>> ripsByGroup = ripsInVisit.GroupBy(
+                mr => string.IsNullOrEmpty(mr.ParsedRipGroup) ?
+                    "<empty>"
+                    : RemoveSuffixFromRipGroup(mr.ParsedRipGroup, toLower: false));
+            return ripsByGroup.Select(group => new KeyValuePair<string, int>(group.Key, group.Count()));
+        }
+
+        private static string RemoveSuffixFromRipGroup(string ripGroup, bool toLower = true)
+        {
+            string ripGroupWithoutSuffix = toLower ? ripGroup.Trim().ToLower() : ripGroup.Trim();
+
+            if (Regex.IsMatch(ripGroup, $"{_squareBracketsSuffix}$", RegexOptions.IgnoreCase))
+                ripGroupWithoutSuffix = Regex.Replace(ripGroup, _squareBracketsSuffix, string.Empty, RegexOptions.IgnoreCase);
+            return ripGroupWithoutSuffix;
         }
 
     }
