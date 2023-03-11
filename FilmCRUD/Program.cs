@@ -238,6 +238,17 @@ namespace FilmCRUD
                     Console.WriteLine($"{visitStr} : {item.Value}");
                 }
             }
+            else if (opts.ByGroup)
+            {
+                Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
+
+                IEnumerable<KeyValuePair<string, int>> countByGroup = scanRipsManager.GetRipCountByRipGroup(visit);
+                Console.WriteLine("ScanRips: count by release group \n");
+                countByGroup
+                    .OrderByDescending(kvp => kvp.Value)
+                    .ToList()
+                    .ForEach(kvp => Console.WriteLine($"{kvp.Key}: {kvp.Value}"));
+            }
             else if (opts.VisitDiff.Any())
             {
                 GetVisitDiffAndPrint(
