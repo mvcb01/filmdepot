@@ -448,13 +448,12 @@ namespace DepotTests.CRUDTests
 
             var visit = new MovieWarehouseVisit()
             {
-                MovieRips = new List<MovieRip>() { movieRip0, movieRip1, movieRip2, movieRip3, movieRip4 },
+                MovieRips = new List<MovieRip>() { movieRip0, movieRip1, movieRip2, movieRip3, movieRip4, movieRip5 },
                 VisitDateTime = DateTime.ParseExact("20220101", "yyyyMMdd", null)
             };
             this._movieRipRepositoryMock
                 .Setup(m => m.GetAllRipsInVisit((It.Is<MovieWarehouseVisit>(v => v.VisitDateTime == visit.VisitDateTime))))
                 .Returns(visit.MovieRips);
-
 
             // act
             IEnumerable<KeyValuePair<string, int>> actual = this._scanRipsManager.GetRipCountByRipGroup(visit);

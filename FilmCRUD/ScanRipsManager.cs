@@ -116,12 +116,19 @@ namespace FilmCRUD
 
         public IEnumerable<KeyValuePair<string, int>> GetRipCountByRipGroup(MovieWarehouseVisit visit)
         {
-            return Array.Empty<KeyValuePair<string, int>>();
+            // ToList forces execution
+            IEnumerable<MovieRip> ripsInVisit = this.UnitOfWork.MovieRips.GetAllRipsInVisit(visit).ToList();
+
+            IEnumerable<IGrouping<string, MovieRip>> ripsByGroup = ripsInVisit.GroupBy(
+                mr => string.IsNullOrEmpty(mr.ParsedRipGroup) ?
+                    "<empty>"
+                    : RemoveSuffixFromRipGroup(mr.ParsedRipGroup, toLower: false));
+            return ripsByGroup.Select(group => new KeyValuePair<string, int>(group.Key, group.Count()));
         }
 
         private static string RemoveSuffixFromRipGroup(string ripGroup, bool toLower = true)
         {
-            string ripGroupWithoutSuffix = toLower ? ripGroup.Trim() : ripGroup;
+            string ripGroupWithoutSuffix = toLower ? ripGroup.ToLower() : ripGroup;
 
             if (Regex.IsMatch(ripGroup, $"{_squareBracketsSuffix}$", RegexOptions.IgnoreCase))
                 ripGroupWithoutSuffix = Regex.Replace(ripGroup, _squareBracketsSuffix, string.Empty, RegexOptions.IgnoreCase);
