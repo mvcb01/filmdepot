@@ -128,7 +128,7 @@ namespace FilmCRUD
 
         private static string RemoveSuffixFromRipGroup(string ripGroup, bool toLower = true)
         {
-            string ripGroupWithoutSuffix = toLower ? ripGroup.ToLower() : ripGroup;
+            string ripGroupWithoutSuffix = toLower ? ripGroup.Trim().ToLower() : ripGroup.Trim();
 
             if (Regex.IsMatch(ripGroup, $"{_squareBracketsSuffix}$", RegexOptions.IgnoreCase))
                 ripGroupWithoutSuffix = Regex.Replace(ripGroup, _squareBracketsSuffix, string.Empty, RegexOptions.IgnoreCase);
