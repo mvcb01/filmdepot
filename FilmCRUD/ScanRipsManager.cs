@@ -112,6 +112,8 @@ namespace FilmCRUD
             IEnumerable<MovieRip> ripsInVisit = this.UnitOfWork.MovieRips.GetAllRipsInVisit(visit).ToList();
 
             return ripsInVisit.Where(mr => ripGroupRegex.IsMatch(mr.ParsedRipGroup));
+
+
         }
 
         public IEnumerable<KeyValuePair<string, int>> GetRipCountByRipGroup(MovieWarehouseVisit visit)
