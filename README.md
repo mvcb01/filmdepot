@@ -140,7 +140,7 @@ filmcrud visit --listvisits
 
 ![visits](./assets/visits.png)
 
-### ScanRips
+### ScanRips command
 
 Prints info about existing visits.
 
@@ -167,7 +167,7 @@ filmcrud scanrips --bygroup -v 20230101
 
 ![bygroup_1](./assets/bygroup_1.png)
 
-### Link
+### Link command
 
 Search [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) using the parsed movie names from existing visits:
 
@@ -209,6 +209,89 @@ filmcrud link --search --maxcalls 10
 ```powershell
 filmcrud link --frommanualextids --maxcalls 10
 ```
+
+### Fetch command
+
+Once movie rips are linked to known movies it's possible to get additional details for these movies: **genres**, **cast members**, **directors**, **keywords** and **IMDB ids**.
+
+Example:
+
+```powershell
+filmcrud fetch --genres
+```
+
+```powershell
+filmcrud fetch --directors
+```
+
+Again, with any of these options it's possible to limit the number of calls to the TMDB API,
+
+```powershell
+filmcrud fetch --genres --maxcalls 10
+```
+
+### ScanMovies command
+
+Once movies are found and their details are fetched it's possible to get aggregated info:
+
+```
+  --withgenres       list movies with genres
+
+  --withcast         list movies with cast members
+
+  --withdirectors    list movies with directors
+
+  --withdates        list movies with released dates
+
+  --withkeywords     list movies with keywords
+
+  --bygenre          get descending movie count by genre
+
+  --bycastmember     get descending movie count by cast member
+
+  --bydirector       get descending movie count by director
+
+  --byreleasedate    get descending movie count by release date
+
+  --search           search movies by title
+
+  --lastvisitdiff    movie difference from last two visits
+
+  --visitdiff        movie difference between two visits: added and removed; visit dates are expected; example:
+                     20100101:20100102
+
+  --listvisits       helper; list dates for all visits
+
+  -v, --visit        warehouse visit date (YYYYMMDD) to use as the scan target; defaults to the most recent visit
+
+  -t, --top          integer to limit output count of bygenre/bycastmember/bydirector and get only the top N
+
+  --help             Display this help screen.
+
+  --version          Display version information.
+```
+
+Example: search movie by title fuzzy matching
+```powershell
+filmcrud scanmovies --search "grand duke"
+```
+
+![local_search](./assets/local_search.png)
+
+Example: count by genre targeting the latest visit
+```powershell
+filmcrud scanmovies --bygenre
+```
+
+![bygenre](./assets/bygenre.png)
+
+Example: count by genre targeting the 20230101 visit.
+```powershell
+filmcrud scanmovies --bygenre --visit 20230101
+```
+![bygenre_1](./assets/bygenre_1.png)
+
+Example:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
