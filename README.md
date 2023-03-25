@@ -77,7 +77,13 @@ Simple CLI manager to interact with your local movie collection. Useful for data
     ```
     You should see the help menu:
 
+    ![help](./assets/help.png)
 
+7. [Get a key for The Movie Database API](https://developers.themoviedb.org/3/getting-started).
+
+8. Edit the following configs in `C:\Users\<your-username>\filmdepot_PROD\appsettings.json`
+
+    ![appsettings.json](./assets/appsettings_0.png)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
