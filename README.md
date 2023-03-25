@@ -26,45 +26,58 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+Simple CLI manager to interact with your local movie collection. Useful for data hoarders.
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
+* parse your movie files into Title, Release Date, rip quality and rip group
+* search [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) and link movie rips to movies
+* get genres, cast members, directors, keywords and IMDB ids of the movies in your collection
+* show aggregated data related to the movies rips and the movies they are linked to
+* keep track of changes over time
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
-
 ### Prerequisites
 
-Requires Windows 10.
-Requires <a href="https://dotnet.microsoft.com/en-us/download/dotnet/6.0">.NET 6 SDK</a> or above. The .NET runtime is not sufficient since currently the only automated installation is building from source.
-
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+* Windows 10
+* [sqlite3](https://www.sqlite.org/download.html)
+* [.NET 6 SDK or above](https://dotnet.microsoft.com/en-us/download/dotnet/6.0). The .NET runtime is not sufficient since currently the only automated installation is building from source.
 
 ### Installation
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+1. Clone the repo
+    ```powershell
+    git clone https://github.com/mvcb01/filmdepot.git
+    ```
+2. Install dependencies
+    ```powershell
+    dotnet restore
+    ```
+3. Run the ps scripts in the _DeploymentScripts directory
+    ```powershell
+    cd .\_DeploymentScripts\
+    .\1_DeployLocally.ps1
+    .\2_GenerateMigrationScripts.ps1
+    .\3_RunMigrationScripts.ps1
+    ```
 
-2. Clone the repo
-   ```sh
-   git clone https://github.com/your_username_/Project-Name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+4. Save the contents of your `PATH` environment variable in a text file in your home directory
+    ```powershell
+    cd ~
+    echo $env:PATH > PATH_backup.txt
+    ```
+
+5. Add the newly created directory `C:\Users\<your-username>\filmdepot_PROD` to your `PATH` environment variable. Follow what's in [To add a path to the PATH environment variable](https://learn.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14)). If you mess it up just restore `PATH` using the text file from step 4.
+
+6. Restart powershell and type this:
+    ```powershell
+    filmcrud --help
+    ```
+    You should see the help menu:
+
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
