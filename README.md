@@ -206,7 +206,7 @@ filmcrud scanrips --search nosferatu
 ```
 ![ripsearch](./assets/ripsearch.png)
 
-Example: get count by release group targeting the most recent visit.
+Example: movie rip count by release group targeting the most recent visit.
 
 ```powershell
 filmcrud scanrips --bygroup
@@ -214,7 +214,7 @@ filmcrud scanrips --bygroup
 
 ![bygroup_0](./assets/bygroup_0.png)
 
-Example: get count by release group targeting the 20230101 visit.
+Example: movie rip count by release group targeting the 20230101 visit.
 
 ```powershell
 filmcrud scanrips --bygroup --visit 20230101
@@ -222,7 +222,7 @@ filmcrud scanrips --bygroup --visit 20230101
 
 ![bygroup_1](./assets/bygroup_1.png)
 
-Example: get the movie rip difference between visits 20230120 and 20230101:
+Example: movie rip difference between visits 20230120 and 20230101:
 
 ```powershell
 filmcrud scanrips scanrips --visitdiff 20230120:20230101
@@ -381,19 +381,25 @@ filmcrud scanmovies --search "grand duke"
 
 ![local_search](./assets/local_search.png)
 
-Example: count by genre targeting the latest visit
+Example: movie count by genre targeting the latest visit
 ```powershell
 filmcrud scanmovies --bygenre
 ```
 
 ![bygenre](./assets/bygenre.PNG)
 
-Example: count by genre targeting the 20230101 visit.
+Example: movie count by genre targeting the 20230101 visit.
 ```powershell
 filmcrud scanmovies --bygenre --visit 20230101
 ```
-
 ![bygenre_1](./assets/bygenre_1.PNG)
+
+Example: movie count by cast member limited to the top 2
+```powershell
+filmcrud scanmovies --bycastmember --top 2
+```
+
+![by_cast](./assets/by_cast.png)
 
 Example: search movies with the _castle_ keyword or the _folk_ keyword
 
