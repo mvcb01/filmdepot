@@ -377,14 +377,14 @@ Example: count by genre targeting the latest visit
 filmcrud scanmovies --bygenre
 ```
 
-![bygenre](./assets/bygenre.png)
+![bygenre](./assets/bygenre.PNG)
 
 Example: count by genre targeting the 20230101 visit.
 ```powershell
 filmcrud scanmovies --bygenre --visit 20230101
 ```
 
-![bygenre_1](./assets/bygenre_1.png)
+![bygenre_1](./assets/bygenre_1.PNG)
 
 Example: search movies with the _castle_ keyword or the _folk_ keyword
 
