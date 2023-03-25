@@ -55,7 +55,7 @@ Simple CLI manager to interact with your local movie collection. Useful for data
     ```powershell
     dotnet restore
     ```
-3. Run the ps scripts in the _DeploymentScripts directory
+3. Run the ps scripts in the `.\_DeploymentScripts` directory
     ```powershell
     cd .\_DeploymentScripts\
     .\1_DeployLocally.ps1
