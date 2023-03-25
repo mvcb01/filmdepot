@@ -75,7 +75,7 @@ Simple CLI manager to interact with your local movie collection. Useful for data
     ```powershell
     filmcrud --help
     ```
-    You should see the help menu:
+    You should see the main help menu:
 
     ![helpmenu](./assets/help.PNG)
 
