@@ -170,7 +170,7 @@ filmcrud visit --listvisits
 
 ### ScanRips command
 
-Prints info about existing visits
+Prints info about movie rips in existing visits.
 
 ```
   --countbyreleasedate    rip count by parsed release date for latest visit
@@ -207,7 +207,7 @@ filmcrud scanrips --search nosferatu
 ```
 ![ripsearch](./assets/ripsearch.png)
 
-Example: get count by release targeting the most recent visit.
+Example: get count by release group targeting the most recent visit.
 
 ```powershell
 filmcrud scanrips --bygroup
@@ -215,11 +215,15 @@ filmcrud scanrips --bygroup
 
 ![bygroup_0](./assets/bygroup_0.png)
 
-Example: get count by release targeting the 20230101 visit.
+Example: get count by release group targeting the 20230101 visit.
 
 ```powershell
 filmcrud scanrips --bygroup --visit 20230101
 ```
+
+Example: get the movie rip difference between visits 20230120 and 20230101:
+
+[rip_visit_diff](rip_visit_diff.png)
 
 ![bygroup_1](./assets/bygroup_1.png)
 
