@@ -26,7 +26,6 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-
 There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
 
 Here's why:
@@ -42,7 +41,9 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
+Requires Windows 10.
+Requires <a href="https://dotnet.microsoft.com/en-us/download/dotnet/6.0">.NET 6 SDK</a> or above. The .NET runtime is not sufficient since currently the only automated installation is building from source.
+
 * npm
   ```sh
   npm install npm@latest -g
@@ -52,7 +53,6 @@ This is an example of how to list things you need to use the software and how to
 
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
-1. Get a free API Key at [https://example.com](https://example.com)
 2. Clone the repo
    ```sh
    git clone https://github.com/your_username_/Project-Name.git
@@ -88,6 +88,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* [Choose an Open Source License](https://choosealicense.com)
+* [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
