@@ -91,9 +91,30 @@ Simple CLI manager to interact with your local movie collection. Useful for data
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Use this like any other CLI:
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+```powershell
+filmcrud <command> [<args>]
+```
+
+The `--help` option is available for all commands:
+
+```powershell
+filmcrud --help
+filmcrud <command> --help
+```
+### `Visit` command
+
+cenas cenas
+
+### ScanRips
+
+cenas cenas
+
+
+### Link
+
+cenas cenas
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
