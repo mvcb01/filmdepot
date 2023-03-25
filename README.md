@@ -77,7 +77,7 @@ Simple CLI manager to interact with your local movie collection. Useful for data
     ```
     You should see the help menu:
 
-    ![help](./assets/help.png)
+    ![helpmenu](./assets/help.png)
 
 7. [Get a key for The Movie Database API](https://developers.themoviedb.org/3/getting-started).
 
