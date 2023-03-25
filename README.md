@@ -225,7 +225,7 @@ filmcrud scanrips --bygroup --visit 20230101
 Example: movie rip difference between visits 20230120 and 20230101:
 
 ```powershell
-filmcrud scanrips scanrips --visitdiff 20230120:20230101
+filmcrud scanrips --visitdiff 20230120:20230101
 ```
 
 ![rip_visitdiff](./assets/rip_visitdiff.png)
@@ -408,6 +408,15 @@ filmcrud scanmovies --withkeywords "castle" "folk"
 ```
 
 ![withkwds](./assets/withkwds.png)
+
+Example: movie difference between visits 20230120 and 20230101
+
+```powershell
+filmcrud scanmovies --visitdiff 20230120:20230101
+```
+
+![movie_diff](./assets/movie_diff.png)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
