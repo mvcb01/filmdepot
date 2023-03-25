@@ -266,7 +266,8 @@ Such cases can be manually searched and the ids set in `.\appsettings.json`. . C
 
 [TMDB: The Finances of the Grand Duke (1924)](https://www.themoviedb.org/movie/55536-die-finanzen-des-gro-herzogs)
 
-Note the movie id: [key]: https://www.themoviedb.org/movie/**55536**-die-finanzen-des-gro-herzogs
+Note the movie id in the url:
+ht<span>tps://www.themoviedb.org/movie/<ins>**55536**</ins>-die-finanzen-des-gro-herzogs
 
 ![manual_extids](./assets/manual_extids.png)
 
