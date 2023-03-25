@@ -104,7 +104,7 @@ filmcrud --help
 filmcrud <command> --help
 ```
 
-Note that some commands will call [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) several times. The follwing configs in `.\appsettings.json` define limits to the number of calls per time unit:
+Note that some commands will call [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) several times. The following configs in `.\appsettings.json` define limits to the number of calls per time unit:
 
 ![policies](./assets/policies.png)
 
