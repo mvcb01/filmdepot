@@ -136,7 +136,10 @@ filmcrud visit --listcontents
 
 This will generate a file such as `.\whcontents\movies_20230101.txt`, suffixed with the execution date:
 
-![movies_0](./assets/movies_0.png)
+```
+Haxan.1922.720p.BluRay.x264-blackBeard
+Nosferatu.1922.1080p.BluRay.x264-iSOMORFiSMO
+```
 
 Persist such contents into the local database `.\FilmDb.db`:
 
@@ -204,7 +207,7 @@ filmcrud scanrips --bygroup
 Example: get count by release targeting the 20230101 visit.
 
 ```powershell
-filmcrud scanrips --bygroup -v 20230101
+filmcrud scanrips --bygroup --visit 20230101
 ```
 
 ![bygroup_1](./assets/bygroup_1.png)
