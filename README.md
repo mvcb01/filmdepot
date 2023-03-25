@@ -104,7 +104,13 @@ filmcrud --help
 filmcrud <command> --help
 ```
 
-Now some non-exhaustive examples of typical usage. For all the available commmands j
+Note that some commands will call [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) several times. The follwing configs in `.\appsettings.json` define limits to the number of calls per time unit:
+
+![policies](./assets/policies.png)
+
+For more info see [Polly](https://github.com/App-vNext/Polly).
+
+Now some non-exhaustive examples of typical usage.
 
 ### Visit command
 
