@@ -103,14 +103,63 @@ The `--help` option is available for all commands:
 filmcrud --help
 filmcrud <command> --help
 ```
-### `Visit` command
 
-cenas cenas
+Now some non-exhaustive examples of typical usage.
+
+### Visit command
+
+Start by listing the contents of the movie directory:
+
+```powershell
+filmcrud visit --listcontents
+```
+
+This will generate a file such as `.\whcontents\movies_20230101.txt`, suffixed with the execution date:
+
+![movies_0](./assets/movies_0.png)
+
+Persist such contents into the local database `.\FilmDb.db`:
+
+```powershell
+filmcrud visit --persistcontents 20230101
+```
+
+![persist_0](./assets/persist_0.png)
+
+Each time these commands run a new **visit** will be created. You can then list all the existing visits:
+
+```powershell
+filmcrud visit --listvisits
+```
+
+![visits](./assets/visits.png)
 
 ### ScanRips
 
-cenas cenas
+Prints info about existing visits.
 
+Example: search by tokens targeting the most recent visit.
+
+```powershell
+filmcrud scanrips --search nosferatu
+```
+![ripsearch](./assets/ripsearch.png)
+
+Example: get count by release targeting the most recent visit.
+
+```powershell
+filmcrud scanrips --bygroup
+```
+
+![bygroup_0](./assets/bygroup_0.png)
+
+Example: get count by release targeting the 20230101 visit.
+
+```powershell
+filmcrud scanrips --bygroup -v 20230101
+```
+
+![bygroup_1](./assets/bygroup_1.png)
 
 ### Link
 
