@@ -149,7 +149,6 @@ Nosferatu.1922.1080p.BluRay.x264-iSOMORFiSMO
 Haxan.1922.1080p.BluRay.x264-beLLamy
 Nosferatu.1922.1080p.BluRay.x264-iSOMORFiSMO
 Finances.of.the.Grand.Duke.1924.1080p.BluRay.x264-iSOMORFiSMO
-
 ```
 
 Persist such contents into the local database `.\FilmDb.db`:
@@ -223,9 +222,8 @@ filmcrud scanrips --bygroup --visit 20230101
 
 Example: get the movie rip difference between visits 20230120 and 20230101:
 
-[rip_visit_diff](rip_visit_diff.png)
+![rip_visit_diff](rip_visit_diff.png)
 
-![bygroup_1](./assets/bygroup_1.png)
 
 ### Link command
 
