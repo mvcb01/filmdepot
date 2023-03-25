@@ -134,9 +134,12 @@ Start by listing the contents of the movie directory:
 filmcrud visit --listcontents
 ```
 
-This will generate a file such as `.\whcontents\movies_20230101.txt`, suffixed with the execution date:
+This will generate a file such as `.\whcontents\movies_YYYYMMDD.txt`, suffixed with the execution date.
 
-```
+Example:
+
+`.\whcontents\movies_20230101.txt`
+```text
 Haxan.1922.720p.BluRay.x264-blackBeard
 Nosferatu.1922.1080p.BluRay.x264-iSOMORFiSMO
 ```
