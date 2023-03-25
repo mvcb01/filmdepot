@@ -220,7 +220,13 @@ Example: get count by release group targeting the 20230101 visit.
 filmcrud scanrips --bygroup --visit 20230101
 ```
 
+![bygroup_1](./assets/bygroup_1.png)
+
 Example: get the movie rip difference between visits 20230120 and 20230101:
+
+```powershell
+filmcrud scanrips scanrips --visitdiff 20230120:20230101
+```
 
 ![rip_visitdiff](./assets/rip_visitdiff.png)
 
