@@ -97,14 +97,14 @@ Use this like any other CLI:
 filmcrud <command> [<args>]
 ```
 
-The `--help` option is available for all commands:
+The `--help` option is available and will list all the available commands and options.
 
 ```powershell
 filmcrud --help
 filmcrud <command> --help
 ```
 
-Now some non-exhaustive examples of typical usage.
+Now some non-exhaustive examples of typical usage. For all the available commmands j
 
 ### Visit command
 
@@ -163,7 +163,46 @@ filmcrud scanrips --bygroup -v 20230101
 
 ### Link
 
-cenas cenas
+Search [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) using the parsed movie names from existing visits:
+
+```powershell
+filmcrud link --search
+```
+![moviesearch](./assets/moviesearch.png)
+
+
+If certain searches have either no matches or several the details can be found in a file such as `.\logs\linking_errors_YYYYMMDD.txt`:
+
+```
+2023-03-25 18:26:25.451 [INF] ----------------------------------
+2023-03-25 18:26:25.455 [INF] --- 25-Mar-23 18:26 ---
+2023-03-25 18:26:25.455 [INF] ----------------------------------
+2023-03-25 18:26:25.455 [ERR] LINKING ERROR: Finances.of.the.Grand.Duke.1924.1080p.BluRay.x264-iSOMORFiSMO: No search results for "finances of the grand duke" with release date in 1924, 1925, 1923
+```
+
+Such cases can be manually searched and the ids set in `.\appsettings.json`. . Considering the example above:
+
+[TMDB: The Finances of the Grand Duke (1924) - https://www.themoviedb.org/movie/55536-die-finanzen-des-gro-herzogs](https://www.themoviedb.org/movie/55536-die-finanzen-des-gro-herzogs)
+
+![manual_extids](./assets/manual_extids.png)
+
+These manual ids can be used and will override any previously existing links:
+
+```powershell
+filmcrud link --frommanualextids
+```
+
+![search_manual_extids](./assets/search_manual_extids.png)
+
+Note that it's possible to limit the number of searches, i.e., the number of calls to the TMDB API:
+
+```powershell
+filmcrud link --search --maxcalls 10
+```
+
+```powershell
+filmcrud link --frommanualextids --maxcalls 10
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
