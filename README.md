@@ -222,7 +222,7 @@ filmcrud scanrips --bygroup --visit 20230101
 
 Example: get the movie rip difference between visits 20230120 and 20230101:
 
-![rip_visit_diff](rip_visit_diff.png)
+![rip_visitdiff](./assets/rip_visitdiff.png)
 
 
 ### Link command
