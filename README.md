@@ -144,6 +144,14 @@ Haxan.1922.720p.BluRay.x264-blackBeard
 Nosferatu.1922.1080p.BluRay.x264-iSOMORFiSMO
 ```
 
+`.\whcontents\movies_20230120.txt`
+```text
+Haxan.1922.1080p.BluRay.x264-beLLamy
+Nosferatu.1922.1080p.BluRay.x264-iSOMORFiSMO
+Finances.of.the.Grand.Duke.1924.1080p.BluRay.x264-iSOMORFiSMO
+
+```
+
 Persist such contents into the local database `.\FilmDb.db`:
 
 ```powershell
