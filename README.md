@@ -114,6 +114,20 @@ Now some non-exhaustive examples of typical usage.
 
 ### Visit command
 
+```
+  --listcontents       generate the warehouse contents text file using the configured paths
+
+  --persistcontents    read the warehouse contents textfile with the provided date and persist in repo
+
+  --processmanual      process the manuallly configured movie rips for an existing visit; a visit date is expected
+
+  -l, --listvisits     helper; list dates for all past visits
+
+  --help               Display this help screen.
+
+  --version            Display version information.
+```
+
 Start by listing the contents of the movie directory:
 
 ```powershell
@@ -142,7 +156,35 @@ filmcrud visit --listvisits
 
 ### ScanRips command
 
-Prints info about existing visits.
+Prints info about existing visits
+
+```
+  --countbyreleasedate    rip count by parsed release date for latest visit
+
+  --withdates             list movies with parsed released dates YYYY
+
+  --withgroup             list movies with parsed parsed release group
+
+  --byvisit               rip count by visit
+
+  --bygroup               rip count by release group
+
+  --lastvisitdiff         movie rip difference from last two visits: added and removed movie rips
+
+  --visitdiff             movie rip difference between two visits with dates YYYYMMDD: added and removed movie rips;
+                          example: 20100101:20100102
+
+  --search                search movie rip filenames by tokens; examples: "the.wicker.man.1973", "wicker man 1973"
+
+  -l, --listvisits        helper; list dates for all visits
+
+  -v, --visit             warehouse visit date (YYYYMMDD) to use as the scan target; defaults to the most recent
+                          visit
+
+  --help                  Display this help screen.
+
+  --version               Display version information.
+```
 
 Example: search by tokens targeting the most recent visit.
 
@@ -169,7 +211,25 @@ filmcrud scanrips --bygroup -v 20230101
 
 ### Link command
 
-Search [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) using the parsed movie names from existing visits:
+Search [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) using the parsed movie names from existing visits.
+
+```
+  --search                  search locally and online
+
+  --frommanualextids        link using the manually configured external ids
+
+  --getunlinkedrips         get all movierips not linked to a movie
+
+  --validatemanualextids    validate the manually configured external ids
+
+  -m, --maxcalls            optional integer to limit the number of API calls
+
+  --help                    Display this help screen.
+
+  --version                 Display version information.
+```
+
+Example: search
 
 ```powershell
 filmcrud link --search
@@ -214,6 +274,24 @@ filmcrud link --frommanualextids --maxcalls 10
 
 Once movie rips are linked to known movies it's possible to get additional details for these movies: **genres**, **cast members**, **directors**, **keywords** and **IMDB ids**.
 
+```
+  --genres          fetch genres for movies
+
+  --castmembers     fetch cast members for movies
+
+  --directors       fetch directors for movies
+
+  --keywords        fetch keywords for movies
+
+  --imdbids         fetch imdb ids for movies
+
+  -m, --maxcalls    optional integer to limit the number of API calls
+
+  --help            Display this help screen.
+
+  --version         Display version information.
+```
+
 Example:
 
 ```powershell
@@ -232,7 +310,7 @@ filmcrud fetch --genres --maxcalls 10
 
 ### ScanMovies command
 
-Once movies are found and their details are fetched it's possible to get aggregated info:
+Once movies are found and their details are fetched it's possible to get aggregated info.
 
 ```
   --withgenres       list movies with genres
@@ -289,9 +367,16 @@ Example: count by genre targeting the 20230101 visit.
 ```powershell
 filmcrud scanmovies --bygenre --visit 20230101
 ```
+
 ![bygenre_1](./assets/bygenre_1.png)
 
-Example:
+Example: search movies with the _castle_ keyword or the _folk_ keyword
+
+```powershell
+filmcrud scanmovies --withkeywords "castle" "folk"
+```
+
+![withkwds](./assets/withkwds.png)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
