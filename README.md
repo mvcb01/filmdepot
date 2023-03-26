@@ -37,7 +37,7 @@
 
 Simple CLI utility to interact with a local movie collection.
 
-* parse your movie files into Title, Release Date, rip quality and rip group
+* parse your movie rips into Title, Release Date, rip quality and rip group
 * search [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) and link movie rips to movies
 * fetch genres, cast members, directors, keywords and IMDB ids
 * show aggregated data related to the movies rips and the movies they are linked to
