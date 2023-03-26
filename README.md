@@ -114,7 +114,7 @@ Note that some commands will call [The Movie Database API](https://developers.th
 
 ![policies](./assets/policies.png)
 
-For more info see [Polly](https://github.com/App-vNext/Polly).
+For more info see [Polly's](https://github.com/App-vNext/Polly) retry and rate limit policies.
 
 Now some non-exhaustive examples of typical usage.
 
