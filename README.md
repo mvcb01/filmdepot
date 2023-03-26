@@ -26,7 +26,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Simple CLI utility to interact with your local movie collection. Useful for data hoarders.
+Simple CLI utility for movie hoarders to interact with a local movie collection.
 
 * parse your movie files into Title, Release Date, rip quality and rip group
 * search [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) and link movie rips to movies
