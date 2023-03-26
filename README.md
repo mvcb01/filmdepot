@@ -239,7 +239,7 @@ filmcrud scanrips --visitdiff 20230120:20230101
 
 ### Link command
 
-Search [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) using the parsed movie names from existing visits.
+Search [The Movie Database API](https://developers.themoviedb.org/3/getting-started/introduction) using the parsed movie names and release dates from existing visits.
 
 ```
   --search                  search locally and online
