@@ -16,7 +16,16 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li>
+      <a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#visit-command">Visit command</a></li>
+        <li><a href="#scanrips-command">ScanRips command</a></li>
+        <li><a href="#link-command">Link command</a></li>
+        <li><a href="#fetch-command">Fetch command</a></li>
+        <li><a href="#scanmovies-command">ScanMovies command</a></li>
+      </ul>
+    </li>
     <li><a href="#license">License</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
