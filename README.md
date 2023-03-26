@@ -257,7 +257,7 @@ Search [The Movie Database API](https://developers.themoviedb.org/3/getting-star
   --version                 Display version information.
 ```
 
-Example: search
+Example: search all unlinked movie rips
 
 ```powershell
 filmcrud link --search
