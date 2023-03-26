@@ -274,7 +274,7 @@ If certain searches have either no matches or several the details can be found i
 2023-03-25 18:26:25.455 [ERR] LINKING ERROR: Finances.of.the.Grand.Duke.1924.1080p.BluRay.x264-iSOMORFiSMO: No search results for "finances of the grand duke" with release date in 1924, 1925, 1923
 ```
 
-Such cases can be manually searched and the ids set in `.\appsettings.json`. . Considering the example above:
+Such cases can be manually searched and the ids set in `.\appsettings.json`. Considering the example above:
 
 [TMDB: The Finances of the Grand Duke (1924)](https://www.themoviedb.org/movie/55536-die-finanzen-des-gro-herzogs)
 
