@@ -51,11 +51,8 @@ Simple CLI utility to interact with your local movie collection. Useful for data
     ```powershell
     git clone https://github.com/mvcb01/filmdepot.git
     ```
-2. Install dependencies
-    ```powershell
-    dotnet restore
-    ```
-3. Run the ps scripts in the `.\_DeploymentScripts` directory
+
+2. Run the ps scripts in the `.\_DeploymentScripts` directory
     ```powershell
     cd .\_DeploymentScripts\
     .\1_DeployLocally.ps1
@@ -63,15 +60,15 @@ Simple CLI utility to interact with your local movie collection. Useful for data
     .\3_RunMigrationScripts.ps1
     ```
 
-4. Save the contents of your `PATH` environment variable in a text file in your home directory
+3. Save the contents of your `PATH` environment variable in a text file in your home directory
     ```powershell
     cd ~
     echo $env:PATH > PATH_backup.txt
     ```
 
-5. Add the newly created directory `C:\Users\<your-username>\filmdepot_PROD` to your `PATH` environment variable. Follow what's in [To add a path to the PATH environment variable](https://learn.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14)). If you mess it up just restore `PATH` using the text file from step 4.
+4. Add the newly created directory `C:\Users\<your-username>\filmdepot_PROD` to your `PATH` environment variable. Follow what's in [To add a path to the PATH environment variable](https://learn.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14)). If you mess it up just restore `PATH` using the text file from step 4.
 
-6. Restart powershell and type this:
+5. Restart powershell and type this:
     ```powershell
     filmcrud --help
     ```
@@ -79,9 +76,9 @@ Simple CLI utility to interact with your local movie collection. Useful for data
 
     ![helpmenu](./assets/help.PNG)
 
-7. [Get a key for The Movie Database API](https://developers.themoviedb.org/3/getting-started).
+6. [Get a key for The Movie Database API](https://developers.themoviedb.org/3/getting-started).
 
-8. Edit the following configs in `C:\Users\<your-username>\filmdepot_PROD\appsettings.json`
+7. Edit the following configs in `C:\Users\<your-username>\filmdepot_PROD\appsettings.json`
 
     ![appsettings](./assets/appsettings_0.png)
 
