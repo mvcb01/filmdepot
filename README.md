@@ -73,7 +73,7 @@ Simple CLI utility to interact with a local movie collection.
     echo $env:PATH > PATH_backup.txt
     ```
 
-4. Add the newly created app directory `C:\Users\<your-username>\filmdepot_PROD` to your `PATH` environment variable. Follow what's in [To add a path to the PATH environment variable](https://learn.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14)). If you mess it up just restore `PATH` using the text file from step 4.
+4. Add the newly created app directory `C:\Users\<your-username>\filmdepot_PROD` to your `PATH` environment variable. Follow what's in [To add a path to the PATH environment variable](https://learn.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14)). If you mess it up just restore `PATH` using the text file from the previous step.
 
 5. Restart powershell and type this:
     ```powershell
