@@ -41,5 +41,8 @@ namespace FilmCRUD.Verbs
         // can be used with any set; relevant for options WithDates and CountByReleaseDate
         [Option('v', "visit", HelpText = "warehouse visit date (YYYYMMDD) to use as the scan target; defaults to the most recent visit")]
         public string Visit { get; set; }
+
+        [Option('t', "top", HelpText = "integer to limit output count of bygroup and get only the top N")]
+        public int? Top { get; set; }
     }
 }
