@@ -243,9 +243,11 @@ namespace FilmCRUD
                 Console.WriteLine($"Visit: {visit.VisitDateTime.ToString(printDateFormat)}");
 
                 IEnumerable<KeyValuePair<string, int>> countByGroup = scanRipsManager.GetRipCountByRipGroup(visit);
+                int topN = opts.Top ?? countByGroup.Count();
                 Console.WriteLine("ScanRips: count by release group \n");
                 countByGroup
                     .OrderByDescending(kvp => kvp.Value)
+                    .Take(topN)
                     .ToList()
                     .ForEach(kvp => Console.WriteLine($"{kvp.Key}: {kvp.Value}"));
             }
